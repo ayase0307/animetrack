@@ -11,12 +11,37 @@
             box-sizing: border-box;
         }
 
+        :root {
+            /* 深色主題 */
+            --bg-primary: #0f0f1e;
+            --bg-secondary: rgba(255, 255, 255, 0.05);
+            --bg-tertiary: rgba(255, 255, 255, 0.08);
+            --text-primary: #fff;
+            --text-secondary: #8892b0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-color-hover: rgba(255, 255, 255, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        body.light-theme {
+            /* 淺色主題 */
+            --bg-primary: #f5f7fa;
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --bg-tertiary: rgba(0, 0, 0, 0.03);
+            --text-primary: #1a1a2e;
+            --text-secondary: #5a6c7d;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --border-color-hover: rgba(0, 0, 0, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-            background: #0f0f1e;
+            background: var(--bg-primary);
             min-height: 100vh;
             padding: 20px;
-            color: #fff;
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -75,11 +100,11 @@
             display: flex;
             gap: 12px;
             margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--bg-secondary);
             padding: 8px;
             border-radius: 16px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
         }
 
         .tab-btn {
@@ -92,7 +117,7 @@
             background: transparent;
             border: none;
             border-radius: 12px;
-            color: #8892b0;
+            color: var(--text-secondary);
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -100,8 +125,8 @@
         }
 
         .tab-btn:hover {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
         }
 
         .tab-btn.active {
@@ -271,6 +296,151 @@
             justify-content: flex-end;
         }
 
+        .control-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 45px 12px 18px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #c06bff;
+            box-shadow: 0 0 0 4px rgba(192, 107, 255, 0.1);
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .control-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .control-select {
+            padding: 10px 35px 10px 15px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%238892b0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            transition: all 0.3s ease;
+        }
+
+        .control-select:hover {
+            border-color: var(--border-color-hover);
+        }
+
+        .control-select:focus {
+            outline: none;
+            border-color: #c06bff;
+            box-shadow: 0 0 0 3px rgba(192, 107, 255, 0.1);
+        }
+
+        .control-select option {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .icon-btn-group {
+            display: flex;
+            gap: 5px;
+            background: var(--bg-tertiary);
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .icon-btn.active {
+            background: linear-gradient(135deg, #ff6b9d 0%, #c06bff 100%);
+            color: white;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-color-hover);
+        }
+
         .btn-toolbar {
             display: flex;
             align-items: center;
@@ -293,9 +463,9 @@
         }
 
         .add-section {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--bg-secondary);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
             border-radius: 24px;
             padding: 35px;
             animation: fadeInUp 0.6s ease;
@@ -338,11 +508,11 @@
         select {
             width: 100%;
             padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             font-size: 1rem;
-            color: #fff;
+            color: var(--text-primary);
             transition: all 0.3s ease;
         }
 
@@ -356,18 +526,19 @@
         }
 
         select option {
-            background: #1a1a2e;
-            color: #fff;
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
 
         input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
+            color: var(--text-secondary);
+            opacity: 0.6;
         }
 
         input:focus,
         select:focus {
             outline: none;
-            background: rgba(255, 255, 255, 0.12);
+            background: var(--bg-tertiary);
             border-color: #c06bff;
             box-shadow: 0 0 0 4px rgba(192, 107, 255, 0.1);
         }
@@ -488,10 +659,50 @@
             animation: fadeIn 0.8s ease;
         }
 
+        .anime-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .anime-grid.compact-view {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .anime-card.list-view-card {
+            display: flex;
+            flex-direction: row;
+            max-height: 200px;
+        }
+
+        .anime-card.list-view-card .anime-image-wrapper {
+            width: 300px;
+            height: 200px;
+            flex-shrink: 0;
+        }
+
+        .anime-card.list-view-card .anime-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .anime-card.compact-view-card .anime-image-wrapper {
+            height: 180px;
+        }
+
+        .anime-card.compact-view-card .anime-title {
+            font-size: 1.1rem;
+        }
+
+        .anime-card.compact-view-card .anime-content {
+            padding: 18px;
+        }
+
         .anime-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--bg-secondary);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
             border-radius: 20px;
             overflow: hidden;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -1043,6 +1254,76 @@
                     <span id="todayCount">0</span> 部劇集
                 </div>
             </div>
+
+            <!-- 控制面板 -->
+            <div class="control-panel">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜尋劇名...">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </div>
+
+                <div class="control-group">
+                    <span class="control-label">篩選</span>
+                    <select id="filterSelect" class="control-select">
+                        <option value="all">全部</option>
+                        <option value="0">週日更新</option>
+                        <option value="1">週一更新</option>
+                        <option value="2">週二更新</option>
+                        <option value="3">週三更新</option>
+                        <option value="4">週四更新</option>
+                        <option value="5">週五更新</option>
+                        <option value="6">週六更新</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <span class="control-label">排序</span>
+                    <select id="sortSelect" class="control-select">
+                        <option value="default">預設</option>
+                        <option value="name-asc">劇名 A-Z</option>
+                        <option value="name-desc">劇名 Z-A</option>
+                        <option value="episode-asc">進度少→多</option>
+                        <option value="episode-desc">進度多→少</option>
+                        <option value="date-new">最新加入</option>
+                        <option value="date-old">最早加入</option>
+                    </select>
+                </div>
+
+                <div class="icon-btn-group">
+                    <button class="icon-btn active" data-view="grid" title="網格模式">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" data-view="compact" title="緊湊模式">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="7"></rect>
+                            <rect x="3" y="14" width="18" height="7"></rect>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" data-view="list" title="列表模式">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <button class="theme-toggle" id="themeToggle" title="切換主題">
+                    🌙
+                </button>
+            </div>
+
             <div class="toolbar">
                 <button class="btn-toolbar" onclick="exportData()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1133,6 +1414,19 @@
     <script>
         // 從 localStorage 載入數據
         let animeList = JSON.parse(localStorage.getItem('animeList')) || [];
+        
+        // 控制狀態
+        let currentView = localStorage.getItem('viewMode') || 'grid';
+        let currentSort = 'default';
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+
+        // 初始化主題
+        if (currentTheme === 'light') {
+            document.body.classList.add('light-theme');
+            document.getElementById('themeToggle').textContent = '☀️';
+        }
 
         // 圖片上傳預覽
         document.getElementById('animeImage').addEventListener('change', function(e) {
@@ -1610,6 +1904,59 @@
         // 初始化頁面
         renderAnimeList();
         renderFinishedList();
+
+        // 主題切換
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            if (currentTheme === 'light') {
+                document.body.classList.add('light-theme');
+                this.textContent = '☀️';
+            } else {
+                document.body.classList.remove('light-theme');
+                this.textContent = '🌙';
+            }
+            
+            localStorage.setItem('theme', currentTheme);
+        });
+
+        // 顯示模式切換
+        document.querySelectorAll('.icon-btn[data-view]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentView = this.dataset.view;
+                
+                // 更新按鈕狀態
+                document.querySelectorAll('.icon-btn[data-view]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 保存設定
+                localStorage.setItem('viewMode', currentView);
+                
+                // 重新渲染
+                renderAnimeList();
+            });
+        });
+
+        // 設定初始顯示模式
+        document.querySelector(`.icon-btn[data-view="${currentView}"]`)?.classList.add('active');
+
+        // 搜尋功能
+        document.getElementById('searchInput').addEventListener('input', function() {
+            searchQuery = this.value.toLowerCase().trim();
+            renderAnimeList();
+        });
+
+        // 篩選功能
+        document.getElementById('filterSelect').addEventListener('change', function() {
+            currentFilter = this.value;
+            renderAnimeList();
+        });
+
+        // 排序功能
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            currentSort = this.value;
+            renderAnimeList();
+        });
 
         // 分頁切換功能
         document.querySelectorAll('.tab-btn').forEach(btn => {
