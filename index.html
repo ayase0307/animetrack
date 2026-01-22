@@ -1103,6 +1103,157 @@
             background: rgba(255, 107, 157, 0.3);
         }
 
+        /* 浮動播放控制條 */
+        .floating-player-bar {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 400px;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px var(--shadow-color);
+            z-index: 2000;
+            animation: slideInUp 0.4s ease;
+            display: none;
+        }
+
+        .floating-player-bar.show {
+            display: block;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .floating-bar-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .playing-icon {
+            font-size: 1.5rem;
+            animation: pulse-icon 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .playing-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .playing-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .playing-episode {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .floating-close-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .floating-close-btn:hover {
+            background: rgba(255, 107, 157, 0.3);
+            color: var(--text-primary);
+        }
+
+        .floating-bar-actions {
+            display: flex;
+            gap: 10px;
+            padding: 16px 20px;
+        }
+
+        .floating-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .floating-btn:hover {
+            background: rgba(192, 107, 255, 0.3);
+            border-color: #c06bff;
+            transform: translateY(-2px);
+        }
+
+        .floating-btn.primary {
+            background: linear-gradient(135deg, #ff6b9d 0%, #c06bff 100%);
+            border: none;
+            color: white;
+        }
+
+        .floating-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(192, 107, 255, 0.4);
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            .floating-player-bar {
+                left: 20px;
+                right: 20px;
+                bottom: 20px;
+                width: auto;
+            }
+
+            .playing-title {
+                font-size: 0.9rem;
+            }
+
+            .floating-bar-actions {
+                flex-direction: column;
+            }
+
+            .floating-btn {
+                width: 100%;
+            }
+        }
+
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -1476,6 +1627,39 @@
         </div>
     </div>
 
+    <!-- 浮動播放控制條 -->
+    <div id="floatingPlayerBar" class="floating-player-bar">
+        <div class="floating-bar-header">
+            <div class="playing-icon">🎬</div>
+            <div class="playing-info">
+                <div class="playing-title" id="floatingTitle">正在播放</div>
+                <div class="playing-episode" id="floatingEpisode">第 1 集</div>
+            </div>
+            <button class="floating-close-btn" onclick="closeFloatingBar()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="floating-bar-actions">
+            <button class="floating-btn primary" onclick="markEpisodeWatched()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                看完一集
+            </button>
+            <button class="floating-btn" onclick="reopenTab()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                重新開啟
+            </button>
+        </div>
+    </div>
+
     <script>
         // 從 localStorage 載入數據
         let animeList = JSON.parse(localStorage.getItem('animeList')) || [];
@@ -1486,12 +1670,124 @@
         let currentFilter = 'all';
         let searchQuery = '';
         let currentTheme = localStorage.getItem('theme') || 'dark';
+        let currentPlayingAnime = null;
 
         // 初始化主題
         if (currentTheme === 'light') {
             document.body.classList.add('light-theme');
             document.getElementById('themeToggle').textContent = '☀️';
         }
+
+        // 播放器相關函數
+        function openPlayer(id) {
+            const anime = animeList.find(a => a.id === id);
+            if (!anime) return;
+            
+            currentPlayingAnime = anime;
+            
+            // 開啟新分頁
+            window.open(anime.link, '_blank');
+            
+            // 顯示浮動控制條
+            const bar = document.getElementById('floatingPlayerBar');
+            const title = document.getElementById('floatingTitle');
+            const episode = document.getElementById('floatingEpisode');
+            
+            title.textContent = anime.name;
+            episode.textContent = `第 ${anime.episode + 1} 集`;
+            
+            bar.classList.add('show');
+        }
+
+        function closeFloatingBar() {
+            const bar = document.getElementById('floatingPlayerBar');
+            bar.classList.remove('show');
+            currentPlayingAnime = null;
+        }
+
+        function markEpisodeWatched() {
+            if (!currentPlayingAnime) return;
+            
+            const anime = animeList.find(a => a.id === currentPlayingAnime.id);
+            if (anime) {
+                anime.episode++;
+                saveToLocalStorage();
+                renderAnimeList();
+                renderFinishedList();
+                
+                // 更新浮動條顯示
+                document.getElementById('floatingEpisode').textContent = `第 ${anime.episode + 1} 集`;
+                
+                // 顯示提示
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 30px;
+                    right: 30px;
+                    padding: 16px 24px;
+                    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+                    color: white;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    box-shadow: 0 8px 24px rgba(78, 205, 196, 0.4);
+                    z-index: 3000;
+                    animation: slideInRight 0.3s ease;
+                `;
+                notification.textContent = `✓ 已標記第 ${anime.episode} 集為已觀看`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            }
+        }
+
+        function reopenTab() {
+            if (currentPlayingAnime) {
+                window.open(currentPlayingAnime.link, '_blank');
+            }
+        }
+
+        // ESC 鍵關閉
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const floatingBar = document.getElementById('floatingPlayerBar');
+                if (floatingBar.classList.contains('show')) {
+                    closeFloatingBar();
+                }
+                const editModal = document.getElementById('editModal');
+                if (editModal.classList.contains('show')) {
+                    closeEditModal();
+                }
+            }
+        });
+
+        // 添加通知動畫
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
 
         // 儲存到 localStorage
         function saveToLocalStorage() {
@@ -1832,7 +2128,7 @@
                             <span class="info-label">目前進度</span>
                             <span class="episode-count">第 ${anime.episode} 集</span>
                         </div>
-                        <a href="${anime.link}" target="_blank" class="anime-link">
+                        <a href="javascript:void(0)" onclick="openPlayer(${anime.id})" class="anime-link">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polygon points="10 8 16 12 10 16 10 8"></polygon>
@@ -1929,7 +2225,7 @@
                         <div style="margin-bottom: 12px; color: var(--text-secondary); font-size: 0.85rem;">
                             📅 完結日期：${finishedDate}
                         </div>
-                        <a href="${anime.link}" target="_blank" class="anime-link">
+                        <a href="javascript:void(0)" onclick="openPlayer(${anime.id})" class="anime-link">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polygon points="10 8 16 12 10 16 10 8"></polygon>
