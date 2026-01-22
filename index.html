@@ -24,142 +24,6 @@
             margin: 0 auto;
         }
 
-        /* 設定面板 */
-        .setup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .setup-overlay.hidden {
-            display: none;
-        }
-
-        .setup-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 40px;
-            max-width: 600px;
-            width: 90%;
-        }
-
-        .setup-panel h2 {
-            background: linear-gradient(135deg, #ff6b9d 0%, #c06bff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .setup-panel p {
-            color: #8892b0;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-
-        .setup-panel .form-group {
-            margin-bottom: 20px;
-        }
-
-        .setup-panel label {
-            display: block;
-            margin-bottom: 8px;
-            color: #8892b0;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .setup-panel input[type="text"],
-        .setup-panel input[type="password"] {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            font-size: 1rem;
-            color: #fff;
-            font-family: monospace;
-        }
-
-        .setup-panel input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.12);
-            border-color: #c06bff;
-            box-shadow: 0 0 0 4px rgba(192, 107, 255, 0.1);
-        }
-
-        .setup-help {
-            background: rgba(78, 205, 196, 0.1);
-            border: 1px solid rgba(78, 205, 196, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            color: #4ecdc4;
-        }
-
-        .setup-help a {
-            color: #4ecdc4;
-            text-decoration: underline;
-        }
-
-        .sync-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            font-size: 0.85rem;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .sync-status.syncing {
-            border-color: #4ecdc4;
-            color: #4ecdc4;
-        }
-
-        .sync-status.error {
-            border-color: #ff6b9d;
-            color: #ff6b9d;
-        }
-
-        .sync-status.success {
-            border-color: #4ecdc4;
-            color: #4ecdc4;
-        }
-
-        .spinner {
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(78, 205, 196, 0.3);
-            border-top-color: #4ecdc4;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* 沿用原本的所有樣式 */
         header {
             text-align: center;
             margin-bottom: 40px;
@@ -381,7 +245,6 @@
         }
 
         .btn-finished {
-            grid-column: span 1;
             background: rgba(78, 205, 196, 0.2);
             border-color: rgba(78, 205, 196, 0.3);
         }
@@ -392,7 +255,6 @@
         }
 
         .btn-unfinished {
-            grid-column: span 2;
             background: rgba(255, 107, 157, 0.2);
             border-color: rgba(255, 107, 157, 0.3);
         }
@@ -766,7 +628,7 @@
         .card-actions {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 10px;
         }
 
         .btn-small {
@@ -793,11 +655,8 @@
         }
 
         .btn-delete {
-            flex: 0;
-            grid-column: span 1;
             background: rgba(255, 107, 157, 0.2);
             border-color: rgba(255, 107, 157, 0.3);
-            padding: 10px 10px;
         }
 
         .btn-delete:hover {
@@ -816,7 +675,41 @@
             color: #4ecdc4;
             font-size: 0.85rem;
             font-weight: 600;
+        }
+
+        .update-day-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-icon-small {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon-small:hover {
+            background: rgba(192, 107, 255, 0.3);
+            border-color: #c06bff;
+            transform: scale(1.1);
+        }
+
+        .btn-icon-small.delete:hover {
+            background: rgba(255, 107, 157, 0.4);
+            border-color: #ff6b9d;
         }
 
         .update-day-badge.today {
@@ -888,10 +781,8 @@
         }
 
         .btn-edit {
-            grid-column: span 1;
             background: rgba(78, 205, 196, 0.2);
             border-color: rgba(78, 205, 196, 0.3);
-            padding: 10px 10px;
         }
 
         .btn-edit:hover {
@@ -1048,40 +939,6 @@
     </style>
 </head>
 <body>
-    <!-- 同步狀態顯示 -->
-    <div id="syncStatus" class="sync-status" style="display: none;">
-        <span id="syncText"></span>
-    </div>
-
-    <!-- GitHub 設定面板 -->
-    <div id="setupOverlay" class="setup-overlay">
-        <div class="setup-panel">
-            <h2>⚙️ GitHub 設定</h2>
-            <p>首次使用需要設定 GitHub 連線，您的追劇資料將同步儲存到 GitHub Gist。</p>
-            
-            <div class="setup-help">
-                💡 <strong>設定步驟：</strong><br>
-                1. 建立 GitHub Personal Access Token：<a href="https://github.com/settings/tokens" target="_blank">前往設定</a><br>
-                2. 建立 Gist：<a href="https://gist.github.com/" target="_blank">前往建立</a><br>
-                3. 將 Token 和 Gist ID 填入下方
-            </div>
-
-            <form id="setupForm">
-                <div class="form-group">
-                    <label for="githubToken">GitHub Personal Access Token</label>
-                    <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="gistId">Gist ID</label>
-                    <input type="text" id="gistId" placeholder="abc123def456..." required>
-                </div>
-                
-                <button type="submit" class="btn">開始使用</button>
-            </form>
-        </div>
-    </div>
-
     <div class="container">
         <header>
             <div class="logo-container">
@@ -1100,7 +957,7 @@
                 </div>
                 <h1>追劇小幫手</h1>
             </div>
-            <p class="subtitle">輕鬆管理你的觀影進度 · 雲端同步</p>
+            <p class="subtitle">輕鬆管理你的觀影進度</p>
         </header>
 
         <nav class="tab-nav">
@@ -1128,54 +985,54 @@
 
         <div class="tab-content active" id="addTab">
             <div class="add-section">
-                <h2>➕ 新增劇集</h2>
-                <form id="addAnimeForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="animeName">動漫名稱</label>
-                            <input type="text" id="animeName" placeholder="例如：斗羅大陸" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="animeLink">觀看連結</label>
-                            <input type="url" id="animeLink" placeholder="https://..." required>
-                        </div>
-                        <div class="form-group">
-                            <label for="currentEpisode">目前集數</label>
-                            <input type="number" id="currentEpisode" min="0" value="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="updateDay">每週更新日</label>
-                            <select id="updateDay">
-                                <option value="">不設定</option>
-                                <option value="1">週一</option>
-                                <option value="2">週二</option>
-                                <option value="3">週三</option>
-                                <option value="4">週四</option>
-                                <option value="5">週五</option>
-                                <option value="6">週六</option>
-                                <option value="0">週日</option>
-                            </select>
-                        </div>
+            <h2>➕ 新增動漫</h2>
+            <form id="addAnimeForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="animeName">動漫名稱</label>
+                        <input type="text" id="animeName" placeholder="例如：斗羅大陸" required>
                     </div>
                     <div class="form-group">
-                        <label for="animeImage">自訂封面圖片（選填）</label>
-                        <div class="image-upload-wrapper">
-                            <input type="file" id="animeImage" accept="image/*" style="display: none;">
-                            <button type="button" class="btn-upload" onclick="document.getElementById('animeImage').click()">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                    <polyline points="21 15 16 10 5 21"></polyline>
-                                </svg>
-                                選擇圖片
-                            </button>
-                            <span class="file-name" id="fileName">未選擇檔案</span>
-                            <div class="image-preview" id="imagePreview"></div>
-                        </div>
+                        <label for="animeLink">觀看連結</label>
+                        <input type="url" id="animeLink" placeholder="https://..." required>
                     </div>
-                    <button type="submit" class="btn">新增動漫</button>
-                </form>
-            </div>
+                    <div class="form-group">
+                        <label for="currentEpisode">目前集數</label>
+                        <input type="number" id="currentEpisode" min="0" value="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateDay">每週更新日</label>
+                        <select id="updateDay">
+                            <option value="">不設定</option>
+                            <option value="1">週一</option>
+                            <option value="2">週二</option>
+                            <option value="3">週三</option>
+                            <option value="4">週四</option>
+                            <option value="5">週五</option>
+                            <option value="6">週六</option>
+                            <option value="0">週日</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="animeImage">自訂封面圖片（選填）</label>
+                    <div class="image-upload-wrapper">
+                        <input type="file" id="animeImage" accept="image/*" style="display: none;">
+                        <button type="button" class="btn-upload" onclick="document.getElementById('animeImage').click()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            選擇圖片
+                        </button>
+                        <span class="file-name" id="fileName">未選擇檔案</span>
+                        <div class="image-preview" id="imagePreview"></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn">新增動漫</button>
+            </form>
+        </div>
         </div>
 
         <div class="tab-content" id="trackTab">
@@ -1274,148 +1131,8 @@
     </div>
 
     <script>
-        // GitHub Gist 設定
-        let GITHUB_TOKEN = localStorage.getItem('github_token') || '';
-        let GIST_ID = localStorage.getItem('gist_id') || '';
-        
-        // 動漫列表
-        let animeList = [];
-        
-        // 同步狀態
-        let isSyncing = false;
-
-        // 檢查是否已設定
-        function checkSetup() {
-            if (!GITHUB_TOKEN || !GIST_ID) {
-                document.getElementById('setupOverlay').classList.remove('hidden');
-                return false;
-            }
-            document.getElementById('setupOverlay').classList.add('hidden');
-            return true;
-        }
-
-        // 設定表單提交
-        document.getElementById('setupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            GITHUB_TOKEN = document.getElementById('githubToken').value.trim();
-            GIST_ID = document.getElementById('gistId').value.trim();
-            
-            // 儲存到 localStorage
-            localStorage.setItem('github_token', GITHUB_TOKEN);
-            localStorage.setItem('gist_id', GIST_ID);
-            
-            // 隱藏設定面板
-            document.getElementById('setupOverlay').classList.add('hidden');
-            
-            // 載入資料
-            await loadFromGist();
-            
-            alert('✅ 設定完成！開始使用追劇小幫手吧！');
-        });
-
-        // 顯示同步狀態
-        function showSyncStatus(message, type = 'syncing') {
-            const statusEl = document.getElementById('syncStatus');
-            const textEl = document.getElementById('syncText');
-            
-            statusEl.className = 'sync-status ' + type;
-            
-            if (type === 'syncing') {
-                textEl.innerHTML = '<div class="spinner"></div>' + message;
-            } else {
-                textEl.textContent = message;
-            }
-            
-            statusEl.style.display = 'flex';
-            
-            if (type !== 'syncing') {
-                setTimeout(() => {
-                    statusEl.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        // 從 Gist 載入資料
-        async function loadFromGist() {
-            if (!checkSetup()) return;
-            
-            try {
-                showSyncStatus('正在載入資料...', 'syncing');
-                
-                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('載入失敗：' + response.status);
-                }
-
-                const gist = await response.json();
-                const content = gist.files['anime-data.json'].content;
-                animeList = JSON.parse(content);
-                
-                renderAnimeList();
-                renderFinishedList();
-                
-                showSyncStatus('✓ 資料已同步', 'success');
-            } catch (error) {
-                console.error('載入錯誤:', error);
-                showSyncStatus('✗ 載入失敗', 'error');
-                
-                // 如果是認證錯誤，重新顯示設定面板
-                if (error.message.includes('401')) {
-                    alert('❌ GitHub Token 無效，請重新設定');
-                    localStorage.removeItem('github_token');
-                    localStorage.removeItem('gist_id');
-                    GITHUB_TOKEN = '';
-                    GIST_ID = '';
-                    checkSetup();
-                }
-            }
-        }
-
-        // 儲存到 Gist
-        async function saveToGist() {
-            if (!checkSetup()) return;
-            if (isSyncing) return; // 防止重複同步
-            
-            isSyncing = true;
-            
-            try {
-                showSyncStatus('正在同步...', 'syncing');
-                
-                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        files: {
-                            'anime-data.json': {
-                                content: JSON.stringify(animeList, null, 2)
-                            }
-                        }
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('同步失敗：' + response.status);
-                }
-
-                showSyncStatus('✓ 已同步到雲端', 'success');
-            } catch (error) {
-                console.error('同步錯誤:', error);
-                showSyncStatus('✗ 同步失敗', 'error');
-            } finally {
-                isSyncing = false;
-            }
-        }
+        // 從 localStorage 載入數據
+        let animeList = JSON.parse(localStorage.getItem('animeList')) || [];
 
         // 圖片上傳預覽
         document.getElementById('animeImage').addEventListener('change', function(e) {
@@ -1441,7 +1158,18 @@
 
         // 自動搜尋圖片（使用多個來源）
         async function searchAnimeImage(animeName) {
-            return `https://picsum.photos/seed/${encodeURIComponent(animeName)}/600/400`;
+            // 使用多個免費圖片源
+            const sources = [
+                // Picsum Photos - 隨機高質量圖片
+                `https://picsum.photos/seed/${encodeURIComponent(animeName)}/600/400`,
+                // UI Avatars - 生成帶文字的圖片
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(animeName)}&size=600&background=667eea&color=fff&bold=true&font-size=0.4`,
+                // DiceBear - 抽象藝術風格
+                `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(animeName)}&backgroundColor=667eea,764ba2,ff6b9d`
+            ];
+            
+            // 隨機選擇一個來源
+            return sources[0];
         }
 
         // 新增動漫
@@ -1458,19 +1186,19 @@
             // 如果有上傳圖片，使用上傳的圖片
             if (imageFile) {
                 const reader = new FileReader();
-                reader.onload = async function(e) {
+                reader.onload = function(e) {
                     imageUrl = e.target.result;
-                    await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
+                    saveAnime(animeName, animeLink, currentEpisode, imageUrl);
                 };
                 reader.readAsDataURL(imageFile);
             } else {
                 // 沒有上傳圖片則使用自動生成
                 imageUrl = await searchAnimeImage(animeName);
-                await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
+                saveAnime(animeName, animeLink, currentEpisode, imageUrl);
             }
         });
 
-        async function saveAnime(animeName, animeLink, currentEpisode, imageUrl) {
+        function saveAnime(animeName, animeLink, currentEpisode, imageUrl) {
             const updateDay = document.getElementById('updateDay').value;
             
             const newAnime = {
@@ -1485,7 +1213,7 @@
             };
 
             animeList.push(newAnime);
-            await saveToGist();
+            saveToLocalStorage();
             renderAnimeList();
             renderFinishedList();
             
@@ -1501,29 +1229,30 @@
             document.querySelector('.tab-btn[data-tab="track"]').classList.add('active');
             document.getElementById('trackTab').classList.add('active');
             
-            alert(`✅ 已成功新增《${animeName}》並同步到雲端！`);
+            // 顯示成功訊息（可選）
+            alert(`✅ 已成功新增《${animeName}》！`);
         }
 
         // 觀看進度 +1
-        async function incrementEpisode(id) {
+        function incrementEpisode(id) {
             const anime = animeList.find(a => a.id === id);
             if (anime) {
                 anime.episode++;
-                await saveToGist();
+                saveToLocalStorage();
                 renderAnimeList();
                 renderFinishedList();
             }
         }
 
         // 標記為完結/取消完結
-        async function toggleFinished(id) {
+        function toggleFinished(id) {
             const anime = animeList.find(a => a.id === id);
             if (anime) {
                 anime.finished = !anime.finished;
                 if (anime.finished) {
                     anime.finishedDate = new Date().toISOString();
                 }
-                await saveToGist();
+                saveToLocalStorage();
                 renderAnimeList();
                 renderFinishedList();
                 
@@ -1538,17 +1267,16 @@
             input.type = 'file';
             input.accept = 'image/*';
             
-            input.onchange = async function(e) {
+            input.onchange = function(e) {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = async function(e) {
+                    reader.onload = function(e) {
                         const anime = animeList.find(a => a.id === id);
                         if (anime) {
                             anime.imageUrl = e.target.result;
-                            await saveToGist();
+                            saveToLocalStorage();
                             renderAnimeList();
-                            renderFinishedList();
                         }
                     };
                     reader.readAsDataURL(file);
@@ -1577,7 +1305,7 @@
         }
 
         // 儲存編輯
-        document.getElementById('editAnimeForm').addEventListener('submit', async function(e) {
+        document.getElementById('editAnimeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const id = parseInt(document.getElementById('editAnimeId').value);
@@ -1589,11 +1317,10 @@
                 anime.episode = parseInt(document.getElementById('editCurrentEpisode').value);
                 anime.updateDay = document.getElementById('editUpdateDay').value;
                 
-                await saveToGist();
+                saveToLocalStorage();
                 renderAnimeList();
-                renderFinishedList();
                 closeEditModal();
-                alert('✅ 已成功更新劇集資訊並同步到雲端！');
+                alert('✅ 已成功更新劇集資訊！');
             }
         });
 
@@ -1604,130 +1331,63 @@
             }
         });
 
-        // 刪除動漫
-        async function deleteAnime(id) {
-            if (confirm('確定要刪除這部動漫嗎？')) {
-                animeList = animeList.filter(a => a.id !== id);
-                await saveToGist();
-                renderAnimeList();
-                renderFinishedList();
-            }
-        }
-
-        // 渲染動漫列表（追蹤中）
-        function renderAnimeList() {
-            const container = document.getElementById('animeList');
-            const emptyState = document.getElementById('emptyState');
-            const todaySummary = document.getElementById('todaySummary');
-            const todayCount = document.getElementById('todayCount');
-            
-            // 只顯示未完結的
-            const trackingList = animeList.filter(anime => !anime.finished);
-            
-            if (trackingList.length === 0) {
-                container.innerHTML = '';
-                emptyState.style.display = 'block';
-                todaySummary.style.display = 'none';
+        // 匯出資料
+        function exportData() {
+            if (animeList.length === 0) {
+                alert('⚠️ 目前沒有任何資料可以匯出！');
                 return;
             }
 
-            emptyState.style.display = 'none';
+            const dataStr = JSON.stringify(animeList, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `追劇清單_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
             
-            // 獲取星期幾的文字
-            const getDayText = (day) => {
-                const days = { '0': '週日', '1': '週一', '2': '週二', '3': '週三', '4': '週四', '5': '週五', '6': '週六' };
-                return days[day] || '';
+            alert('✅ 清單已成功匯出！');
+        }
+
+        // 匯入資料
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (!Array.isArray(importedData)) {
+                        throw new Error('格式錯誤');
+                    }
+
+                    if (confirm(`確定要匯入 ${importedData.length} 筆資料嗎？\n這將覆蓋現有的清單！`)) {
+                        animeList = importedData;
+                        saveToLocalStorage();
+                        renderAnimeList();
+                        alert('✅ 清單已成功匯入！');
+                    }
+                } catch (error) {
+                    alert('❌ 匯入失敗！檔案格式不正確。');
+                }
             };
-
-            // 獲取今天是星期幾 (0-6)
-            const today = new Date().getDay().toString();
-
-            // 判斷是否為今日更新
-            const isTodayUpdate = (anime) => {
-                return anime.updateDay && anime.updateDay === today;
-            };
-
-            // 計算今日更新數量
-            const todayUpdateCount = trackingList.filter(isTodayUpdate).length;
+            reader.readAsText(file);
             
-            // 顯示或隱藏今日更新統計
-            if (todayUpdateCount > 0) {
-                todaySummary.style.display = 'flex';
-                todayCount.textContent = todayUpdateCount;
-            } else {
-                todaySummary.style.display = 'none';
+            // 清空input，允許重複選擇同一個檔案
+            this.value = '';
+        });
+
+        // 刪除動漫
+        function deleteAnime(id) {
+            if (confirm('確定要刪除這部動漫嗎？')) {
+                animeList = animeList.filter(a => a.id !== id);
+                saveToLocalStorage();
+                renderAnimeList();
+                renderFinishedList();
             }
-
-            // 排序：今日更新的排在前面
-            const sortedList = [...trackingList].sort((a, b) => {
-                const aIsToday = isTodayUpdate(a);
-                const bIsToday = isTodayUpdate(b);
-                
-                if (aIsToday && !bIsToday) return -1;
-                if (!aIsToday && bIsToday) return 1;
-                return 0;
-            });
-            
-            container.innerHTML = sortedList.map(anime => {
-                const isToday = isTodayUpdate(anime);
-                
-                return `
-                <div class="anime-card ${isToday ? 'today-update' : ''}">
-                    ${isToday ? '<div class="today-badge">🔥 今日更新</div>' : ''}
-                    <div class="anime-image-wrapper">
-                        <button class="change-image-btn" onclick="changeImage(${anime.id})">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <polyline points="21 15 16 10 5 21"></polyline>
-                            </svg>
-                            更換圖片
-                        </button>
-                        <img src="${anime.imageUrl}" alt="${anime.name}" class="anime-image" 
-                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(anime.name)}&size=600&background=random&color=fff&bold=true&font-size=0.4'">
-                        <div class="image-overlay"></div>
-                    </div>
-                    <div class="anime-content">
-                        <h3 class="anime-title">${anime.name}</h3>
-                        ${anime.updateDay ? `
-                            <div class="update-day-badge ${isToday ? 'today' : ''}">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
-                                ${getDayText(anime.updateDay)} 更新
-                            </div>
-                        ` : ''}
-                        <div class="anime-info">
-                            <span class="info-label">目前進度</span>
-                            <span class="episode-count">第 ${anime.episode} 集</span>
-                        </div>
-                        <a href="${anime.link}" target="_blank" class="anime-link">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polygon points="10 8 16 12 10 16 10 8"></polygon>
-                            </svg>
-                            立即觀看
-                        </a>
-                        <div class="card-actions">
-                            <button class="btn-small" onclick="incrementEpisode(${anime.id})" style="grid-column: span 2;">
-                                ✓ 看完一集
-                            </button>
-                            <button class="btn-small btn-finished" onclick="toggleFinished(${anime.id})" title="標記為完結">
-                                ✓ 完結
-                            </button>
-                            <button class="btn-small btn-edit" onclick="openEditModal(${anime.id})" title="編輯資訊">
-                                ✎
-                            </button>
-                            <button class="btn-small btn-delete" onclick="deleteAnime(${anime.id})" title="刪除">
-                                🗑
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
         }
 
         // 渲染完結列表
@@ -1781,17 +1441,25 @@
                     </div>
                     <div class="anime-content">
                         <h3 class="anime-title">${anime.name}</h3>
-                        ${anime.updateDay ? `
-                            <div class="update-day-badge">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
-                                ${getDayText(anime.updateDay)} 更新
-                            </div>
-                        ` : ''}
+                        <div class="update-day-section">
+                            ${anime.updateDay ? `
+                                <div class="update-day-badge">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    ${getDayText(anime.updateDay)} 更新
+                                </div>
+                            ` : ''}
+                            <button class="btn-icon-small" onclick="openEditModal(${anime.id})" title="編輯資訊">
+                                ✎
+                            </button>
+                            <button class="btn-icon-small delete" onclick="deleteAnime(${anime.id})" title="刪除">
+                                🗑
+                            </button>
+                        </div>
                         <div class="anime-info">
                             <span class="info-label">完結集數</span>
                             <span class="episode-count">共 ${anime.episode} 集</span>
@@ -1807,14 +1475,8 @@
                             重新觀看
                         </a>
                         <div class="card-actions">
-                            <button class="btn-small btn-unfinished" onclick="toggleFinished(${anime.id})" title="移回追蹤列表">
+                            <button class="btn-small btn-unfinished" onclick="toggleFinished(${anime.id})" title="移回追蹤列表" style="grid-column: span 2;">
                                 ↩ 繼續追蹤
-                            </button>
-                            <button class="btn-small btn-edit" onclick="openEditModal(${anime.id})" title="編輯資訊">
-                                ✎
-                            </button>
-                            <button class="btn-small btn-delete" onclick="deleteAnime(${anime.id})" title="刪除">
-                                🗑
                             </button>
                         </div>
                     </div>
@@ -1822,60 +1484,132 @@
             `}).join('');
         }
 
-        // 匯出資料
-        function exportData() {
-            if (animeList.length === 0) {
-                alert('⚠️ 目前沒有任何資料可以匯出！');
+        // 儲存到 localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('animeList', JSON.stringify(animeList));
+        }
+
+        // 渲染動漫列表（追蹤中）
+        function renderAnimeList() {
+            const container = document.getElementById('animeList');
+            const emptyState = document.getElementById('emptyState');
+            const todaySummary = document.getElementById('todaySummary');
+            const todayCount = document.getElementById('todayCount');
+            
+            // 只顯示未完結的
+            const trackingList = animeList.filter(anime => !anime.finished);
+            
+            if (trackingList.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                todaySummary.style.display = 'none';
                 return;
             }
 
-            const dataStr = JSON.stringify(animeList, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `追劇清單_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            URL.revokeObjectURL(url);
+            emptyState.style.display = 'none';
             
-            alert('✅ 清單已成功匯出！');
-        }
-
-        // 匯入資料
-        document.getElementById('importFile').addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    
-                    if (!Array.isArray(importedData)) {
-                        throw new Error('格式錯誤');
-                    }
-
-                    if (confirm(`確定要匯入 ${importedData.length} 筆資料嗎？\n這將覆蓋現有的清單並同步到雲端！`)) {
-                        animeList = importedData;
-                        await saveToGist();
-                        renderAnimeList();
-                        renderFinishedList();
-                        alert('✅ 清單已成功匯入並同步到雲端！');
-                    }
-                } catch (error) {
-                    alert('❌ 匯入失敗！檔案格式不正確。');
-                }
+            // 獲取星期幾的文字
+            const getDayText = (day) => {
+                const days = { '0': '週日', '1': '週一', '2': '週二', '3': '週三', '4': '週四', '5': '週五', '6': '週六' };
+                return days[day] || '';
             };
-            reader.readAsText(file);
+
+            // 獲取今天是星期幾 (0-6)
+            const today = new Date().getDay().toString();
+
+            // 判斷是否為今日更新
+            const isTodayUpdate = (anime) => {
+                return anime.updateDay && anime.updateDay === today;
+            };
+
+            // 計算今日更新數量
+            const todayUpdateCount = trackingList.filter(isTodayUpdate).length;
             
-            // 清空input，允許重複選擇同一個檔案
-            this.value = '';
-        });
+            // 顯示或隱藏今日更新統計
+            if (todayUpdateCount > 0) {
+                todaySummary.style.display = 'flex';
+                todayCount.textContent = todayUpdateCount;
+            } else {
+                todaySummary.style.display = 'none';
+            }
+
+            // 排序：今日更新的排在前面
+            const sortedList = [...trackingList].sort((a, b) => {
+                const aIsToday = isTodayUpdate(a);
+                const bIsToday = isTodayUpdate(b);
+                
+                if (aIsToday && !bIsToday) return -1;
+                if (!aIsToday && bIsToday) return 1;
+                return 0; // 保持原有順序
+            });
+            
+            container.innerHTML = sortedList.map(anime => {
+                const isToday = isTodayUpdate(anime);
+                
+                return `
+                <div class="anime-card ${isToday ? 'today-update' : ''}">
+                    ${isToday ? '<div class="today-badge">🔥 今日更新</div>' : ''}
+                    <div class="anime-image-wrapper">
+                        <button class="change-image-btn" onclick="changeImage(${anime.id})">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            更換圖片
+                        </button>
+                        <img src="${anime.imageUrl}" alt="${anime.name}" class="anime-image" 
+                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(anime.name)}&size=600&background=random&color=fff&bold=true&font-size=0.4'">
+                        <div class="image-overlay"></div>
+                    </div>
+                    <div class="anime-content">
+                        <h3 class="anime-title">${anime.name}</h3>
+                        <div class="update-day-section">
+                            ${anime.updateDay ? `
+                                <div class="update-day-badge ${isToday ? 'today' : ''}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    ${getDayText(anime.updateDay)} 更新
+                                </div>
+                            ` : ''}
+                            <button class="btn-icon-small" onclick="openEditModal(${anime.id})" title="編輯資訊">
+                                ✎
+                            </button>
+                            <button class="btn-icon-small delete" onclick="deleteAnime(${anime.id})" title="刪除">
+                                🗑
+                            </button>
+                        </div>
+                        <div class="anime-info">
+                            <span class="info-label">目前進度</span>
+                            <span class="episode-count">第 ${anime.episode} 集</span>
+                        </div>
+                        <a href="${anime.link}" target="_blank" class="anime-link">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                            </svg>
+                            立即觀看
+                        </a>
+                        <div class="card-actions">
+                            <button class="btn-small" onclick="incrementEpisode(${anime.id})">
+                                ✓ 看完一集
+                            </button>
+                            <button class="btn-small btn-finished" onclick="toggleFinished(${anime.id})" title="標記為完結">
+                                ✓ 完結
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
 
         // 初始化頁面
-        if (checkSetup()) {
-            loadFromGist();
-        }
+        renderAnimeList();
+        renderFinishedList();
 
         // 分頁切換功能
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1891,13 +1625,6 @@
                 document.getElementById(targetTab + 'Tab').classList.add('active');
             });
         });
-
-        // 定期同步（每5分鐘）
-        setInterval(() => {
-            if (GITHUB_TOKEN && GIST_ID && !isSyncing) {
-                loadFromGist();
-            }
-        }, 5 * 60 * 1000);
     </script>
 </body>
 </html>
