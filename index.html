@@ -1796,17 +1796,42 @@
 
         // 圖片上傳預覽
         document.getElementById('animeImage').addEventListener('change', function(e) {
+            console.log('Image upload change event triggered');
             const file = e.target.files[0];
             const fileNameSpan = document.getElementById('fileName');
             const preview = document.getElementById('imagePreview');
             
+            console.log('Selected file:', file);
+            
             if (file) {
+                // 檢查檔案大小
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('❌ 圖片檔案太大！請選擇小於 5MB 的圖片。');
+                    this.value = '';
+                    fileNameSpan.textContent = '未選擇檔案';
+                    return;
+                }
+                
+                // 檢查檔案類型
+                if (!file.type.startsWith('image/')) {
+                    alert('❌ 請選擇圖片檔案！');
+                    this.value = '';
+                    fileNameSpan.textContent = '未選擇檔案';
+                    return;
+                }
+                
                 fileNameSpan.textContent = file.name;
+                console.log('File name:', file.name);
                 
                 const reader = new FileReader();
                 reader.onload = function(e) {
+                    console.log('Image preview loaded');
                     preview.innerHTML = `<img src="${e.target.result}" alt="預覽圖">`;
                     preview.classList.add('show');
+                };
+                reader.onerror = function(e) {
+                    console.error('FileReader error:', e);
+                    alert('❌ 讀取圖片失敗！請重試。');
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -1909,28 +1934,69 @@
 
         // 更換圖片
         function changeImage(id) {
+            console.log('changeImage called for id:', id);
+            
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
             
             input.onchange = function(e) {
+                console.log('File input changed');
                 const file = e.target.files[0];
+                console.log('Selected file:', file);
+                
                 if (file) {
+                    // 檢查檔案大小（最大 5MB）
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('❌ 圖片檔案太大！請選擇小於 5MB 的圖片。');
+                        return;
+                    }
+                    
+                    // 檢查檔案類型
+                    if (!file.type.startsWith('image/')) {
+                        alert('❌ 請選擇圖片檔案！');
+                        return;
+                    }
+                    
                     const reader = new FileReader();
+                    
                     reader.onload = function(e) {
+                        console.log('File loaded successfully');
                         const anime = animeList.find(a => a.id === id);
                         if (anime) {
+                            console.log('Updating anime:', anime.name);
                             anime.imageUrl = e.target.result;
                             saveToLocalStorage();
                             renderAnimeList();
                             renderFinishedList();
+                            alert('✅ 圖片已更換成功！');
+                        } else {
+                            console.error('Anime not found for id:', id);
+                            alert('❌ 找不到該劇集！');
                         }
                     };
+                    
+                    reader.onerror = function(e) {
+                        console.error('FileReader error:', e);
+                        alert('❌ 讀取圖片失敗！請重試。');
+                    };
+                    
                     reader.readAsDataURL(file);
+                } else {
+                    console.log('No file selected');
                 }
             };
             
+            // 確保 input 被加到 DOM 中（某些瀏覽器需要）
+            input.style.display = 'none';
+            document.body.appendChild(input);
+            
             input.click();
+            
+            // 點擊後移除（避免 DOM 污染）
+            setTimeout(() => {
+                document.body.removeChild(input);
+            }, 1000);
         }
 
         // 開啟編輯模態框
