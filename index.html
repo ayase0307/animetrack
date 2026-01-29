@@ -1794,8 +1794,78 @@
             localStorage.setItem('animeList', JSON.stringify(animeList));
         }
 
+        // 圖片壓縮函數
+        function compressImage(file, maxWidth = 800, quality = 0.8) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // 計算新尺寸（保持比例）
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // 轉為壓縮後的 Base64
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                        
+                        // 計算壓縮率
+                        const originalSize = e.target.result.length;
+                        const compressedSize = compressedDataUrl.length;
+                        const ratio = ((1 - compressedSize / originalSize) * 100).toFixed(1);
+                        
+                        console.log(`圖片壓縮完成: ${(originalSize / 1024).toFixed(1)}KB → ${(compressedSize / 1024).toFixed(1)}KB (壓縮了 ${ratio}%)`);
+                        
+                        resolve(compressedDataUrl);
+                    };
+                    
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 檢查 localStorage 剩餘空間
+        function checkStorageSpace() {
+            try {
+                const test = 'x'.repeat(1024 * 1024); // 1MB
+                localStorage.setItem('test', test);
+                localStorage.removeItem('test');
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // 獲取 localStorage 使用情況
+        function getStorageSize() {
+            let total = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    total += localStorage[key].length + key.length;
+                }
+            }
+            return (total / 1024).toFixed(2); // 返回 KB
+        }
+
         // 圖片上傳預覽
-        document.getElementById('animeImage').addEventListener('change', function(e) {
+        document.getElementById('animeImage').addEventListener('change', async function(e) {
             console.log('Image upload change event triggered');
             const file = e.target.files[0];
             const fileNameSpan = document.getElementById('fileName');
@@ -1805,8 +1875,8 @@
             
             if (file) {
                 // 檢查檔案大小
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('❌ 圖片檔案太大！請選擇小於 5MB 的圖片。');
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('❌ 圖片檔案太大！請選擇小於 10MB 的圖片。');
                     this.value = '';
                     fileNameSpan.textContent = '未選擇檔案';
                     return;
@@ -1820,24 +1890,31 @@
                     return;
                 }
                 
-                fileNameSpan.textContent = file.name;
-                console.log('File name:', file.name);
+                fileNameSpan.textContent = `${file.name} (壓縮中...)`;
+                console.log('File name:', file.name, 'Size:', (file.size / 1024).toFixed(2), 'KB');
                 
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    console.log('Image preview loaded');
-                    preview.innerHTML = `<img src="${e.target.result}" alt="預覽圖">`;
+                try {
+                    // 壓縮圖片
+                    const compressedDataUrl = await compressImage(file, 800, 0.8);
+                    
+                    console.log('Image compressed successfully');
+                    fileNameSpan.textContent = `${file.name} ✓`;
+                    preview.innerHTML = `<img src="${compressedDataUrl}" alt="預覽圖">`;
                     preview.classList.add('show');
-                };
-                reader.onerror = function(e) {
-                    console.error('FileReader error:', e);
-                    alert('❌ 讀取圖片失敗！請重試。');
-                };
-                reader.readAsDataURL(file);
+                    
+                    // 將壓縮後的圖片存到 input 的 dataset 中
+                    this.dataset.compressedImage = compressedDataUrl;
+                } catch (error) {
+                    console.error('Image compression error:', error);
+                    alert('❌ 圖片壓縮失敗！請重試或選擇其他圖片。');
+                    this.value = '';
+                    fileNameSpan.textContent = '未選擇檔案';
+                }
             } else {
                 fileNameSpan.textContent = '未選擇檔案';
                 preview.classList.remove('show');
                 preview.innerHTML = '';
+                delete this.dataset.compressedImage;
             }
         });
 
@@ -1853,18 +1930,27 @@
             const animeName = document.getElementById('animeName').value.trim();
             const animeLink = document.getElementById('animeLink').value.trim();
             const currentEpisode = parseInt(document.getElementById('currentEpisode').value);
-            const imageFile = document.getElementById('animeImage').files[0];
+            const imageInput = document.getElementById('animeImage');
 
             let imageUrl;
             
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    imageUrl = e.target.result;
+            // 優先使用壓縮後的圖片
+            if (imageInput.dataset.compressedImage) {
+                imageUrl = imageInput.dataset.compressedImage;
+                await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
+            } else if (imageInput.files[0]) {
+                // 如果有檔案但沒有壓縮（不應該發生，但以防萬一）
+                try {
+                    imageUrl = await compressImage(imageInput.files[0], 800, 0.8);
                     await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
-                };
-                reader.readAsDataURL(imageFile);
+                } catch (error) {
+                    console.error('Compression error:', error);
+                    alert('❌ 圖片處理失敗！將使用預設圖片。');
+                    imageUrl = await searchAnimeImage(animeName);
+                    await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
+                }
             } else {
+                // 使用預設圖片
                 imageUrl = await searchAnimeImage(animeName);
                 await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
             }
@@ -1884,24 +1970,40 @@
                 addedDate: new Date().toISOString()
             };
 
-            animeList.push(newAnime);
-            saveToLocalStorage();
-            renderAnimeList();
-            renderFinishedList();
+            // 檢查儲存空間
+            console.log('Current storage size:', getStorageSize(), 'KB');
             
-            // 清空表單
-            document.getElementById('addAnimeForm').reset();
-            document.getElementById('fileName').textContent = '未選擇檔案';
-            document.getElementById('imagePreview').classList.remove('show');
-            document.getElementById('imagePreview').innerHTML = '';
-            
-            // 切換到追蹤列表分頁
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab-btn[data-tab="track"]').classList.add('active');
-            document.getElementById('trackTab').classList.add('active');
-            
-            alert(`✅ 已成功新增《${animeName}》！`);
+            try {
+                animeList.push(newAnime);
+                saveToLocalStorage();
+                renderAnimeList();
+                renderFinishedList();
+                
+                // 清空表單
+                document.getElementById('addAnimeForm').reset();
+                document.getElementById('fileName').textContent = '未選擇檔案';
+                document.getElementById('imagePreview').classList.remove('show');
+                document.getElementById('imagePreview').innerHTML = '';
+                delete document.getElementById('animeImage').dataset.compressedImage;
+                
+                // 切換到追蹤列表分頁
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector('.tab-btn[data-tab="track"]').classList.add('active');
+                document.getElementById('trackTab').classList.add('active');
+                
+                alert(`✅ 已成功新增《${animeName}》！`);
+                console.log('Storage size after save:', getStorageSize(), 'KB');
+            } catch (error) {
+                console.error('Save error:', error);
+                
+                if (error.name === 'QuotaExceededError') {
+                    alert('❌ 儲存空間不足！\n\n建議：\n1. 刪除一些不需要的劇集\n2. 更換為更小的圖片\n3. 使用圖片網址代替上傳');
+                    animeList.pop(); // 移除剛加入的項目
+                } else {
+                    alert('❌ 儲存失敗！請重試。');
+                }
+            }
         }
 
         // 觀看進度 +1
@@ -1933,22 +2035,22 @@
         }
 
         // 更換圖片
-        function changeImage(id) {
+        async function changeImage(id) {
             console.log('changeImage called for id:', id);
             
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
             
-            input.onchange = function(e) {
+            input.onchange = async function(e) {
                 console.log('File input changed');
                 const file = e.target.files[0];
                 console.log('Selected file:', file);
                 
                 if (file) {
-                    // 檢查檔案大小（最大 5MB）
-                    if (file.size > 5 * 1024 * 1024) {
-                        alert('❌ 圖片檔案太大！請選擇小於 5MB 的圖片。');
+                    // 檢查檔案大小（最大 10MB）
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('❌ 圖片檔案太大！請選擇小於 10MB 的圖片。');
                         return;
                     }
                     
@@ -1958,30 +2060,40 @@
                         return;
                     }
                     
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        console.log('File loaded successfully');
+                    try {
+                        console.log('Compressing image...');
+                        const compressedDataUrl = await compressImage(file, 800, 0.8);
+                        console.log('File compressed successfully');
+                        
                         const anime = animeList.find(a => a.id === id);
                         if (anime) {
                             console.log('Updating anime:', anime.name);
-                            anime.imageUrl = e.target.result;
-                            saveToLocalStorage();
-                            renderAnimeList();
-                            renderFinishedList();
-                            alert('✅ 圖片已更換成功！');
+                            console.log('Storage before:', getStorageSize(), 'KB');
+                            
+                            anime.imageUrl = compressedDataUrl;
+                            
+                            try {
+                                saveToLocalStorage();
+                                renderAnimeList();
+                                renderFinishedList();
+                                alert('✅ 圖片已更換成功！');
+                                console.log('Storage after:', getStorageSize(), 'KB');
+                            } catch (saveError) {
+                                console.error('Save error:', saveError);
+                                if (saveError.name === 'QuotaExceededError') {
+                                    alert('❌ 儲存空間不足！\n請嘗試：\n1. 選擇更小的圖片\n2. 刪除一些不需要的劇集');
+                                } else {
+                                    alert('❌ 儲存失敗！請重試。');
+                                }
+                            }
                         } else {
                             console.error('Anime not found for id:', id);
                             alert('❌ 找不到該劇集！');
                         }
-                    };
-                    
-                    reader.onerror = function(e) {
-                        console.error('FileReader error:', e);
-                        alert('❌ 讀取圖片失敗！請重試。');
-                    };
-                    
-                    reader.readAsDataURL(file);
+                    } catch (error) {
+                        console.error('Compression error:', error);
+                        alert('❌ 圖片壓縮失敗！請選擇其他圖片或重試。');
+                    }
                 } else {
                     console.log('No file selected');
                 }
@@ -1995,7 +2107,9 @@
             
             // 點擊後移除（避免 DOM 污染）
             setTimeout(() => {
-                document.body.removeChild(input);
+                if (document.body.contains(input)) {
+                    document.body.removeChild(input);
+                }
             }, 1000);
         }
 
