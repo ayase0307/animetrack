@@ -1442,8 +1442,20 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="animeImage">自訂封面圖片（選填）</label>
-                        <div class="image-upload-wrapper">
+                        <label for="animeImage">封面圖片（選填）</label>
+                        
+                        <!-- 切換按鈕 -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                            <button type="button" class="btn-upload" id="uploadModeBtn" onclick="switchImageMode('upload')" style="flex: 1; background: linear-gradient(135deg, #ff6b9d 0%, #c06bff 100%); color: white; border: none;">
+                                📤 上傳圖片
+                            </button>
+                            <button type="button" class="btn-upload" id="urlModeBtn" onclick="switchImageMode('url')" style="flex: 1;">
+                                🔗 圖片網址
+                            </button>
+                        </div>
+                        
+                        <!-- 上傳模式 -->
+                        <div id="uploadMode" class="image-upload-wrapper">
                             <input type="file" id="animeImage" accept="image/*" style="display: none;">
                             <button type="button" class="btn-upload" onclick="document.getElementById('animeImage').click()">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1454,8 +1466,18 @@
                                 選擇圖片
                             </button>
                             <span class="file-name" id="fileName">未選擇檔案</span>
-                            <div class="image-preview" id="imagePreview"></div>
                         </div>
+                        
+                        <!-- 網址模式 -->
+                        <div id="urlMode" style="display: none;">
+                            <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" style="width: 100%;">
+                            <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+                                💡 提示：使用圖片網址可以節省儲存空間
+                            </p>
+                        </div>
+                        
+                        <!-- 預覽 -->
+                        <div class="image-preview" id="imagePreview"></div>
                     </div>
                     <button type="submit" class="btn">新增動漫</button>
                 </form>
@@ -1671,11 +1693,54 @@
         let searchQuery = '';
         let currentTheme = localStorage.getItem('theme') || 'dark';
         let currentPlayingAnime = null;
+        let imageInputMode = 'upload'; // 'upload' 或 'url'
 
         // 初始化主題
         if (currentTheme === 'light') {
             document.body.classList.add('light-theme');
             document.getElementById('themeToggle').textContent = '☀️';
+        }
+
+        // 切換圖片輸入模式
+        function switchImageMode(mode) {
+            imageInputMode = mode;
+            const uploadMode = document.getElementById('uploadMode');
+            const urlMode = document.getElementById('urlMode');
+            const uploadBtn = document.getElementById('uploadModeBtn');
+            const urlBtn = document.getElementById('urlModeBtn');
+            const preview = document.getElementById('imagePreview');
+            
+            if (mode === 'upload') {
+                uploadMode.style.display = 'flex';
+                urlMode.style.display = 'none';
+                uploadBtn.style.background = 'linear-gradient(135deg, #ff6b9d 0%, #c06bff 100%)';
+                uploadBtn.style.color = 'white';
+                uploadBtn.style.border = 'none';
+                urlBtn.style.background = 'var(--bg-tertiary)';
+                urlBtn.style.color = 'var(--text-primary)';
+                urlBtn.style.border = '1px solid var(--border-color)';
+                
+                // 清空網址輸入
+                document.getElementById('imageUrl').value = '';
+            } else {
+                uploadMode.style.display = 'none';
+                urlMode.style.display = 'block';
+                urlBtn.style.background = 'linear-gradient(135deg, #ff6b9d 0%, #c06bff 100%)';
+                urlBtn.style.color = 'white';
+                urlBtn.style.border = 'none';
+                uploadBtn.style.background = 'var(--bg-tertiary)';
+                uploadBtn.style.color = 'var(--text-primary)';
+                uploadBtn.style.border = '1px solid var(--border-color)';
+                
+                // 清空檔案輸入
+                document.getElementById('animeImage').value = '';
+                document.getElementById('fileName').textContent = '未選擇檔案';
+                delete document.getElementById('animeImage').dataset.compressedImage;
+            }
+            
+            // 清空預覽
+            preview.classList.remove('show');
+            preview.innerHTML = '';
         }
 
         // 播放器相關函數
@@ -1918,6 +1983,29 @@
             }
         });
 
+        // 網址輸入即時預覽
+        document.getElementById('imageUrl').addEventListener('input', function() {
+            const url = this.value.trim();
+            const preview = document.getElementById('imagePreview');
+            
+            if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                // 測試圖片是否可載入
+                const img = new Image();
+                img.onload = function() {
+                    preview.innerHTML = `<img src="${url}" alt="預覽圖">`;
+                    preview.classList.add('show');
+                };
+                img.onerror = function() {
+                    preview.innerHTML = `<p style="color: var(--text-secondary); padding: 20px; text-align: center;">❌ 無法載入圖片<br>請檢查網址是否正確</p>`;
+                    preview.classList.add('show');
+                };
+                img.src = url;
+            } else {
+                preview.classList.remove('show');
+                preview.innerHTML = '';
+            }
+        });
+
         // 自動搜尋圖片
         async function searchAnimeImage(animeName) {
             return `https://picsum.photos/seed/${encodeURIComponent(animeName)}/600/400`;
@@ -1930,29 +2018,42 @@
             const animeName = document.getElementById('animeName').value.trim();
             const animeLink = document.getElementById('animeLink').value.trim();
             const currentEpisode = parseInt(document.getElementById('currentEpisode').value);
-            const imageInput = document.getElementById('animeImage');
 
             let imageUrl;
             
-            // 優先使用壓縮後的圖片
-            if (imageInput.dataset.compressedImage) {
-                imageUrl = imageInput.dataset.compressedImage;
+            // 根據模式選擇圖片來源
+            if (imageInputMode === 'url') {
+                // 使用網址
+                const urlInput = document.getElementById('imageUrl').value.trim();
+                if (urlInput && (urlInput.startsWith('http://') || urlInput.startsWith('https://'))) {
+                    imageUrl = urlInput;
+                    console.log('Using image URL:', imageUrl);
+                } else {
+                    // 沒有輸入網址，使用預設
+                    imageUrl = await searchAnimeImage(animeName);
+                }
                 await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
-            } else if (imageInput.files[0]) {
-                // 如果有檔案但沒有壓縮（不應該發生，但以防萬一）
-                try {
-                    imageUrl = await compressImage(imageInput.files[0], 800, 0.8);
+            } else {
+                // 使用上傳
+                const imageInput = document.getElementById('animeImage');
+                
+                if (imageInput.dataset.compressedImage) {
+                    imageUrl = imageInput.dataset.compressedImage;
                     await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
-                } catch (error) {
-                    console.error('Compression error:', error);
-                    alert('❌ 圖片處理失敗！將使用預設圖片。');
+                } else if (imageInput.files[0]) {
+                    try {
+                        imageUrl = await compressImage(imageInput.files[0], 800, 0.8);
+                        await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
+                    } catch (error) {
+                        console.error('Compression error:', error);
+                        alert('❌ 圖片處理失敗！將使用預設圖片。');
+                        imageUrl = await searchAnimeImage(animeName);
+                        await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
+                    }
+                } else {
                     imageUrl = await searchAnimeImage(animeName);
                     await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
                 }
-            } else {
-                // 使用預設圖片
-                imageUrl = await searchAnimeImage(animeName);
-                await saveAnime(animeName, animeLink, currentEpisode, imageUrl);
             }
         });
 
@@ -1984,7 +2085,11 @@
                 document.getElementById('fileName').textContent = '未選擇檔案';
                 document.getElementById('imagePreview').classList.remove('show');
                 document.getElementById('imagePreview').innerHTML = '';
+                document.getElementById('imageUrl').value = '';
                 delete document.getElementById('animeImage').dataset.compressedImage;
+                
+                // 重置為上傳模式
+                switchImageMode('upload');
                 
                 // 切換到追蹤列表分頁
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1998,8 +2103,8 @@
                 console.error('Save error:', error);
                 
                 if (error.name === 'QuotaExceededError') {
-                    alert('❌ 儲存空間不足！\n\n建議：\n1. 刪除一些不需要的劇集\n2. 更換為更小的圖片\n3. 使用圖片網址代替上傳');
-                    animeList.pop(); // 移除剛加入的項目
+                    alert('❌ 儲存空間不足！\n\n建議：\n1. 刪除一些不需要的劇集\n2. 使用圖片網址代替上傳\n3. 選擇更小的圖片');
+                    animeList.pop();
                 } else {
                     alert('❌ 儲存失敗！請重試。');
                 }
