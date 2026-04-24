@@ -892,7 +892,7 @@ async function loadData() {
   const { data, error } = await sb.from('anime_list').select('*').eq('user_id', user.id).order('added_date',{ascending:false});
   if (error) { setSyncing('offline'); if (!cached) toast('error','載入失敗：'+error.message); return; }
   anime = data.map(mapRow);
-  localStorage.setItem(cacheKey, JSON.stringify(anime));
+  saveCache();
   setSyncing('synced');
   renderAll();
 }
@@ -960,7 +960,12 @@ async function dbDelete(id) {
 }
 
 function saveCache() {
-  localStorage.setItem('ac_'+user.id, JSON.stringify(anime));
+  try {
+    localStorage.setItem('ac_'+user.id, JSON.stringify(anime));
+  } catch(e) {
+    // localStorage 已滿（通常因為 base64 圖片太大），跳過快取
+    localStorage.removeItem('ac_'+user.id);
+  }
 }
 
 // ═══════════════════════════════════════════
