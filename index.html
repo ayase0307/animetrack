@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
@@ -804,13 +804,15 @@ async function login() {
   const err = document.getElementById('loginError');
   err.classList.remove('show');
   if (!email || !pw) { err.textContent='請填入所有欄位'; err.classList.add('show'); return; }
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if (error) {
-    err.textContent = error.message.includes('Invalid') ? '帳號或密碼錯誤' : error.message;
-    err.classList.add('show'); return;
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) { err.textContent = error.message; err.classList.add('show'); return; }
+    user = data.user;
+    await loadApp();
+  } catch(e) {
+    err.textContent = '連線失敗，請確認網路或 Supabase 設定：' + e.message;
+    err.classList.add('show');
   }
-  user = data.user;
-  await loadApp();
 }
 
 async function signup() {
@@ -1369,22 +1371,26 @@ document.getElementById('importFile').addEventListener('change', async function(
       if (!Array.isArray(data)) throw new Error('格式錯誤');
       showConfirm(`確定要匯入 <strong>${data.length}</strong> 筆資料嗎？<br><small style="color:var(--accent-pink)">這將清除現有所有資料！</small>`, '📥', async () => {
         setSyncing('syncing');
-        await sb.from('anime_list').delete().eq('user_id',user.id);
-        for (const item of data) {
-          await sb.from('anime_list').insert({
-            user_id: user.id,
-            name: item.name||'未命名',
-            link: item.link||item.animeLink||'',
-            episode: item.episode||0,
-            total_episodes: item.totalEpisodes||item.total_episodes||null,
-            image_url: item.imageUrl||item.image_url||null,
-            update_day: item.updateDay||item.update_day||null,
-            finished: item.finished||false,
-            finished_date: item.finishedDate||item.finished_date||null,
-            added_date: item.addedDate||item.added_date||new Date().toISOString(),
-            rating: item.rating||null,
-            notes: item.notes||null
-          });
+        const { error: delErr } = await sb.from('anime_list').delete().eq('user_id', user.id);
+        if (delErr) { toast('error','清除舊資料失敗：'+delErr.message); setSyncing('offline'); return; }
+        const rows = data.map(item => ({
+          user_id: user.id,
+          name: item.name||'未命名',
+          link: item.link||item.animeLink||'',
+          episode: item.episode||0,
+          total_episodes: item.totalEpisodes||item.total_episodes||null,
+          image_url: item.imageUrl||item.image_url||null,
+          update_day: item.updateDay||item.update_day||null,
+          finished: item.finished||false,
+          finished_date: item.finishedDate||item.finished_date||null,
+          added_date: item.addedDate||item.added_date||new Date().toISOString(),
+          rating: item.rating||null,
+          notes: item.notes||null
+        }));
+        const CHUNK = 50;
+        for (let i = 0; i < rows.length; i += CHUNK) {
+          const { error: insErr } = await sb.from('anime_list').insert(rows.slice(i, i + CHUNK));
+          if (insErr) { toast('error','匯入失敗：'+insErr.message); setSyncing('offline'); return; }
         }
         await loadData();
         toast('success', `已成功匯入 ${data.length} 筆資料！`);
