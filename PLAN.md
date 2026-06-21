@@ -111,11 +111,9 @@ Supabase 專案 → Settings → API
 - **分類標籤**：番劇 / 劇場版 / 想看清單，卡片標籤 + 篩選 chips。
 - **鍵盤快捷鍵**：`/` 搜尋、`N` 新增、`1–4` 切分頁、`Esc` 關閉、`?` 說明。
 
-### ⚠️ 分類的雲端同步（選用）
-分類目前存在**瀏覽器本機**（localStorage），單裝置即用、零設定。若要跨裝置同步分類，於 Supabase SQL Editor 執行：
+### 分類的雲端同步（已啟用）
+已執行 `ALTER TABLE public.anime_list ADD COLUMN category TEXT DEFAULT 'tv';`，v4 的分類現在**讀寫 DB `category` 欄位**，可跨裝置同步。
 
-```sql
-ALTER TABLE public.anime_list ADD COLUMN category TEXT DEFAULT 'tv';
-```
-
-告訴我之後，我可以把分類改為讀寫這個欄位（匯出 JSON 已含 `category`，遷移不會掉資料）。
+- 首次載入會自動把本機既有分類遷移上雲（`catmig_<uid>` 旗標，只跑一次）。
+- 若 DB 沒有該欄位，會自動退回本機儲存（`dbHasCategory` 保護），不會壞。
+- 匯出 JSON 含 `category`，匯入會一併寫回。

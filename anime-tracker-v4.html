@@ -608,6 +608,7 @@ let finSort=localStorage.getItem('v4_finsort')||'date-new';
 let searchQ='', finSearchQ='';
 let playingAnime=null, confirmCb=null;
 let catMap={}, customOrder=[], dragId=null;
+let dbHasCategory=true; // 偵測到 DB 沒有 category 欄位時自動翻 false，退回本機儲存
 
 const DAYS={'0':'週日','1':'週一','2':'週二','3':'週三','4':'週四','5':'週五','6':'週六'};
 const CATS={tv:'番劇',movie:'劇場版',watchlist:'想看清單'};
@@ -702,7 +703,23 @@ function loadLocalMeta(){
 }
 function saveCatMap(){ try{ localStorage.setItem('cat_'+user.id,JSON.stringify(catMap)); }catch(e){} }
 function saveOrder(){ try{ localStorage.setItem('order_'+user.id,JSON.stringify(customOrder)); }catch(e){} }
-const getCat=id=>catMap[id]||'tv';
+function getCat(id){
+  const a=anime.find(x=>x.id===id);
+  if(a&&a.category) return a.category;   // DB 來源優先
+  return catMap[id]||'tv';               // 本機快取 / 預設
+}
+// 一次性遷移：把本機既有分類推上雲（ALTER 會把舊資料預設成 'tv'，不遷移會被覆蓋）
+async function migrateLocalCategories(){
+  if(!dbHasCategory) return;
+  if(localStorage.getItem('catmig_'+user.id)==='1') return;
+  const pending=anime.filter(a=>catMap[a.id]&&catMap[a.id]!==(a.category||'tv'));
+  for(const a of pending){
+    const {error}=await sb.from('anime_list').update({category:catMap[a.id]}).eq('id',a.id).eq('user_id',user.id);
+    if(error){ if(/category/i.test(error.message)) dbHasCategory=false; return; }
+    a.category=catMap[a.id];
+  }
+  localStorage.setItem('catmig_'+user.id,'1'); saveCache();
+}
 
 // ═══════════════════ DATA ═══════════════════
 function setSyncing(s){
@@ -713,7 +730,8 @@ function setSyncing(s){
 function mapRow(r){
   return {id:r.id,name:r.name,link:r.link||'',episode:r.episode||0,totalEpisodes:r.total_episodes||null,
     imageUrl:r.image_url||'',updateDay:r.update_day||'',finished:r.finished||false,
-    finishedDate:r.finished_date||null,addedDate:r.added_date,rating:r.rating||null,notes:r.notes||''};
+    finishedDate:r.finished_date||null,addedDate:r.added_date,rating:r.rating||null,notes:r.notes||'',
+    category:r.category||null};
 }
 async function loadData(){
   setSyncing('syncing');
@@ -721,17 +739,25 @@ async function loadData(){
   if(cached){ try{ anime=JSON.parse(cached); renderAll(); }catch(e){} }
   const {data,error}=await sb.from('anime_list').select('*').eq('user_id',user.id).order('added_date',{ascending:false});
   if(error){ setSyncing('offline'); if(!cached) toast('error','載入失敗：'+error.message); return; }
-  anime=data.map(mapRow); saveCache(); ensureOrder(); setSyncing('synced'); renderAll();
+  anime=data.map(mapRow); saveCache(); ensureOrder(); await migrateLocalCategories(); setSyncing('synced'); renderAll();
 }
 async function dbAdd(p){
   setSyncing('syncing');
-  const {data,error}=await sb.from('anime_list').insert({
+  const cat=p.category||'tv';
+  const base={
     user_id:user.id,name:p.name,link:p.link,episode:p.episode,total_episodes:p.totalEpisodes||null,
     image_url:p.imageUrl||null,update_day:p.updateDay||null,finished:false,
     added_date:new Date().toISOString(),rating:p.rating||null,notes:p.notes||null
-  }).select().single();
+  };
+  let {data,error}=await sb.from('anime_list').insert(dbHasCategory?{...base,category:cat}:base).select().single();
+  if(error&&dbHasCategory&&/category/i.test(error.message)){
+    dbHasCategory=false;
+    ({data,error}=await sb.from('anime_list').insert(base).select().single());
+  }
   if(error){ setSyncing('offline'); toast('error','新增失敗：'+error.message); return null; }
-  const item=mapRow(data); anime.unshift(item); saveCache(); ensureOrder(); setSyncing('synced'); renderAll();
+  const item=mapRow(data); if(!item.category) item.category=cat;
+  catMap[item.id]=cat; saveCatMap();
+  anime.unshift(item); saveCache(); ensureOrder(); setSyncing('synced'); renderAll();
   return item;
 }
 async function dbUpdate(id,u){
@@ -740,11 +766,17 @@ async function dbUpdate(id,u){
   if('name'in u)db.name=u.name; if('link'in u)db.link=u.link; if('episode'in u)db.episode=u.episode;
   if('totalEpisodes'in u)db.total_episodes=u.totalEpisodes||null; if('updateDay'in u)db.update_day=u.updateDay||null;
   if('rating'in u)db.rating=u.rating||null; if('notes'in u)db.notes=u.notes||null; if('imageUrl'in u)db.image_url=u.imageUrl||null;
+  if('category'in u && dbHasCategory) db.category=u.category||'tv';
   if('finished'in u){ db.finished=u.finished; db.finished_date=u.finished?new Date().toISOString():null; }
-  const {error}=await sb.from('anime_list').update(db).eq('id',id).eq('user_id',user.id);
+  let {error}=await sb.from('anime_list').update(db).eq('id',id).eq('user_id',user.id);
+  if(error&&dbHasCategory&&/category/i.test(error.message)){
+    dbHasCategory=false; delete db.category;
+    ({error}=await sb.from('anime_list').update(db).eq('id',id).eq('user_id',user.id));
+  }
   if(error){ setSyncing('offline'); toast('error','更新失敗：'+error.message); return false; }
   const idx=anime.findIndex(a=>a.id===id);
   if(idx!==-1){ Object.assign(anime[idx],u); if('finished'in u) anime[idx].finishedDate=db.finished_date; }
+  if('category'in u){ catMap[id]=u.category||'tv'; saveCatMap(); }
   saveCache(); setSyncing('synced'); renderAll(); return true;
 }
 async function dbDelete(id){
@@ -1007,7 +1039,7 @@ async function doAdd(){
   const notes=document.getElementById('addNotes').value.trim();
   const imageUrl=imgMode==='upload'?addImgData:document.getElementById('addImgUrl').value.trim();
   const btn=document.getElementById('addSubmitBtn'); btn.disabled=true; btn.textContent='新增中…';
-  const result=await dbAdd({name,link,episode:ep,totalEpisodes:total,imageUrl,updateDay:day,rating,notes});
+  const result=await dbAdd({name,link,episode:ep,totalEpisodes:total,imageUrl,updateDay:day,rating,notes,category:cat});
   btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增動漫';
   if(result){
     catMap[result.id]=cat; saveCatMap();
@@ -1044,7 +1076,8 @@ async function submitEdit(e){
     totalEpisodes:parseInt(document.getElementById('editTotal').value)||null,
     updateDay:document.getElementById('editDay').value,
     rating:parseInt(document.getElementById('editRating').value)||null,
-    notes:document.getElementById('editNotes').value.trim()
+    notes:document.getElementById('editNotes').value.trim(),
+    category:cat
   };
   catMap[id]=cat; saveCatMap();
   if(await dbUpdate(id,updates)){ closeEdit(); toast('success','已更新作品資訊'); }
@@ -1102,14 +1135,18 @@ document.getElementById('importFile').addEventListener('change',async function(e
         setSyncing('syncing');
         const {error:delErr}=await sb.from('anime_list').delete().eq('user_id',user.id);
         if(delErr){ toast('error','清除舊資料失敗：'+delErr.message); setSyncing('offline'); return; }
-        const rows=data.map(item=>({
-          user_id:user.id,name:item.name||'未命名',link:item.link||item.animeLink||'',
-          episode:item.episode||0,total_episodes:item.totalEpisodes||item.total_episodes||null,
-          image_url:item.imageUrl||item.image_url||null,update_day:item.updateDay||item.update_day||null,
-          finished:item.finished||false,finished_date:item.finishedDate||item.finished_date||null,
-          added_date:item.addedDate||item.added_date||new Date().toISOString(),
-          rating:item.rating||null,notes:item.notes||null
-        }));
+        const rows=data.map(item=>{
+          const r={
+            user_id:user.id,name:item.name||'未命名',link:item.link||item.animeLink||'',
+            episode:item.episode||0,total_episodes:item.totalEpisodes||item.total_episodes||null,
+            image_url:item.imageUrl||item.image_url||null,update_day:item.updateDay||item.update_day||null,
+            finished:item.finished||false,finished_date:item.finishedDate||item.finished_date||null,
+            added_date:item.addedDate||item.added_date||new Date().toISOString(),
+            rating:item.rating||null,notes:item.notes||null
+          };
+          if(dbHasCategory) r.category=item.category||'tv';
+          return r;
+        });
         const cats=data.map(item=>item.category||'tv');
         const CHUNK=50; let inserted=[];
         for(let i=0;i<rows.length;i+=CHUNK){
