@@ -1,0 +1,12 @@
+# OS / 系統檔
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 編輯器
+.vscode/
+.idea/
+
+# 暫存
+*.tmp
+*.log

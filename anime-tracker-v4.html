@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>追劇小幫手</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;
+  --bg-elev:#101018;
+  --surface:rgba(255,255,255,0.045);
+  --surface-2:rgba(255,255,255,0.07);
+  --surface-hover:rgba(255,255,255,0.10);
+  --modal:#12121b;
+  --fg:#f3f3f7;
+  --muted:#9b9bb3;
+  --faint:rgba(243,243,247,0.42);
+  --border:rgba(255,255,255,0.09);
+  --border-strong:rgba(255,255,255,0.17);
+  --accent:#ff4d6d;
+  --accent-2:#ff7a52;
+  --accent-soft:rgba(255,77,109,0.13);
+  --accent-border:rgba(255,77,109,0.42);
+  --success:#34d399;
+  --success-soft:rgba(52,211,153,0.13);
+  --warn:#fbbf24;
+  --danger:#ff5c7c;
+  --info:#56b6ff;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;
+  --shadow:0 18px 50px -14px rgba(0,0,0,0.72);
+  --shadow-card:0 10px 30px -12px rgba(0,0,0,0.6);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei','PingFang TC',sans-serif;
+  --mono:'SF Mono',ui-monospace,'JetBrains Mono',Menlo,monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(900px 600px at 85% -10%,rgba(255,77,109,0.10),transparent 60%),
+  radial-gradient(800px 500px at 5% 5%,rgba(86,98,255,0.07),transparent 55%);
+  pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.14);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.26)}
+::selection{background:var(--accent);color:#fff}
+
+/* ── SCREEN SYSTEM ── */
+.screen{display:none;min-height:100vh;position:relative;z-index:1}
+.screen.active{display:flex;flex-direction:column}
+.center-screen{align-items:center;justify-content:center;padding:24px}
+
+/* ── AUTH / SETUP BOX ── */
+.auth-box{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-xl);padding:44px 38px;width:100%;max-width:430px;box-shadow:var(--shadow)}
+.auth-logo{text-align:center;margin-bottom:30px}
+.auth-logo .mark{display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 10px 30px -8px var(--accent);margin-bottom:16px}
+.auth-logo h1{font-size:1.7rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px}
+.auth-logo p{color:var(--muted);font-size:.88rem}
+.auth-tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:4px;margin-bottom:26px}
+.auth-tab{flex:1;padding:10px;background:transparent;border:none;border-radius:var(--r-sm);color:var(--muted);font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;transition:all .18s}
+.auth-tab.active{background:var(--accent);color:#fff;box-shadow:0 4px 14px -4px var(--accent)}
+
+/* ── FORM ELEMENTS ── */
+.form-group{margin-bottom:15px}
+.form-group label{display:block;margin-bottom:6px;color:var(--muted);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em}
+.form-control{width:100%;padding:12px 15px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);color:var(--fg);font-family:var(--font);font-size:.94rem;transition:border-color .18s,background .18s,box-shadow .18s}
+.form-control:focus{outline:none;border-color:var(--accent-border);background:var(--surface-2);box-shadow:0 0 0 3px var(--accent-soft)}
+.form-control::placeholder{color:var(--faint)}
+select.form-control{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%239b9bb3' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+select.form-control option{background:var(--modal);color:var(--fg)}
+textarea.form-control{resize:vertical;min-height:78px;line-height:1.6}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.error-msg{color:var(--danger);font-size:.82rem;margin-top:8px;display:none}
+.error-msg.show{display:block}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border:none;border-radius:var(--r-md);font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;transition:all .18s;text-decoration:none;white-space:nowrap;position:relative}
+.btn svg{flex-shrink:0}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 6px 18px -6px var(--accent)}
+.btn-primary:hover{background:#ff6280;transform:translateY(-1px);box-shadow:0 10px 24px -6px var(--accent)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:var(--surface);color:var(--fg);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--surface-hover);border-color:var(--border-strong)}
+.btn-danger{background:rgba(255,92,124,.12);color:var(--danger);border:1px solid rgba(255,92,124,.22)}
+.btn-danger:hover{background:rgba(255,92,124,.2);border-color:var(--danger)}
+.btn-success{background:var(--success-soft);color:var(--success);border:1px solid rgba(52,211,153,.24)}
+.btn-success:hover{background:rgba(52,211,153,.22);border-color:var(--success)}
+.btn-full{width:100%}
+.btn-sm{padding:7px 13px;font-size:.82rem;border-radius:var(--r-sm)}
+.btn-icon{width:34px;height:34px;padding:0;border-radius:var(--r-sm)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* ── SETUP STEPS ── */
+.setup-step{margin-bottom:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md)}
+.setup-step-title{font-weight:700;font-size:.9rem;margin-bottom:6px}
+.setup-step-desc{color:var(--muted);font-size:.82rem;line-height:1.7}
+.setup-step-desc code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:.8rem}
+.auth-hint{text-align:center;margin-top:18px;color:var(--muted);font-size:.82rem}
+.auth-hint a{color:var(--accent);cursor:pointer}
+.auth-hint a:hover{text-decoration:underline}
+
+/* ── LOADING ── */
+#loadingOverlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}
+#loadingOverlay.hidden{display:none}
+.spinner{width:38px;height:38px;border:3px solid var(--surface-2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--muted);font-size:.9rem}
+
+/* ── APP HEADER ── */
+.app-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 22px;height:64px;background:rgba(10,10,15,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-logo{height:34px;width:auto;display:block;border-radius:8px}
+.brand-word{font-size:1.12rem;font-weight:800;letter-spacing:-0.01em;white-space:nowrap}
+.brand-word .dot{color:var(--accent)}
+.header-actions{display:flex;align-items:center;gap:9px}
+.sync-pill{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;font-size:.76rem;font-weight:600;background:var(--surface);border:1px solid var(--border)}
+.sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--muted)}
+.sync-pill.synced{color:var(--success)}.sync-pill.synced .sync-dot{background:var(--success)}
+.sync-pill.syncing{color:var(--accent)}.sync-pill.syncing .sync-dot{background:var(--accent);animation:pulse 1s infinite}
+.sync-pill.offline{color:var(--warn)}.sync-pill.offline .sync-dot{background:var(--warn)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.icon-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--muted);cursor:pointer;transition:all .18s}
+.icon-btn:hover{color:var(--fg);border-color:var(--border-strong);background:var(--surface-hover)}
+.user-btn{display:flex;align-items:center;gap:8px;padding:6px 11px 6px 6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);color:var(--fg);cursor:pointer;font-family:var(--font);font-size:.82rem;font-weight:600;transition:all .18s}
+.user-btn:hover{border-color:var(--border-strong);background:var(--surface-hover)}
+.user-avatar{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:.74rem;color:#fff;font-weight:800;flex-shrink:0}
+.user-email-text{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── TAB NAV ── */
+.tab-nav{display:flex;gap:2px;padding:0 22px;background:rgba(10,10,15,.7);border-bottom:1px solid var(--border);overflow-x:auto;backdrop-filter:blur(14px);position:sticky;top:64px;z-index:90}
+.tab-nav::-webkit-scrollbar{height:0}
+.tab-btn{display:flex;align-items:center;gap:8px;padding:14px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;transition:color .18s,border-color .18s;white-space:nowrap;margin-bottom:-1px}
+.tab-btn:hover{color:var(--fg)}
+.tab-btn.active{color:var(--fg);border-bottom-color:var(--accent)}
+.tab-badge{padding:1px 8px;border-radius:10px;font-size:.7rem;font-weight:800;background:var(--surface-2);color:var(--muted);font-variant-numeric:tabular-nums}
+.tab-btn.active .tab-badge{background:var(--accent-soft);color:var(--accent)}
+
+/* ── APP MAIN ── */
+.app-main{flex:1;padding:22px;max-width:1480px;margin:0 auto;width:100%}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeUp .28s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+.search-input{width:100%;padding:10px 14px 10px 40px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);color:var(--fg);font-family:var(--font);font-size:.88rem;transition:border-color .18s,background .18s}
+.search-input:focus{outline:none;border-color:var(--accent-border);background:var(--surface-2);box-shadow:0 0 0 3px var(--accent-soft)}
+.search-input::placeholder{color:var(--faint)}
+.ctrl-select{padding:10px 32px 10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);color:var(--fg);font-family:var(--font);font-size:.83rem;font-weight:600;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%239b9bb3' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;transition:border-color .18s}
+.ctrl-select:focus{outline:none;border-color:var(--accent-border)}
+.ctrl-select option{background:var(--modal)}
+.view-toggle{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:3px}
+.view-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;border-radius:var(--r-sm);color:var(--faint);cursor:pointer;transition:all .18s}
+.view-btn:hover{color:var(--fg)}
+.view-btn.active{background:var(--accent);color:#fff}
+
+/* ── CATEGORY CHIPS ── */
+.chips{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.chip{padding:7px 15px;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .16s}
+.chip:hover{color:var(--fg);border-color:var(--border-strong)}
+.chip.active{background:var(--accent-soft);border-color:var(--accent-border);color:var(--accent)}
+.chip .chip-count{opacity:.7;margin-left:5px;font-variant-numeric:tabular-nums}
+
+/* ── TODAY BANNER ── */
+.today-banner{display:none;align-items:center;gap:14px;padding:14px 18px;margin-bottom:16px;background:linear-gradient(100deg,var(--accent-soft),transparent);border:1px solid var(--accent-border);border-radius:var(--r-lg)}
+.today-banner svg{color:var(--accent);flex-shrink:0}
+.today-banner strong{display:block;color:var(--fg);font-weight:700;font-size:.95rem}
+.today-banner span{font-size:.84rem;color:var(--muted)}
+.drag-hint{display:none;align-items:center;gap:8px;padding:9px 14px;margin-bottom:14px;background:var(--surface);border:1px dashed var(--border-strong);border-radius:var(--r-md);color:var(--muted);font-size:.82rem}
+.drag-hint.show{display:flex}
+.drag-hint svg{color:var(--accent);flex-shrink:0}
+
+/* ── ANIME GRID + CARDS ── */
+.anime-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.anime-grid.list-view{grid-template-columns:1fr;gap:10px}
+.anime-grid.compact-view{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.anime-card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s;display:flex;flex-direction:column}
+.anime-card:hover{transform:translateY(-4px);border-color:var(--border-strong);box-shadow:var(--shadow-card)}
+.anime-card[draggable="true"]{cursor:grab}
+.anime-card.dragging{opacity:.4;cursor:grabbing}
+.anime-card.drop-target{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.card-cover{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--surface-2)}
+.card-cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.anime-card:hover .card-cover img{transform:scale(1.05)}
+.card-scrim{position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(10,10,15,.55) 78%,rgba(10,10,15,.92) 100%)}
+.card-badges{position:absolute;top:9px;left:9px;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:7px;font-size:.7rem;font-weight:700;backdrop-filter:blur(8px)}
+.badge-today{background:var(--accent);color:#fff}
+.badge-finished{background:rgba(52,211,153,.9);color:#04150f}
+.badge-day{background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.18)}
+.cat-tag{position:absolute;top:9px;right:9px;padding:3px 9px;border-radius:7px;font-size:.68rem;font-weight:700;background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16)}
+.cat-tag.watchlist{background:var(--accent-soft);color:#ffb3c2;border-color:var(--accent-border)}
+.change-img-btn{position:absolute;bottom:9px;right:9px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;cursor:pointer;opacity:0;transition:opacity .2s,background .2s}
+.anime-card:hover .change-img-btn{opacity:1}
+.change-img-btn:hover{background:var(--accent)}
+.card-body{padding:13px 14px 14px;display:flex;flex-direction:column;flex:1}
+.card-title{font-size:.98rem;font-weight:700;line-height:1.35;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
+.card-stars{display:flex;gap:2px;margin-bottom:8px}
+.card-stars .star{color:var(--surface-2);font-size:.85rem}
+.card-stars .star.filled{color:var(--warn)}
+.card-ep-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;gap:8px}
+.ep-label{font-size:.72rem;color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.ep-num{font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums}
+.ep-num b{color:var(--accent);font-size:1.05rem}
+.progress-bar{height:5px;background:var(--surface-2);border-radius:3px;overflow:hidden;margin-bottom:11px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px;transition:width .4s}
+.card-date{font-size:.74rem;color:var(--faint);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.card-actions{display:flex;gap:6px;margin-top:auto}
+.card-actions .btn-icon{flex:0 0 auto}
+.card-actions .spacer{flex:1}
+
+/* list view tweaks */
+.list-view .anime-card{flex-direction:row}
+.list-view .card-cover{width:90px;flex-shrink:0;aspect-ratio:3/4}
+.list-view .card-body{flex:1}
+.list-view .card-title{-webkit-line-clamp:1;min-height:0}
+.list-view .change-img-btn{display:none}
+.compact-view .card-body{padding:10px}
+.compact-view .card-title{font-size:.86rem}
+.compact-view .card-actions .btn-icon{width:30px;height:30px}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:70px 20px;color:var(--muted)}
+.empty svg{color:var(--surface-2);margin-bottom:16px}
+.empty h3{font-size:1.05rem;color:var(--fg);margin-bottom:6px;font-weight:700}
+.empty p{font-size:.88rem}
+
+/* ── SECTION SUMMARY (finished) ── */
+.summary-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.summary-pill{display:flex;align-items:center;gap:9px;padding:11px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md)}
+.summary-pill svg{color:var(--accent)}
+.summary-pill .v{font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums}
+.summary-pill .l{font-size:.78rem;color:var(--muted)}
+
+/* ── ADD FORM ── */
+.form-card{max-width:640px;margin:0 auto;background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-xl);padding:30px}
+.form-card h2{font-size:1.25rem;font-weight:800;margin-bottom:4px;letter-spacing:-0.01em}
+.form-card .sub{color:var(--muted);font-size:.86rem;margin-bottom:24px}
+.img-mode{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:4px;margin-bottom:12px}
+.img-mode-btn{flex:1;padding:8px;background:transparent;border:none;border-radius:var(--r-sm);color:var(--muted);font-family:var(--font);font-size:.84rem;font-weight:600;cursor:pointer;transition:all .16s}
+.img-mode-btn.active{background:var(--surface-2);color:var(--fg)}
+.file-drop{display:flex;align-items:center;gap:10px;padding:12px 15px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;transition:border-color .18s}
+.file-drop:hover{border-color:var(--accent-border)}
+.file-drop svg{color:var(--accent);flex-shrink:0}
+.file-name{font-size:.85rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.img-preview{display:none;margin-top:12px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--border);max-width:160px}
+.img-preview.show{display:block}
+.img-preview img{width:100%;display:block}
+.star-input{display:flex;gap:5px}
+.star-inp-btn{background:none;border:none;font-size:1.5rem;color:var(--surface-2);cursor:pointer;transition:color .14s,transform .1s;padding:0;line-height:1}
+.star-inp-btn:hover{transform:scale(1.15)}
+.star-inp-btn.on{color:var(--warn)}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:26px}
+.stat-card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px}
+.stat-card .stat-icon{width:40px;height:40px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.stat-card .stat-val{font-size:2rem;font-weight:800;line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.stat-card .stat-label{font-size:.82rem;color:var(--muted);margin-top:6px}
+.section-title{font-size:1.05rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title svg{color:var(--accent)}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.week-col{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 10px;min-height:100px}
+.week-label{text-align:center;font-size:.82rem;font-weight:700;color:var(--muted);padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.week-label.today{color:var(--accent)}
+.week-items{display:flex;flex-direction:column;gap:6px}
+.week-item{font-size:.74rem;padding:5px 8px;background:var(--surface);border-radius:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.week-item.today-item{background:var(--accent-soft);color:var(--accent);font-weight:600}
+@media(max-width:760px){.week-grid{grid-template-columns:repeat(3,1fr)}}
+
+.data-actions{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(5,5,8,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-overlay.show{display:flex}
+.modal{background:var(--modal);border:1px solid var(--border-strong);border-radius:var(--r-xl);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);animation:modalIn .22s cubic-bezier(.16,1,.3,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:22px 24px;border-bottom:1px solid var(--border)}
+.modal-head h3{font-size:1.1rem;font-weight:800}
+.modal-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .16s}
+.modal-close:hover{color:var(--fg);background:var(--surface-hover)}
+.modal-body{padding:24px}
+.modal-foot{display:flex;gap:10px;justify-content:flex-end;padding:0 24px 24px}
+.confirm-modal{max-width:400px;text-align:center}
+.confirm-icon{width:56px;height:56px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:28px auto 16px}
+.confirm-text{font-size:.96rem;line-height:1.6;padding:0 28px;margin-bottom:24px}
+.confirm-text strong{color:var(--accent)}
+.confirm-actions{display:flex;gap:10px;padding:0 24px 26px}
+.confirm-actions .btn{flex:1}
+
+/* shortcuts help */
+.kbd-list{display:flex;flex-direction:column;gap:2px}
+.kbd-row{display:flex;align-items:center;justify-content:space-between;padding:11px 4px;border-bottom:1px solid var(--border)}
+.kbd-row:last-child{border-bottom:none}
+.kbd-row span{font-size:.9rem;color:var(--fg)}
+.kbd-keys{display:flex;gap:5px}
+kbd{font-family:var(--mono);font-size:.78rem;background:var(--surface-2);border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:6px;padding:3px 8px;color:var(--fg);min-width:24px;text-align:center}
+
+/* ── FLOATING PLAYER BAR ── */
+.floating-bar{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);background:var(--modal);border:1px solid var(--border-strong);border-radius:var(--r-lg);padding:12px 14px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);z-index:900;transition:transform .3s cubic-bezier(.16,1,.3,1);max-width:calc(100vw - 32px)}
+.floating-bar.show{transform:translateX(-50%) translateY(0)}
+.fb-info{min-width:0}
+.fb-title{font-weight:700;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.fb-ep{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.fb-actions{display:flex;gap:8px}
+
+/* ── TOASTS ── */
+.toast-container{position:fixed;top:18px;right:18px;display:flex;flex-direction:column;gap:10px;z-index:2000;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--modal);border:1px solid var(--border-strong);border-radius:var(--r-md);box-shadow:var(--shadow);font-size:.88rem;font-weight:500;animation:toastIn .3s cubic-bezier(.16,1,.3,1);pointer-events:auto;max-width:340px}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateX(40px)}}
+.toast-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;flex-shrink:0;color:#fff}
+.toast.success .toast-icon{background:var(--success)}
+.toast.error .toast-icon{background:var(--danger)}
+.toast.info .toast-icon{background:var(--info)}
+
+@media(max-width:560px){
+  .app-main{padding:16px}
+  .anime-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .user-email-text{display:none}
+  .brand-word{display:none}
+  .form-card{padding:22px 18px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingOverlay"><div class="spinner"></div><div class="loading-text">載入中…</div></div>
+
+<!-- SETUP SCREEN -->
+<div class="screen center-screen" id="setupScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="mark"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      <h1>首次設定</h1>
+      <p>連接你的 Supabase 專案以啟用雲端同步</p>
+    </div>
+    <div class="setup-step">
+      <div class="setup-step-title">1 · 建立免費專案</div>
+      <div class="setup-step-desc">前往 <code>supabase.com</code> 新建專案，於 SQL Editor 執行建表語法（見 PLAN.md）。</div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-step-title">2 · 取得金鑰</div>
+      <div class="setup-step-desc">專案 → Settings → API，複製 <code>Project URL</code> 與 <code>anon public key</code>。</div>
+    </div>
+    <div class="form-group" style="margin-top:18px"><label>Project URL</label><input class="form-control" id="setupUrl" placeholder="https://xxxx.supabase.co"></div>
+    <div class="form-group"><label>Anon Public Key</label><input class="form-control" id="setupKey" placeholder="eyJhbGci..."></div>
+    <div class="error-msg" id="setupError"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="saveSetup()">儲存並繼續</button>
+  </div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div class="screen center-screen" id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="mark"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      <h1>追劇小幫手</h1>
+      <p>登入以同步你的追劇清單</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">登入</button>
+      <button class="auth-tab" id="signupTab" onclick="switchAuthTab('signup')">註冊</button>
+    </div>
+    <div id="loginPanel">
+      <div class="form-group"><label>Email</label><input class="form-control" type="email" id="loginEmail" placeholder="you@example.com"></div>
+      <div class="form-group"><label>密碼</label><input class="form-control" type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="login()">登入</button>
+    </div>
+    <div id="signupPanel" style="display:none">
+      <div class="form-group"><label>Email</label><input class="form-control" type="email" id="signupEmail" placeholder="you@example.com"></div>
+      <div class="form-group"><label>密碼（至少 6 字元）</label><input class="form-control" type="password" id="signupPassword" placeholder="••••••••"></div>
+      <div class="error-msg" id="signupError"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="signup()">建立帳號</button>
+    </div>
+    <div class="auth-hint"><a onclick="resetSetup()">重新設定 Supabase 連線</a></div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div class="screen" id="appScreen">
+  <header class="app-header">
+    <div class="brand">
+      <img class="brand-logo" id="brandLogo" src="assets/logo.png" alt="追劇小幫手" onerror="this.style.display='none'">
+      <span class="brand-word">追劇小幫手<span class="dot">.</span></span>
+    </div>
+    <div class="header-actions">
+      <div class="sync-pill synced" id="syncPill"><div class="sync-dot"></div><span id="syncText">已同步</span></div>
+      <button class="icon-btn" onclick="toggleHelp()" title="鍵盤快捷鍵 (?)" aria-label="鍵盤快捷鍵">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+      </button>
+      <button class="user-btn" onclick="handleLogout()">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span class="user-email-text" id="userEmailText">使用者</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="track"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>追蹤列表<span class="tab-badge" id="trackBadge">0</span></button>
+    <button class="tab-btn" data-tab="finished"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>完結作品<span class="tab-badge" id="finishedBadge">0</span></button>
+    <button class="tab-btn" data-tab="add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增動漫</button>
+    <button class="tab-btn" data-tab="stats"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>統計</button>
+  </nav>
+
+  <main class="app-main">
+    <!-- TAB: TRACK -->
+    <div class="tab-content active" id="trackTab">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" id="searchInput" placeholder="搜尋作品…（按 / 快速聚焦）">
+        </div>
+        <select class="ctrl-select" id="filterSelect">
+          <option value="all">全部更新日</option>
+          <option value="1">週一</option><option value="2">週二</option><option value="3">週三</option>
+          <option value="4">週四</option><option value="5">週五</option><option value="6">週六</option><option value="0">週日</option>
+        </select>
+        <select class="ctrl-select" id="sortSelect">
+          <option value="default">智慧排序</option>
+          <option value="custom">自訂順序（可拖曳）</option>
+          <option value="name-asc">名稱 A→Z</option>
+          <option value="name-desc">名稱 Z→A</option>
+          <option value="ep-desc">集數多→少</option>
+          <option value="ep-asc">集數少→多</option>
+          <option value="date-new">最新加入</option>
+          <option value="date-old">最早加入</option>
+          <option value="rating">評分高→低</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="grid" title="網格" aria-label="網格檢視"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+          <button class="view-btn" data-view="compact" title="精簡" aria-label="精簡檢視"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/></svg></button>
+          <button class="view-btn" data-view="list" title="清單" aria-label="清單檢視"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+        </div>
+      </div>
+      <div class="chips" id="catChips"></div>
+      <div class="today-banner" id="todayBanner">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <div><strong id="todayBannerText"></strong><span>記得去追進度！</span></div>
+      </div>
+      <div class="drag-hint" id="dragHint">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+        拖曳卡片即可調整自訂順序，會自動記住。
+      </div>
+      <div id="animeGrid" class="anime-grid"></div>
+      <div class="empty" id="trackEmpty" style="display:none">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <h3>這裡還空空的</h3><p>切到「新增動漫」開始建立你的追劇清單吧</p>
+      </div>
+    </div>
+
+    <!-- TAB: FINISHED -->
+    <div class="tab-content" id="finishedTab">
+      <div class="summary-row">
+        <div class="summary-pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><div><div class="v" id="finishedCount">0</div><div class="l">已完結</div></div></div>
+        <div class="summary-pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15 9 22 9.3 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.3 9 9"/></svg><div><div class="v" id="avgRating">-</div><div class="l">平均評分</div></div></div>
+      </div>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" id="finSearchInput" placeholder="搜尋完結作品…">
+        </div>
+        <select class="ctrl-select" id="finSortSelect">
+          <option value="date-new">最近完結</option>
+          <option value="date-old">最早完結</option>
+          <option value="rating">評分高→低</option>
+          <option value="name-asc">名稱 A→Z</option>
+          <option value="ep-desc">集數多→少</option>
+        </select>
+      </div>
+      <div id="finishedGrid" class="anime-grid"></div>
+      <div class="empty" id="finishedEmpty" style="display:none">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <h3>還沒有完結的作品</h3><p>把追完的動漫標記為完結，就會出現在這裡</p>
+      </div>
+    </div>
+
+    <!-- TAB: ADD -->
+    <div class="tab-content" id="addTab">
+      <div class="form-card">
+        <h2>新增動漫</h2>
+        <p class="sub">加入一部新作品到你的清單</p>
+        <form id="addForm" onsubmit="submitAdd(event)">
+          <div class="form-group"><label>作品名稱 *</label><input class="form-control" id="addName" required placeholder="例如：葬送的芙莉蓮"></div>
+          <div class="form-group"><label>觀看連結</label><input class="form-control" id="addLink" placeholder="https://..."></div>
+          <div class="form-row">
+            <div class="form-group"><label>目前集數</label><input class="form-control" type="number" min="0" id="addEp" value="0"></div>
+            <div class="form-group"><label>總集數（可空）</label><input class="form-control" type="number" min="0" id="addTotal" placeholder="如 28"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>分類</label><select class="form-control" id="addCat"><option value="tv">番劇</option><option value="movie">劇場版</option><option value="watchlist">想看清單</option></select></div>
+            <div class="form-group"><label>更新日</label><select class="form-control" id="addDay"><option value="">未設定</option><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option><option value="0">週日</option></select></div>
+          </div>
+          <div class="form-group"><label>評分</label><div class="star-input" id="addStars"><button type="button" class="star-inp-btn" data-v="1">★</button><button type="button" class="star-inp-btn" data-v="2">★</button><button type="button" class="star-inp-btn" data-v="3">★</button><button type="button" class="star-inp-btn" data-v="4">★</button><button type="button" class="star-inp-btn" data-v="5">★</button></div><input type="hidden" id="addRating"></div>
+          <div class="form-group"><label>備註</label><textarea class="form-control" id="addNotes" placeholder="心得、提醒…"></textarea></div>
+          <div class="form-group"><label>封面圖</label>
+            <div class="img-mode">
+              <button type="button" class="img-mode-btn active" id="uploadModeBtn" onclick="setImgMode('upload')">上傳圖片</button>
+              <button type="button" class="img-mode-btn" id="urlModeBtn" onclick="setImgMode('url')">圖片網址</button>
+            </div>
+            <div id="uploadPanel">
+              <label class="file-drop" for="addImgFile">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span class="file-name" id="addFileName">未選擇檔案</span>
+              </label>
+              <input type="file" id="addImgFile" accept="image/*" style="display:none">
+            </div>
+            <div id="urlPanel" style="display:none"><input class="form-control" id="addImgUrl" placeholder="https://...jpg"></div>
+            <div class="img-preview" id="addImgPreview"></div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" style="margin-top:6px" id="addSubmitBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增動漫</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: STATS -->
+    <div class="tab-content" id="statsTab">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>每週更新排程</div>
+      <div class="week-grid" id="weekGrid"></div>
+      <div class="data-actions">
+        <button class="btn btn-secondary" onclick="exportData()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>匯出備份</button>
+        <label class="btn btn-secondary" for="importFile"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>匯入資料</label>
+        <input type="file" id="importFile" accept="application/json" style="display:none">
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>編輯作品</h3><button class="modal-close" onclick="closeEdit()" aria-label="關閉"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <form id="editForm" onsubmit="submitEdit(event)">
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+        <div class="form-group"><label>作品名稱</label><input class="form-control" id="editName" required></div>
+        <div class="form-group"><label>觀看連結</label><input class="form-control" id="editLink"></div>
+        <div class="form-row">
+          <div class="form-group"><label>目前集數</label><input class="form-control" type="number" min="0" id="editEp"></div>
+          <div class="form-group"><label>總集數</label><input class="form-control" type="number" min="0" id="editTotal"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>分類</label><select class="form-control" id="editCat"><option value="tv">番劇</option><option value="movie">劇場版</option><option value="watchlist">想看清單</option></select></div>
+          <div class="form-group"><label>更新日</label><select class="form-control" id="editDay"><option value="">未設定</option><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option><option value="0">週日</option></select></div>
+        </div>
+        <div class="form-group"><label>評分</label><div class="star-input" id="editStars"><button type="button" class="star-inp-btn" data-v="1">★</button><button type="button" class="star-inp-btn" data-v="2">★</button><button type="button" class="star-inp-btn" data-v="3">★</button><button type="button" class="star-inp-btn" data-v="4">★</button><button type="button" class="star-inp-btn" data-v="5">★</button></div><input type="hidden" id="editRating"></div>
+        <div class="form-group"><label>備註</label><textarea class="form-control" id="editNotes"></textarea></div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-secondary" onclick="closeEdit()">取消</button><button type="submit" class="btn btn-primary">儲存變更</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmOverlay">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon" id="confirmIcon">⚠️</div>
+    <div class="confirm-text" id="confirmText"></div>
+    <div class="confirm-actions"><button class="btn btn-secondary" onclick="closeConfirm()">取消</button><button class="btn btn-primary" id="confirmOkBtn">確定</button></div>
+  </div>
+</div>
+
+<!-- SHORTCUTS HELP MODAL -->
+<div class="modal-overlay" id="helpOverlay">
+  <div class="modal confirm-modal" style="max-width:420px">
+    <div class="modal-head"><h3>鍵盤快捷鍵</h3><button class="modal-close" onclick="closeHelp()" aria-label="關閉"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body">
+      <div class="kbd-list">
+        <div class="kbd-row"><span>聚焦搜尋框</span><div class="kbd-keys"><kbd>/</kbd></div></div>
+        <div class="kbd-row"><span>切到「新增動漫」</span><div class="kbd-keys"><kbd>N</kbd></div></div>
+        <div class="kbd-row"><span>切換分頁</span><div class="kbd-keys"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></div></div>
+        <div class="kbd-row"><span>關閉視窗 / 浮動列</span><div class="kbd-keys"><kbd>Esc</kbd></div></div>
+        <div class="kbd-row"><span>顯示這個說明</span><div class="kbd-keys"><kbd>?</kbd></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING PLAYER BAR -->
+<div class="floating-bar" id="floatingBar">
+  <div class="fb-info"><div class="fb-title" id="fbTitle"></div><div class="fb-ep" id="fbEp"></div></div>
+  <div class="fb-actions">
+    <button class="btn btn-secondary btn-sm" onclick="reopenTab()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>再開連結</button>
+    <button class="btn btn-success btn-sm" onclick="markWatched()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>看完 +1</button>
+    <button class="btn btn-secondary btn-sm btn-icon" onclick="closeFloatingBar()" aria-label="關閉"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════ STATE ═══════════════════
+let sb=null, user=null, anime=[];
+let imgMode='upload', addImgData='';
+let curView=localStorage.getItem('v4_view')||'grid';
+let curSort=localStorage.getItem('v4_sort')||'default';
+let curFilter=localStorage.getItem('v4_filter')||'all';
+let curCat=localStorage.getItem('v4_cat')||'all';
+let finSort=localStorage.getItem('v4_finsort')||'date-new';
+let searchQ='', finSearchQ='';
+let playingAnime=null, confirmCb=null;
+let catMap={}, customOrder=[], dragId=null;
+
+const DAYS={'0':'週日','1':'週一','2':'週二','3':'週三','4':'週四','5':'週五','6':'週六'};
+const CATS={tv:'番劇',movie:'劇場版',watchlist:'想看清單'};
+const FALLBACK=n=>`https://ui-avatars.com/api/?name=${encodeURIComponent(n||'?')}&size=600&background=1a1a2e&color=ff4d6d&bold=true&font-size=0.34`;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ═══════════════════ INIT ═══════════════════
+async function init(){
+  const url=localStorage.getItem('sb_url'), key=localStorage.getItem('sb_key');
+  if(!url||!key){ showScreen('setup'); return; }
+  try{ sb=window.supabase.createClient(url,key); }catch(e){ showScreen('setup'); return; }
+  try{
+    const {data:{session},error}=await sb.auth.getSession();
+    if(error) throw error;
+    if(!session){ showScreen('auth'); return; }
+    user=session.user; await loadApp();
+  }catch(e){ console.error('init error:',e); showScreen('auth'); }
+}
+function showScreen(name){
+  document.getElementById('loadingOverlay').classList.add('hidden');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById({setup:'setupScreen',auth:'authScreen',app:'appScreen'}[name]).classList.add('active');
+}
+
+// ═══════════════════ SETUP ═══════════════════
+function saveSetup(){
+  const url=document.getElementById('setupUrl').value.trim();
+  const key=document.getElementById('setupKey').value.trim();
+  const err=document.getElementById('setupError');
+  if(!url||!key){ err.textContent='請填入所有欄位'; err.classList.add('show'); return; }
+  if(!url.startsWith('https://')){ err.textContent='URL 需以 https:// 開頭'; err.classList.add('show'); return; }
+  localStorage.setItem('sb_url',url); localStorage.setItem('sb_key',key);
+  try{ sb=window.supabase.createClient(url,key); showScreen('auth'); }
+  catch(e){ err.textContent='連線設定有誤，請確認後重試'; err.classList.add('show'); }
+}
+function resetSetup(){ localStorage.removeItem('sb_url'); localStorage.removeItem('sb_key'); showScreen('setup'); }
+
+// ═══════════════════ AUTH ═══════════════════
+function switchAuthTab(tab){
+  document.getElementById('loginTab').classList.toggle('active',tab==='login');
+  document.getElementById('signupTab').classList.toggle('active',tab==='signup');
+  document.getElementById('loginPanel').style.display=tab==='login'?'block':'none';
+  document.getElementById('signupPanel').style.display=tab==='signup'?'block':'none';
+}
+async function login(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pw=document.getElementById('loginPassword').value;
+  const err=document.getElementById('loginError'); err.classList.remove('show');
+  if(!email||!pw){ err.textContent='請填入所有欄位'; err.classList.add('show'); return; }
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
+    if(error){ err.textContent=error.message; err.classList.add('show'); return; }
+    user=data.user; await loadApp();
+  }catch(e){ err.textContent='連線失敗：'+e.message; err.classList.add('show'); }
+}
+async function signup(){
+  const email=document.getElementById('signupEmail').value.trim();
+  const pw=document.getElementById('signupPassword').value;
+  const err=document.getElementById('signupError'); err.classList.remove('show');
+  if(!email||!pw){ err.textContent='請填入所有欄位'; err.classList.add('show'); return; }
+  if(pw.length<6){ err.textContent='密碼至少需要 6 個字元'; err.classList.add('show'); return; }
+  const {data,error}=await sb.auth.signUp({email,password:pw});
+  if(error){ err.textContent=error.message; err.classList.add('show'); return; }
+  if(data.user&&!data.session){ toast('info','請前往信箱點擊確認連結後再登入'); return; }
+  user=data.user; await loadApp();
+}
+function handleLogout(){
+  showConfirm('確定要登出嗎？','🚪',async()=>{
+    await sb.auth.signOut(); user=null; anime=[]; showScreen('auth');
+  });
+}
+
+// ═══════════════════ LOAD APP ═══════════════════
+async function loadApp(){
+  const email=user.email;
+  document.getElementById('userEmailText').textContent=email.split('@')[0];
+  document.getElementById('userAvatar').textContent=email[0].toUpperCase();
+  loadLocalMeta();
+  // reflect persisted controls
+  document.getElementById('sortSelect').value=curSort;
+  document.getElementById('filterSelect').value=curFilter;
+  document.getElementById('finSortSelect').value=finSort;
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===curView));
+  initStars('addStars','addRating',0);
+  initStars('editStars','editRating',0);
+  await loadData();
+  showScreen('app');
+}
+function loadLocalMeta(){
+  try{ catMap=JSON.parse(localStorage.getItem('cat_'+user.id)||'{}'); }catch(e){ catMap={}; }
+  try{ customOrder=JSON.parse(localStorage.getItem('order_'+user.id)||'[]'); }catch(e){ customOrder=[]; }
+}
+function saveCatMap(){ try{ localStorage.setItem('cat_'+user.id,JSON.stringify(catMap)); }catch(e){} }
+function saveOrder(){ try{ localStorage.setItem('order_'+user.id,JSON.stringify(customOrder)); }catch(e){} }
+const getCat=id=>catMap[id]||'tv';
+
+// ═══════════════════ DATA ═══════════════════
+function setSyncing(s){
+  const p=document.getElementById('syncPill');
+  p.className='sync-pill '+s;
+  document.getElementById('syncText').textContent={synced:'已同步',syncing:'同步中…',offline:'離線'}[s];
+}
+function mapRow(r){
+  return {id:r.id,name:r.name,link:r.link||'',episode:r.episode||0,totalEpisodes:r.total_episodes||null,
+    imageUrl:r.image_url||'',updateDay:r.update_day||'',finished:r.finished||false,
+    finishedDate:r.finished_date||null,addedDate:r.added_date,rating:r.rating||null,notes:r.notes||''};
+}
+async function loadData(){
+  setSyncing('syncing');
+  const cacheKey='ac_'+user.id, cached=localStorage.getItem(cacheKey);
+  if(cached){ try{ anime=JSON.parse(cached); renderAll(); }catch(e){} }
+  const {data,error}=await sb.from('anime_list').select('*').eq('user_id',user.id).order('added_date',{ascending:false});
+  if(error){ setSyncing('offline'); if(!cached) toast('error','載入失敗：'+error.message); return; }
+  anime=data.map(mapRow); saveCache(); ensureOrder(); setSyncing('synced'); renderAll();
+}
+async function dbAdd(p){
+  setSyncing('syncing');
+  const {data,error}=await sb.from('anime_list').insert({
+    user_id:user.id,name:p.name,link:p.link,episode:p.episode,total_episodes:p.totalEpisodes||null,
+    image_url:p.imageUrl||null,update_day:p.updateDay||null,finished:false,
+    added_date:new Date().toISOString(),rating:p.rating||null,notes:p.notes||null
+  }).select().single();
+  if(error){ setSyncing('offline'); toast('error','新增失敗：'+error.message); return null; }
+  const item=mapRow(data); anime.unshift(item); saveCache(); ensureOrder(); setSyncing('synced'); renderAll();
+  return item;
+}
+async function dbUpdate(id,u){
+  setSyncing('syncing');
+  const db={};
+  if('name'in u)db.name=u.name; if('link'in u)db.link=u.link; if('episode'in u)db.episode=u.episode;
+  if('totalEpisodes'in u)db.total_episodes=u.totalEpisodes||null; if('updateDay'in u)db.update_day=u.updateDay||null;
+  if('rating'in u)db.rating=u.rating||null; if('notes'in u)db.notes=u.notes||null; if('imageUrl'in u)db.image_url=u.imageUrl||null;
+  if('finished'in u){ db.finished=u.finished; db.finished_date=u.finished?new Date().toISOString():null; }
+  const {error}=await sb.from('anime_list').update(db).eq('id',id).eq('user_id',user.id);
+  if(error){ setSyncing('offline'); toast('error','更新失敗：'+error.message); return false; }
+  const idx=anime.findIndex(a=>a.id===id);
+  if(idx!==-1){ Object.assign(anime[idx],u); if('finished'in u) anime[idx].finishedDate=db.finished_date; }
+  saveCache(); setSyncing('synced'); renderAll(); return true;
+}
+async function dbDelete(id){
+  setSyncing('syncing');
+  const {error}=await sb.from('anime_list').delete().eq('id',id).eq('user_id',user.id);
+  if(error){ setSyncing('offline'); toast('error','刪除失敗：'+error.message); return; }
+  anime=anime.filter(a=>a.id!==id);
+  delete catMap[id]; saveCatMap();
+  customOrder=customOrder.filter(x=>x!==id); saveOrder();
+  saveCache(); setSyncing('synced'); renderAll();
+}
+function saveCache(){
+  const key='ac_'+user.id;
+  try{ localStorage.setItem(key,JSON.stringify(anime)); }
+  catch(e){
+    try{
+      const stripped=anime.map(a=>({...a,imageUrl:a.imageUrl&&a.imageUrl.startsWith('data:')?'':a.imageUrl}));
+      localStorage.setItem(key,JSON.stringify(stripped));
+    }catch(_){ localStorage.removeItem(key); }
+  }
+}
+
+// ═══════════════════ CUSTOM ORDER ═══════════════════
+function ensureOrder(){
+  const ids=anime.map(a=>a.id);
+  customOrder=customOrder.filter(id=>ids.includes(id));
+  ids.forEach(id=>{ if(!customOrder.includes(id)) customOrder.push(id); });
+  saveOrder();
+}
+function reorder(srcId,destId){
+  ensureOrder();
+  const from=customOrder.indexOf(srcId);
+  if(from<0) return;
+  customOrder.splice(from,1);
+  const to=customOrder.indexOf(destId);
+  customOrder.splice(to<0?customOrder.length:to,0,srcId);
+  saveOrder(); renderTrack();
+}
+
+// ═══════════════════ RENDER ═══════════════════
+function renderAll(){ renderChips(); renderTrack(); renderFinished(); renderStats();
+  document.getElementById('trackBadge').textContent=anime.filter(a=>!a.finished).length;
+  document.getElementById('finishedBadge').textContent=anime.filter(a=>a.finished).length;
+}
+function renderChips(){
+  const wrap=document.getElementById('catChips');
+  const tracking=anime.filter(a=>!a.finished);
+  const counts={all:tracking.length,tv:0,movie:0,watchlist:0};
+  tracking.forEach(a=>{ counts[getCat(a.id)]=(counts[getCat(a.id)]||0)+1; });
+  const defs=[['all','全部'],['tv','番劇'],['movie','劇場版'],['watchlist','想看清單']];
+  wrap.innerHTML=defs.map(([v,l])=>`<button class="chip${curCat===v?' active':''}" data-cat="${v}">${l}<span class="chip-count">${counts[v]||0}</span></button>`).join('');
+  wrap.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ curCat=c.dataset.cat; localStorage.setItem('v4_cat',curCat); renderChips(); renderTrack(); });
+}
+function sortList(list,mode){
+  const today=new Date().getDay().toString();
+  if(mode==='default') list.sort((a,b)=>(b.updateDay===today)-(a.updateDay===today));
+  else if(mode==='custom') list.sort((a,b)=>customOrder.indexOf(a.id)-customOrder.indexOf(b.id));
+  else if(mode==='name-asc') list.sort((a,b)=>a.name.localeCompare(b.name,'zh-TW'));
+  else if(mode==='name-desc') list.sort((a,b)=>b.name.localeCompare(a.name,'zh-TW'));
+  else if(mode==='ep-asc') list.sort((a,b)=>a.episode-b.episode);
+  else if(mode==='ep-desc') list.sort((a,b)=>b.episode-a.episode);
+  else if(mode==='date-new') list.sort((a,b)=>new Date(b.addedDate)-new Date(a.addedDate));
+  else if(mode==='date-old') list.sort((a,b)=>new Date(a.addedDate)-new Date(b.addedDate));
+  else if(mode==='rating') list.sort((a,b)=>(b.rating||0)-(a.rating||0));
+  return list;
+}
+function getTrackList(){
+  let list=anime.filter(a=>!a.finished);
+  if(searchQ) list=list.filter(a=>a.name.toLowerCase().includes(searchQ));
+  if(curCat!=='all') list=list.filter(a=>getCat(a.id)===curCat);
+  if(curFilter!=='all') list=list.filter(a=>a.updateDay===curFilter);
+  return sortList(list,curSort);
+}
+function renderTrack(){
+  const grid=document.getElementById('animeGrid'), empty=document.getElementById('trackEmpty'), banner=document.getElementById('todayBanner');
+  const list=getTrackList();
+  const today=new Date().getDay().toString();
+  const todayCount=anime.filter(a=>!a.finished&&a.updateDay===today&&getCat(a.id)!=='watchlist').length;
+  if(todayCount>0&&!searchQ&&curFilter==='all'&&curCat==='all'){
+    document.getElementById('todayBannerText').textContent=`今天有 ${todayCount} 部作品更新！`;
+    banner.style.display='flex';
+  } else banner.style.display='none';
+  document.getElementById('dragHint').classList.toggle('show',curSort==='custom');
+  if(list.length===0){ grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  grid.className='anime-grid'+(curView==='list'?' list-view':curView==='compact'?' compact-view':'');
+  const drag=curSort==='custom';
+  grid.innerHTML=list.map(a=>cardHTML(a,false,drag)).join('');
+}
+function renderFinished(){
+  const grid=document.getElementById('finishedGrid'), empty=document.getElementById('finishedEmpty');
+  let list=anime.filter(a=>a.finished);
+  const allFin=list.length;
+  const rated=list.filter(a=>a.rating);
+  document.getElementById('finishedCount').textContent=allFin;
+  document.getElementById('avgRating').textContent=rated.length?(rated.reduce((s,a)=>s+a.rating,0)/rated.length).toFixed(1):'-';
+  if(finSearchQ) list=list.filter(a=>a.name.toLowerCase().includes(finSearchQ));
+  if(finSort==='date-new') list.sort((a,b)=>new Date(b.finishedDate||0)-new Date(a.finishedDate||0));
+  else sortList(list,finSort);
+  if(list.length===0){ grid.innerHTML=''; empty.style.display='block'; empty.querySelector('h3').textContent=allFin?'找不到符合的作品':'還沒有完結的作品'; return; }
+  empty.style.display='none';
+  grid.className='anime-grid';
+  grid.innerHTML=list.map(a=>cardHTML(a,true,false)).join('');
+}
+function cardHTML(a,fin,drag){
+  const today=new Date().getDay().toString();
+  const isTodayUpd=!fin&&a.updateDay===today&&getCat(a.id)!=='watchlist';
+  const pct=a.totalEpisodes?Math.min(100,Math.round((a.episode/a.totalEpisodes)*100)):null;
+  const stars=Array.from({length:5},(_,i)=>`<span class="star${a.rating&&i<a.rating?' filled':''}">★</span>`).join('');
+  const img=a.imageUrl||FALLBACK(a.name);
+  const cat=getCat(a.id);
+  const badges=[
+    fin?'<span class="badge badge-finished">完結</span>':'',
+    isTodayUpd?'<span class="badge badge-today">今日更新</span>':'',
+    !fin&&a.updateDay?`<span class="badge badge-day">${DAYS[a.updateDay]}</span>`:''
+  ].filter(Boolean).join('');
+  const catTag=`<span class="cat-tag${cat==='watchlist'?' watchlist':''}">${CATS[cat]}</span>`;
+  const progress=pct!==null?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`:'<div style="margin-bottom:11px"></div>';
+  const epDisplay=fin?`<span class="ep-num">共 <b>${a.episode}</b> 集</span>`:`<span class="ep-num">第 <b>${a.episode}</b> 集${a.totalEpisodes?` / ${a.totalEpisodes}`:''}</span>`;
+  const actions=fin
+    ? `<button class="btn btn-secondary btn-sm btn-icon" onclick="toggleFinished('${a.id}')" title="移回追蹤" aria-label="移回追蹤"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg></button>`
+    : `<button class="btn btn-primary btn-sm btn-icon" onclick="openPlayer('${a.id}')" title="立即觀看" aria-label="立即觀看"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+       <button class="btn btn-success btn-sm btn-icon" onclick="incEp('${a.id}')" title="看完一集 +1" aria-label="看完一集"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+       <button class="btn btn-success btn-sm btn-icon" onclick="toggleFinished('${a.id}')" title="標記完結" aria-label="標記完結"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>`;
+  return `
+  <div class="anime-card${fin?' is-finished':''}"${drag?` draggable="true" data-id="${a.id}"`:''}>
+    <div class="card-cover">
+      <img src="${esc(img)}" alt="${esc(a.name)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(FALLBACK(a.name))}'">
+      <div class="card-scrim"></div>
+      <div class="card-badges">${badges}</div>
+      ${catTag}
+      <button class="change-img-btn" onclick="changeImg('${a.id}')" title="更換封面" aria-label="更換封面"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-title" title="${esc(a.name)}">${esc(a.name)}</div>
+      ${a.rating?`<div class="card-stars" aria-label="評分 ${a.rating} 顆星">${stars}</div>`:''}
+      <div class="card-ep-row"><span class="ep-label">${fin?'完結集數':'進度'}</span>${epDisplay}</div>
+      ${progress}
+      ${fin&&a.finishedDate?`<div class="card-date"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${new Date(a.finishedDate).toLocaleDateString('zh-TW')}</div>`:''}
+      <div class="card-actions">
+        ${actions}<span class="spacer"></span>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="openEdit('${a.id}')" title="編輯" aria-label="編輯"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="delAnime('${a.id}')" title="刪除" aria-label="刪除"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      </div>
+    </div>
+  </div>`;
+}
+function renderStats(){
+  const tracking=anime.filter(a=>!a.finished).length;
+  const finished=anime.filter(a=>a.finished).length;
+  const totalEps=anime.reduce((s,a)=>s+(a.episode||0),0);
+  const rated=anime.filter(a=>a.rating);
+  const avg=rated.length?(rated.reduce((s,a)=>s+a.rating,0)/rated.length).toFixed(1):'-';
+  const ic={
+    track:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    done:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+    eps:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+    star:'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.3 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.3 9 9"/></svg>'
+  };
+  document.getElementById('statsGrid').innerHTML=[
+    [ic.track,tracking,'追蹤中'],[ic.done,finished,'已完結'],[ic.eps,totalEps,'看過集數'],[ic.star,avg,'平均評分']
+  ].map(([icon,val,lbl])=>`<div class="stat-card"><div class="stat-icon">${icon}</div><div class="stat-val">${val}</div><div class="stat-label">${lbl}</div></div>`).join('');
+  const today=new Date().getDay().toString();
+  const dayOrder=['1','2','3','4','5','6','0'], dayLbl=['一','二','三','四','五','六','日'];
+  document.getElementById('weekGrid').innerHTML=dayOrder.map((d,i)=>{
+    const items=anime.filter(a=>!a.finished&&a.updateDay===d&&getCat(a.id)!=='watchlist');
+    const isT=d===today;
+    return `<div class="week-col"><div class="week-label${isT?' today':''}">週${dayLbl[i]}</div><div class="week-items">${items.map(a=>`<div class="week-item${isT?' today-item':''}" title="${esc(a.name)}">${esc(a.name)}</div>`).join('')||'<div class="week-item" style="opacity:.4">—</div>'}</div></div>`;
+  }).join('');
+}
+
+// ═══════════════════ ACTIONS ═══════════════════
+async function incEp(id){
+  const a=anime.find(x=>x.id===id); if(!a) return;
+  const newEp=a.episode+1;
+  if(await dbUpdate(id,{episode:newEp})) toast('success',`《${a.name}》已更新至第 ${newEp} 集`);
+}
+async function toggleFinished(id){
+  const a=anime.find(x=>x.id===id); if(!a) return;
+  const nv=!a.finished;
+  if(await dbUpdate(id,{finished:nv})) toast('success',`《${a.name}》已標記為${nv?'完結':'追蹤中'}`);
+}
+function delAnime(id){
+  const a=anime.find(x=>x.id===id); if(!a) return;
+  showConfirm(`確定要刪除《<strong>${esc(a.name)}</strong>》嗎？`,'🗑️',async()=>{ await dbDelete(id); toast('success',`已刪除《${a.name}》`); });
+}
+async function changeImg(id){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.style.display='none';
+  inp.onchange=async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    if(f.size>10*1024*1024){ toast('error','圖片過大，請選擇 10MB 以下'); return; }
+    const comp=await compressImg(f);
+    if(await dbUpdate(id,{imageUrl:comp})) toast('success','封面已更換');
+  };
+  document.body.appendChild(inp); inp.click();
+  setTimeout(()=>inp.parentNode&&inp.parentNode.removeChild(inp),1500);
+}
+
+// ═══════════════════ PLAYER ═══════════════════
+function openPlayer(id){
+  const a=anime.find(x=>x.id===id); if(!a) return;
+  if(!a.link){ toast('error','此作品沒有設定觀看連結'); return; }
+  playingAnime=a;
+  const w=window.open(a.link,'_blank');
+  if(!w) toast('info','瀏覽器攔截了新分頁，請允許彈出視窗');
+  document.getElementById('fbTitle').textContent=a.name;
+  document.getElementById('fbEp').textContent=`下一集：第 ${a.episode+1} 集`;
+  document.getElementById('floatingBar').classList.add('show');
+}
+function closeFloatingBar(){ document.getElementById('floatingBar').classList.remove('show'); playingAnime=null; }
+async function markWatched(){
+  if(!playingAnime) return;
+  const newEp=playingAnime.episode+1;
+  await dbUpdate(playingAnime.id,{episode:newEp});
+  playingAnime.episode=newEp;
+  document.getElementById('fbEp').textContent=`下一集：第 ${newEp+1} 集`;
+  toast('success',`已記錄第 ${newEp} 集`);
+}
+function reopenTab(){ if(playingAnime&&playingAnime.link) window.open(playingAnime.link,'_blank'); }
+
+// ═══════════════════ ADD FORM ═══════════════════
+function setImgMode(mode){
+  imgMode=mode;
+  document.getElementById('uploadPanel').style.display=mode==='upload'?'block':'none';
+  document.getElementById('urlPanel').style.display=mode==='url'?'block':'none';
+  document.getElementById('uploadModeBtn').classList.toggle('active',mode==='upload');
+  document.getElementById('urlModeBtn').classList.toggle('active',mode==='url');
+  const prev=document.getElementById('addImgPreview'); prev.classList.remove('show'); prev.innerHTML='';
+  addImgData=''; document.getElementById('addImgFile').value=''; document.getElementById('addFileName').textContent='未選擇檔案';
+  document.getElementById('addImgUrl').value='';
+}
+document.getElementById('addImgFile').addEventListener('change',async function(e){
+  const f=e.target.files[0]; if(!f) return;
+  if(f.size>10*1024*1024){ toast('error','圖片過大，請選擇 10MB 以下'); return; }
+  document.getElementById('addFileName').textContent='壓縮中…';
+  addImgData=await compressImg(f);
+  document.getElementById('addFileName').textContent=f.name+' ✓';
+  const p=document.getElementById('addImgPreview'); p.innerHTML=`<img src="${esc(addImgData)}" alt="預覽">`; p.classList.add('show');
+});
+document.getElementById('addImgUrl').addEventListener('input',function(){
+  const url=this.value.trim(), p=document.getElementById('addImgPreview');
+  if(url.startsWith('http')){ p.innerHTML=`<img src="${esc(url)}" alt="預覽" onerror="this.parentElement.classList.remove('show')">`; p.classList.add('show'); }
+  else p.classList.remove('show');
+});
+async function submitAdd(e){
+  e.preventDefault();
+  const name=document.getElementById('addName').value.trim();
+  const dup=anime.find(a=>a.name.trim().toLowerCase()===name.toLowerCase());
+  if(dup){ showConfirm(`清單中已有《<strong>${esc(name)}</strong>》<br><small style="color:var(--muted)">仍要再新增一筆嗎？</small>`,'⚠️',()=>doAdd()); return; }
+  doAdd();
+}
+async function doAdd(){
+  const name=document.getElementById('addName').value.trim();
+  const link=document.getElementById('addLink').value.trim();
+  const ep=parseInt(document.getElementById('addEp').value)||0;
+  const total=parseInt(document.getElementById('addTotal').value)||null;
+  const day=document.getElementById('addDay').value;
+  const cat=document.getElementById('addCat').value;
+  const rating=parseInt(document.getElementById('addRating').value)||null;
+  const notes=document.getElementById('addNotes').value.trim();
+  const imageUrl=imgMode==='upload'?addImgData:document.getElementById('addImgUrl').value.trim();
+  const btn=document.getElementById('addSubmitBtn'); btn.disabled=true; btn.textContent='新增中…';
+  const result=await dbAdd({name,link,episode:ep,totalEpisodes:total,imageUrl,updateDay:day,rating,notes});
+  btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增動漫';
+  if(result){
+    catMap[result.id]=cat; saveCatMap();
+    document.getElementById('addForm').reset(); setImgMode('upload'); initStars('addStars','addRating',0);
+    renderAll(); switchTab('track'); toast('success',`已新增《${name}》！`);
+  }
+}
+
+// ═══════════════════ EDIT MODAL ═══════════════════
+function openEdit(id){
+  const a=anime.find(x=>x.id===id); if(!a) return;
+  document.getElementById('editId').value=id;
+  document.getElementById('editName').value=a.name;
+  document.getElementById('editLink').value=a.link;
+  document.getElementById('editEp').value=a.episode;
+  document.getElementById('editTotal').value=a.totalEpisodes||'';
+  document.getElementById('editDay').value=a.updateDay||'';
+  document.getElementById('editCat').value=getCat(id);
+  document.getElementById('editNotes').value=a.notes||'';
+  document.getElementById('editRating').value=a.rating||'';
+  initStars('editStars','editRating',a.rating||0);
+  document.getElementById('editOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('editName').focus(),50);
+}
+function closeEdit(){ document.getElementById('editOverlay').classList.remove('show'); }
+async function submitEdit(e){
+  e.preventDefault();
+  const id=document.getElementById('editId').value;
+  const cat=document.getElementById('editCat').value;
+  const updates={
+    name:document.getElementById('editName').value.trim(),
+    link:document.getElementById('editLink').value.trim(),
+    episode:parseInt(document.getElementById('editEp').value)||0,
+    totalEpisodes:parseInt(document.getElementById('editTotal').value)||null,
+    updateDay:document.getElementById('editDay').value,
+    rating:parseInt(document.getElementById('editRating').value)||null,
+    notes:document.getElementById('editNotes').value.trim()
+  };
+  catMap[id]=cat; saveCatMap();
+  if(await dbUpdate(id,updates)){ closeEdit(); toast('success','已更新作品資訊'); }
+}
+
+// ═══════════════════ CONFIRM / HELP MODAL ═══════════════════
+function showConfirm(text,icon,cb){
+  document.getElementById('confirmIcon').textContent=icon||'⚠️';
+  document.getElementById('confirmText').innerHTML=text;
+  confirmCb=cb; document.getElementById('confirmOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('confirmOkBtn').focus(),50);
+}
+function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('show'); confirmCb=null; }
+document.getElementById('confirmOkBtn').addEventListener('click',()=>{ if(confirmCb) confirmCb(); closeConfirm(); });
+function toggleHelp(){ document.getElementById('helpOverlay').classList.toggle('show'); }
+function closeHelp(){ document.getElementById('helpOverlay').classList.remove('show'); }
+
+// ═══════════════════ TOASTS ═══════════════════
+function toast(type,msg){
+  const c=document.getElementById('toastContainer');
+  const icons={success:'✓',error:'✕',info:'i'};
+  const el=document.createElement('div'); el.className=`toast ${type}`;
+  el.innerHTML=`<div class="toast-icon">${icons[type]||'i'}</div><span>${esc(msg)}</span>`;
+  el.setAttribute('role','alert'); c.appendChild(el);
+  setTimeout(()=>{ el.style.animation='toastOut .3s ease forwards'; setTimeout(()=>el.remove(),300); },3000);
+}
+
+// ═══════════════════ STAR RATING ═══════════════════
+function initStars(containerId,hiddenId,current){
+  const container=document.getElementById(containerId), hidden=document.getElementById(hiddenId);
+  let val=current||0;
+  const btns=container.querySelectorAll('.star-inp-btn');
+  const refresh=()=>btns.forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)<=val));
+  refresh();
+  btns.forEach(b=>{ b.onclick=()=>{ const v=parseInt(b.dataset.v); val=val===v?0:v; hidden.value=val||''; refresh(); }; });
+}
+
+// ═══════════════════ IMPORT / EXPORT ═══════════════════
+function exportData(){
+  if(!anime.length){ toast('info','目前沒有資料可以匯出'); return; }
+  const out=anime.map(a=>({...a,category:getCat(a.id)}));
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`追劇清單_${new Date().toISOString().split('T')[0]}.json`;
+  a.click(); URL.revokeObjectURL(url); toast('success','匯出成功！');
+}
+document.getElementById('importFile').addEventListener('change',async function(e){
+  const f=e.target.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!Array.isArray(data)) throw new Error('格式錯誤');
+      showConfirm(`確定要匯入 <strong>${data.length}</strong> 筆資料嗎？<br><small style="color:var(--danger)">這將清除現有所有資料！</small>`,'📥',async()=>{
+        setSyncing('syncing');
+        const {error:delErr}=await sb.from('anime_list').delete().eq('user_id',user.id);
+        if(delErr){ toast('error','清除舊資料失敗：'+delErr.message); setSyncing('offline'); return; }
+        const rows=data.map(item=>({
+          user_id:user.id,name:item.name||'未命名',link:item.link||item.animeLink||'',
+          episode:item.episode||0,total_episodes:item.totalEpisodes||item.total_episodes||null,
+          image_url:item.imageUrl||item.image_url||null,update_day:item.updateDay||item.update_day||null,
+          finished:item.finished||false,finished_date:item.finishedDate||item.finished_date||null,
+          added_date:item.addedDate||item.added_date||new Date().toISOString(),
+          rating:item.rating||null,notes:item.notes||null
+        }));
+        const cats=data.map(item=>item.category||'tv');
+        const CHUNK=50; let inserted=[];
+        for(let i=0;i<rows.length;i+=CHUNK){
+          const {data:ins,error:insErr}=await sb.from('anime_list').insert(rows.slice(i,i+CHUNK)).select();
+          if(insErr){ toast('error','匯入失敗：'+insErr.message); setSyncing('offline'); return; }
+          inserted=inserted.concat(ins);
+        }
+        // restore categories by matching insertion order
+        catMap={}; inserted.forEach((row,i)=>{ catMap[row.id]=cats[i]||'tv'; }); saveCatMap();
+        customOrder=[]; saveOrder();
+        await loadData();
+        toast('success',`已成功匯入 ${data.length} 筆資料！`);
+      });
+    }catch(err){ toast('error','匯入失敗：'+err.message); }
+  };
+  reader.readAsText(f); this.value='';
+});
+
+// ═══════════════════ IMAGE COMPRESSION ═══════════════════
+function compressImg(file,maxW=800,q=0.82){
+  const isPng=file.type==='image/png';
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement('canvas');
+        let w=img.width,h=img.height;
+        if(w>maxW){ h=h*maxW/w; w=maxW; }
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL(isPng?'image/png':'image/jpeg',q));
+      };
+      img.onerror=reject; img.src=e.target.result;
+    };
+    reader.onerror=reject; reader.readAsDataURL(file);
+  });
+}
+
+// ═══════════════════ TABS / VIEW / SEARCH / SORT ═══════════════════
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id===name+'Tab'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.tab-btn[data-tab]').forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
+document.querySelectorAll('.view-btn[data-view]').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    curView=this.dataset.view;
+    document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');
+    localStorage.setItem('v4_view',curView); renderTrack();
+  });
+});
+document.getElementById('searchInput').addEventListener('input',function(){ searchQ=this.value.toLowerCase().trim(); renderTrack(); });
+document.getElementById('filterSelect').addEventListener('change',function(){ curFilter=this.value; localStorage.setItem('v4_filter',curFilter); renderTrack(); });
+document.getElementById('sortSelect').addEventListener('change',function(){ curSort=this.value; localStorage.setItem('v4_sort',curSort); if(curSort==='custom') ensureOrder(); renderTrack(); });
+document.getElementById('finSearchInput').addEventListener('input',function(){ finSearchQ=this.value.toLowerCase().trim(); renderFinished(); });
+document.getElementById('finSortSelect').addEventListener('change',function(){ finSort=this.value; localStorage.setItem('v4_finsort',finSort); renderFinished(); });
+
+// ═══════════════════ DRAG REORDER ═══════════════════
+const grid=document.getElementById('animeGrid');
+grid.addEventListener('dragstart',e=>{ const c=e.target.closest('.anime-card'); if(!c||curSort!=='custom') return; dragId=c.dataset.id; c.classList.add('dragging'); });
+grid.addEventListener('dragend',e=>{ const c=e.target.closest('.anime-card'); if(c) c.classList.remove('dragging'); grid.querySelectorAll('.drop-target').forEach(x=>x.classList.remove('drop-target')); dragId=null; });
+grid.addEventListener('dragover',e=>{
+  if(curSort!=='custom'||!dragId) return; e.preventDefault();
+  const c=e.target.closest('.anime-card');
+  grid.querySelectorAll('.drop-target').forEach(x=>x.classList.remove('drop-target'));
+  if(c&&c.dataset.id!==dragId) c.classList.add('drop-target');
+});
+grid.addEventListener('drop',e=>{
+  if(curSort!=='custom'||!dragId) return; e.preventDefault();
+  const c=e.target.closest('.anime-card');
+  if(c&&c.dataset.id&&c.dataset.id!==dragId) reorder(dragId,c.dataset.id);
+  dragId=null;
+});
+
+// ═══════════════════ KEYBOARD ═══════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closeEdit(); closeConfirm(); closeHelp(); closeFloatingBar(); return; }
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea'||e.target.isContentEditable) return;
+  if(document.getElementById('appScreen').classList.contains('active')===false) return;
+  if(e.key==='/'){ e.preventDefault(); focusSearch(); }
+  else if(e.key==='?'){ toggleHelp(); }
+  else if(e.key==='n'||e.key==='N'){ switchTab('add'); }
+  else if(e.key>='1'&&e.key<='4'){ switchTab(['track','finished','add','stats'][+e.key-1]); }
+});
+function focusSearch(){
+  const finActive=document.getElementById('finishedTab').classList.contains('active');
+  if(finActive){ document.getElementById('finSearchInput').focus(); }
+  else { if(!document.getElementById('trackTab').classList.contains('active')) switchTab('track'); document.getElementById('searchInput').focus(); }
+}
+document.getElementById('editOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeEdit(); });
+document.getElementById('confirmOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeConfirm(); });
+document.getElementById('helpOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeHelp(); });
+
+// ═══════════════════ START ═══════════════════
+const _initTimeout=setTimeout(()=>{ if(!document.getElementById('appScreen').classList.contains('active')) showScreen('auth'); },8000);
+init().finally(()=>clearTimeout(_initTimeout));
+</script>
+</body>
+</html>
