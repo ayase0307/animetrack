@@ -108,12 +108,9 @@ textarea.form-control{resize:vertical;min-height:78px;line-height:1.6}
 .loading-text{color:var(--muted);font-size:.9rem}
 
 /* ── APP HEADER ── */
-.app-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 22px;height:64px;background:rgba(10,10,15,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border)}
-.brand{display:flex;align-items:center;gap:11px;min-width:0}
-.brand-logo{height:34px;width:auto;display:block;border-radius:8px}
-.brand-word{font-size:1.12rem;font-weight:800;letter-spacing:-0.01em;white-space:nowrap}
-.brand-word .dot{color:var(--accent)}
-.header-actions{display:flex;align-items:center;gap:9px}
+.app-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 22px;height:64px;background:rgba(10,10,15,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border)}
+.header-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:clamp(180px,24vw,260px);max-height:48px;display:block}
+.header-actions{display:flex;align-items:center;gap:9px;position:relative;z-index:1}
 .sync-pill{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;font-size:.76rem;font-weight:600;background:var(--surface);border:1px solid var(--border)}
 .sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--muted)}
 .sync-pill.synced{color:var(--success)}.sync-pill.synced .sync-dot{background:var(--success)}
@@ -322,7 +319,9 @@ kbd{font-family:var(--mono);font-size:.78rem;background:var(--surface-2);border:
   .app-main{padding:16px}
   .anime-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
   .user-email-text{display:none}
-  .brand-word{display:none}
+  .header-logo{width:150px}
+  .sync-pill{padding:6px 9px}
+  #syncText{display:none}
   .form-card{padding:22px 18px}
 }
 </style>
@@ -386,10 +385,7 @@ kbd{font-family:var(--mono);font-size:.78rem;background:var(--surface-2);border:
 <!-- APP SCREEN -->
 <div class="screen" id="appScreen">
   <header class="app-header">
-    <div class="brand">
-      <img class="brand-logo" id="brandLogo" src="assets/logo.png" alt="追劇小幫手" onerror="this.style.display='none'">
-      <span class="brand-word">追劇小幫手<span class="dot">.</span></span>
-    </div>
+    <img class="header-logo" src="zhuiju-helper-logo.svg" alt="追劇小幫手">
     <div class="header-actions">
       <div class="sync-pill synced" id="syncPill"><div class="sync-dot"></div><span id="syncText">已同步</span></div>
       <button class="icon-btn" onclick="toggleHelp()" title="鍵盤快捷鍵 (?)" aria-label="鍵盤快捷鍵">

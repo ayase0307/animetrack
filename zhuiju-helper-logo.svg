@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">追劇小幫手 logo</title>
+  <desc id="desc">A neon cyan and violet streaming assistant logo mark with the Chinese text 追劇小幫手, designed for dark website backgrounds.</desc>
+  <defs>
+    <linearGradient id="markGradient" x1="54" y1="42" x2="284" y2="284" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7df9ff"/>
+      <stop offset="0.48" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="textGradient" x1="338" y1="100" x2="1030" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.52" stop-color="#dffbff"/>
+      <stop offset="1" stop-color="#b9a9ff"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.15  0 0 0 0 0.78  0 0 0 0 1  0 0 0 0.5 0" result="blueGlow"/>
+      <feMerge>
+        <feMergeNode in="blueGlow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="textGlow" x="-10%" y="-25%" width="120%" height="150%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.88  0 0 0 0 1  0 0 0 0.32 0" result="cyanGlow"/>
+      <feMerge>
+        <feMergeNode in="cyanGlow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g filter="url(#softGlow)">
+    <rect x="54" y="70" width="224" height="164" rx="42" fill="#08111f" stroke="url(#markGradient)" stroke-width="12"/>
+    <path d="M140 121 L217 166 L140 211 Z" fill="url(#markGradient)"/>
+    <path d="M99 258 H236" stroke="url(#markGradient)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M156 234 V258" stroke="url(#markGradient)" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="245" cy="226" r="46" fill="#08111f" stroke="#7df9ff" stroke-width="12"/>
+    <path d="M278 259 L318 299" stroke="#a78bfa" stroke-width="14" stroke-linecap="round"/>
+    <path d="M74 48 L84 70 L107 80 L84 90 L74 112 L64 90 L41 80 L64 70 Z" fill="#7df9ff"/>
+    <path d="M288 54 L295 70 L312 77 L295 84 L288 101 L281 84 L264 77 L281 70 Z" fill="#a78bfa"/>
+  </g>
+
+  <g filter="url(#textGlow)">
+    <text x="350" y="214"
+      fill="url(#textGradient)"
+      font-size="94"
+      font-weight="800"
+      letter-spacing="4"
+      font-family="'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', 'Heiti TC', sans-serif">追劇小幫手</text>
+    <path d="M358 245 H852" stroke="url(#markGradient)" stroke-width="7" stroke-linecap="round" opacity="0.88"/>
+    <circle cx="894" cy="245" r="5" fill="#7df9ff"/>
+    <circle cx="918" cy="245" r="5" fill="#a78bfa"/>
+  </g>
+</svg>
