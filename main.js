@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 
@@ -6,6 +7,66 @@ let mainWindow;
 
 const dataDir = path.join(__dirname, 'data');
 const dataFile = path.join(dataDir, 'anime.json');
+
+function setupAutoUpdate() {
+  if (!app.isPackaged) return;
+
+  autoUpdater.autoDownload = false;
+
+  autoUpdater.on('update-available', async (info) => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: '發現新版本',
+      message: `追劇小幫手 ${info.version} 已可更新。`,
+      detail: '要現在下載更新檔嗎？下載完成後會再詢問是否重新啟動安裝。',
+      buttons: ['稍後再說', '下載更新'],
+      defaultId: 1,
+      cancelId: 0,
+      noLink: true
+    });
+
+    if (result.response === 1) {
+      autoUpdater.downloadUpdate().catch((error) => {
+        dialog.showErrorBox('更新下載失敗', error.message);
+      });
+    }
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    console.log('No updates available.');
+  });
+
+  autoUpdater.on('update-downloaded', async () => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'question',
+      title: '更新已下載',
+      message: '新版追劇小幫手已下載完成。',
+      detail: '要現在重新啟動並安裝更新嗎？',
+      buttons: ['稍後', '重新啟動安裝'],
+      defaultId: 1,
+      cancelId: 0,
+      noLink: true
+    });
+
+    if (result.response === 1) {
+      autoUpdater.quitAndInstall(false, true);
+    }
+  });
+
+  autoUpdater.on('error', (error) => {
+    console.error('Auto update failed:', error);
+  });
+
+  setTimeout(() => {
+    autoUpdater.checkForUpdates().catch((error) => {
+      console.error('Update check failed:', error);
+    });
+  }, 3000);
+}
 
 function ensureDataFile() {
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
@@ -55,6 +116,7 @@ function createMainWindow() {
 app.whenReady().then(() => {
   ensureDataFile();
   createMainWindow();
+  setupAutoUpdate();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
