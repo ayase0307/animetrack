@@ -1,3 +1,19 @@
 {
-  "animeList": []
+  "animeList": [
+    {
+      "id": "5b5aa8ed-766b-49fe-830b-f9e4ceb162bf",
+      "name": "神墓",
+      "link": "https://www.iyf.tv/play/GpFhvfQnyFC",
+      "episode": 1,
+      "totalEpisodes": null,
+      "imageUrl": "",
+      "updateDay": "",
+      "finished": false,
+      "finishedDate": null,
+      "addedDate": "2026-06-22T16:15:42.374Z",
+      "rating": null,
+      "notes": "",
+      "category": "tv"
+    }
+  ]
 }
