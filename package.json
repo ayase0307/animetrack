@@ -10,6 +10,7 @@
   "build": {
     "appId": "com.ayase0307.animetrack",
     "productName": "追劇小幫手",
+    "artifactName": "AnimeTrack-Setup-${version}.${ext}",
     "icon": "enso-play-icon.png",
     "files": [
       "main.js",
@@ -26,9 +27,8 @@
     },
     "publish": [
       {
-        "provider": "github",
-        "owner": "ayase0307",
-        "repo": "animetrack"
+        "provider": "generic",
+        "url": "https://ayase0307.github.io/animetrack/updates/"
       }
     ]
   },
