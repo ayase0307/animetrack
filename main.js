@@ -41,6 +41,7 @@ function createMainWindow() {
     minHeight: 720,
     backgroundColor: '#10110e',
     title: '追劇小幫手',
+    icon: path.join(__dirname, 'enso-play-icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
