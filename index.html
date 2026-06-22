@@ -1024,11 +1024,6 @@ const SAMPLE_ANIME=[
 // ═══════════════════ INIT ═══════════════════
 async function init(){
   const url=localStorage.getItem('sb_url'), key=localStorage.getItem('sb_key');
-  if(IS_ELECTRON){
-    user={id:'electron-local',email:'桌面版'};
-    await loadApp();
-    return;
-  }
   if(DRAFT_PREVIEW){
     user={id:'draft-preview',email:'預覽模式'};
     anime=SAMPLE_ANIME.map(x=>({...x}));
@@ -1095,7 +1090,6 @@ async function signup(){
   user=data.user; await loadApp();
 }
 function handleLogout(){
-  if(IS_ELECTRON){ toast('info','桌面版使用本機資料，不需要登出'); return; }
   showConfirm('確定要登出嗎？','🚪',async()=>{
     await sb.auth.signOut(); user=null; anime=[]; showScreen('auth');
   });
@@ -1105,7 +1099,7 @@ function handleLogout(){
 async function loadApp(){
   const email=user.email;
   document.getElementById('userEmailText').textContent=email.includes('@')?email.split('@')[0]:email;
-  document.getElementById('userAvatar').textContent=IS_ELECTRON?'桌':email[0].toUpperCase();
+  document.getElementById('userAvatar').textContent=email[0].toUpperCase();
   loadLocalMeta();
   // reflect persisted controls
   document.getElementById('sortSelect').value=curSort;
@@ -1155,29 +1149,6 @@ function mapRow(r){
 }
 async function loadData(){
   setSyncing('syncing');
-  if(IS_ELECTRON){
-    try{
-      anime=(await window.electronAPI.loadAnimeList()).map(a=>({
-        id:a.id||crypto.randomUUID(),
-        name:a.name||a.title||'未命名作品',
-        link:a.link||a.url||'',
-        episode:Number(a.episode??a.currentEp)||0,
-        totalEpisodes:a.totalEpisodes??a.total_episodes??null,
-        imageUrl:a.imageUrl||a.image_url||'',
-        updateDay:a.updateDay||a.update_day||'',
-        finished:!!a.finished,
-        finishedDate:a.finishedDate||a.finished_date||null,
-        addedDate:a.addedDate||a.added_date||new Date().toISOString(),
-        rating:a.rating||null,
-        notes:a.notes||'',
-        category:a.category||'tv'
-      }));
-      saveCache(); ensureOrder(); setSyncing('synced'); renderAll();
-    }catch(e){
-      setSyncing('offline'); toast('error','本機資料讀取失敗：'+e.message);
-    }
-    return;
-  }
   const cacheKey='ac_'+user.id, cached=localStorage.getItem(cacheKey);
   if(cached){ try{ anime=JSON.parse(cached); renderAll(); }catch(e){} }
   const {data,error}=await sb.from('anime_list').select('*').eq('user_id',user.id).order('added_date',{ascending:false});
@@ -1186,28 +1157,6 @@ async function loadData(){
 }
 async function dbAdd(p){
   setSyncing('syncing');
-  if(IS_ELECTRON){
-    const item={
-      id:crypto.randomUUID(),
-      name:p.name,
-      link:p.link,
-      episode:p.episode,
-      totalEpisodes:p.totalEpisodes||null,
-      imageUrl:p.imageUrl||'',
-      updateDay:p.updateDay||'',
-      finished:false,
-      finishedDate:null,
-      addedDate:new Date().toISOString(),
-      rating:p.rating||null,
-      notes:p.notes||'',
-      category:p.category||'tv'
-    };
-    anime.unshift(item);
-    ensureOrder(); saveCache();
-    await window.electronAPI.saveAnimeList(anime);
-    setSyncing('synced'); renderAll();
-    return item;
-  }
   const cat=p.category||'tv';
   const base={
     user_id:user.id,name:p.name,link:p.link,episode:p.episode,total_episodes:p.totalEpisodes||null,
@@ -1227,18 +1176,6 @@ async function dbAdd(p){
 }
 async function dbUpdate(id,u){
   setSyncing('syncing');
-  if(IS_ELECTRON){
-    const idx=anime.findIndex(a=>a.id===id);
-    if(idx===-1){ setSyncing('offline'); return false; }
-    const next={...anime[idx],...u};
-    if('finished'in u) next.finishedDate=u.finished?new Date().toISOString():null;
-    anime[idx]=next;
-    if('category'in u){ catMap[id]=u.category||'tv'; saveCatMap(); }
-    saveCache();
-    await window.electronAPI.saveAnimeList(anime);
-    setSyncing('synced'); renderAll();
-    return true;
-  }
   const db={};
   if('name'in u)db.name=u.name; if('link'in u)db.link=u.link; if('episode'in u)db.episode=u.episode;
   if('totalEpisodes'in u)db.total_episodes=u.totalEpisodes||null; if('updateDay'in u)db.update_day=u.updateDay||null;
@@ -1258,15 +1195,6 @@ async function dbUpdate(id,u){
 }
 async function dbDelete(id){
   setSyncing('syncing');
-  if(IS_ELECTRON){
-    anime=anime.filter(a=>a.id!==id);
-    delete catMap[id]; saveCatMap();
-    customOrder=customOrder.filter(x=>x!==id); saveOrder();
-    saveCache();
-    await window.electronAPI.saveAnimeList(anime);
-    setSyncing('synced'); renderAll();
-    return;
-  }
   const {error}=await sb.from('anime_list').delete().eq('id',id).eq('user_id',user.id);
   if(error){ setSyncing('offline'); toast('error','刪除失敗：'+error.message); return; }
   anime=anime.filter(a=>a.id!==id);
