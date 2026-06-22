@@ -10,3 +10,7 @@ desktop.ini
 # 暫存
 *.tmp
 *.log
+
+# 相依套件與打包輸出
+node_modules/
+dist/
