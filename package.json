@@ -20,7 +20,9 @@
       "*.svg"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "signAndEditExecutable": false,
+      "signDlls": false
     },
     "publish": [
       {
