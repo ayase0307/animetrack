@@ -1,0 +1,29 @@
+{
+  "name": "animetrack",
+  "version": "0.1.0",
+  "description": "追劇小幫手桌面版",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.ayase0307.animetrack",
+    "productName": "追劇小幫手",
+    "files": [
+      "main.js",
+      "preload.js",
+      "anime-tracker-guoman-draft.html",
+      "data/**/*",
+      "*.png",
+      "*.svg"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  }
+}
