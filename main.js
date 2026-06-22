@@ -48,7 +48,7 @@ function createMainWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'anime-tracker-guoman-draft.html'));
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
 }
 
 app.whenReady().then(() => {

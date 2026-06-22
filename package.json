@@ -13,7 +13,7 @@
     "files": [
       "main.js",
       "preload.js",
-      "anime-tracker-guoman-draft.html",
+      "index.html",
       "data/**/*",
       "*.png",
       "*.svg"
