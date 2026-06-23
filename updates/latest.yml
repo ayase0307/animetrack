@@ -1,8 +1,8 @@
-version: 0.1.1
+version: 0.1.2
 files:
-  - url: AnimeTrack-Setup-0.1.1.exe
-    sha512: 9y4hMwuaMkgINt/1sBgXgYiaESUu2CR4NPuc8Hz7CyqUfbS8jujAhzDLl3VnwKbX5guoSR9A4Bbx17Qg6ZH4TA==
-    size: 89299332
-path: AnimeTrack-Setup-0.1.1.exe
-sha512: 9y4hMwuaMkgINt/1sBgXgYiaESUu2CR4NPuc8Hz7CyqUfbS8jujAhzDLl3VnwKbX5guoSR9A4Bbx17Qg6ZH4TA==
-releaseDate: '2026-06-23T16:21:28.219Z'
+  - url: AnimeTrack-Setup-0.1.2.exe
+    sha512: P7+MUrlA1sKSfD9vD2zkcqHT9TMJIwlO+Yypie+pWHQYJid0mhqOA7sOgsWGaJ+JQX+rmYb5+KRCgbSJpgHT3g==
+    size: 89299632
+path: AnimeTrack-Setup-0.1.2.exe
+sha512: P7+MUrlA1sKSfD9vD2zkcqHT9TMJIwlO+Yypie+pWHQYJid0mhqOA7sOgsWGaJ+JQX+rmYb5+KRCgbSJpgHT3g==
+releaseDate: '2026-06-23T16:24:08.984Z'
