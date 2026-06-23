@@ -137,7 +137,8 @@ ipcMain.handle('viewer:open', async (event, payload) => {
     id: payload && payload.id,
     title: payload && payload.title ? String(payload.title) : '未命名作品',
     url: payload && payload.url ? String(payload.url) : '',
-    currentEp: Number(payload && payload.currentEp) || 0
+    currentEp: Number(payload && payload.currentEp) || 0,
+    cover: payload && payload.cover ? String(payload.cover) : ''
   };
 
   if (!anime.url || !/^https?:\/\//i.test(anime.url)) {
@@ -167,25 +168,14 @@ ipcMain.handle('viewer:open', async (event, payload) => {
 
   viewer.on('closed', () => {
     if (!sourceWindow || sourceWindow.isDestroyed()) return;
-
-    const nextEp = anime.currentEp + 1;
-    const choice = dialog.showMessageBoxSync(sourceWindow, {
-      type: 'question',
-      title: '更新觀看進度',
-      message: `《${anime.title}》`,
-      detail: `你看完第 ${anime.currentEp} 集了嗎？`,
-      buttons: ['否，還沒看完', `是，更新到第 ${nextEp} 集`],
-      defaultId: 1,
-      cancelId: 0,
-      noLink: true
+    sourceWindow.focus();
+    // 改由前台顯示水墨自製彈窗（取代原生系統對話框）
+    sourceWindow.webContents.send('viewer:closed', {
+      id: anime.id,
+      title: anime.title,
+      currentEp: anime.currentEp,
+      cover: anime.cover
     });
-
-    if (choice === 1) {
-      sourceWindow.webContents.send('episode:updated', {
-        id: anime.id,
-        episode: nextEp
-      });
-    }
   });
 
   return { opened: true };

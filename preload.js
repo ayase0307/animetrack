@@ -8,5 +8,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const listener = (_event, payload) => callback(payload);
     ipcRenderer.on('episode:updated', listener);
     return () => ipcRenderer.removeListener('episode:updated', listener);
+  },
+  onViewerClosed: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on('viewer:closed', listener);
+    return () => ipcRenderer.removeListener('viewer:closed', listener);
   }
 });

@@ -306,6 +306,24 @@ textarea.form-control{resize:vertical;min-height:78px;line-height:1.6}
 .confirm-text{font-size:.96rem;line-height:1.6;padding:0 28px;margin-bottom:24px}
 .confirm-text strong{color:var(--accent)}
 .confirm-actions{display:flex;gap:10px;padding:0 24px 26px}
+.watch-modal{max-width:440px}
+.watch-top{display:flex;gap:16px;margin-bottom:22px}
+.watch-cover{width:84px;height:112px;object-fit:cover;border-radius:10px;border:1px solid var(--border);flex-shrink:0;background:var(--surface-2)}
+.watch-meta{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.watch-title{font-size:1.1rem;font-weight:800;margin-bottom:10px;line-height:1.3}
+.watch-prog{display:flex;align-items:center;gap:9px;margin-bottom:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.watch-prog .watch-arrow{color:var(--accent);flex-shrink:0}
+.watch-prog .watch-to{color:var(--accent)}
+.watch-q{font-size:.86rem;color:var(--muted)}
+.watch-stepper{display:flex;align-items:center;justify-content:center;gap:18px}
+.watch-stepper button{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--fg);font-size:1.4rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .16s}
+.watch-stepper button:hover{border-color:var(--accent-border);background:var(--surface-2)}
+.watch-stepper button:disabled{opacity:.35;cursor:not-allowed}
+.watch-count{font-size:1rem;min-width:66px;text-align:center;color:var(--muted)}
+.watch-count b{font-size:1.7rem;color:var(--accent);font-weight:800;margin-right:3px}
+.watch-foot-done{display:none}
+.modal-overlay.done .watch-foot-main{display:none}
+.modal-overlay.done .watch-foot-done{display:flex}
 .confirm-actions .btn{flex:1}
 
 /* shortcuts help */
@@ -982,6 +1000,37 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
   </div>
 </div>
 
+<!-- WATCH CONFIRM MODAL（桌面版，取代原生對話框） -->
+<div class="modal-overlay" id="watchOverlay">
+  <div class="modal watch-modal">
+    <div class="modal-head"><h3>更新觀看進度</h3><button class="modal-close" onclick="closeWatch()" aria-label="關閉"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body">
+      <div class="watch-top">
+        <img id="watchCover" class="watch-cover" alt="">
+        <div class="watch-meta">
+          <div class="watch-title" id="watchTitle"></div>
+          <div class="watch-prog"><span id="watchFrom">第 0 集</span><svg class="watch-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg><span class="watch-to" id="watchTo">第 1 集</span></div>
+          <div class="watch-q">這次看完幾集？</div>
+        </div>
+      </div>
+      <div class="watch-stepper">
+        <button type="button" id="watchMinus" aria-label="減一集">−</button>
+        <div class="watch-count"><b id="watchN">1</b>集</div>
+        <button type="button" id="watchPlus" aria-label="加一集">+</button>
+      </div>
+    </div>
+    <div class="modal-foot watch-foot watch-foot-main">
+      <button class="btn btn-secondary" onclick="closeWatch()">還沒看</button>
+      <button class="btn btn-secondary" id="watchFinishBtn">直接標完結</button>
+      <button class="btn btn-primary" id="watchConfirmBtn">看完 +1</button>
+    </div>
+    <div class="modal-foot watch-foot watch-foot-done">
+      <button class="btn btn-secondary" onclick="closeWatch()">完成</button>
+      <button class="btn btn-primary" id="watchContinueBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>繼續看下一集</button>
+    </div>
+  </div>
+</div>
+
 <!-- FLOATING PLAYER BAR -->
 <div class="floating-bar" id="floatingBar">
   <div class="fb-info"><div class="fb-title" id="fbTitle"></div><div class="fb-ep" id="fbEp"></div></div>
@@ -1399,7 +1448,8 @@ function openPlayer(id){
       id:a.id,
       title:a.name,
       url:a.link,
-      currentEp:a.episode
+      currentEp:a.episode,
+      cover:a.imageUrl||''
     }).then(result=>{
       if(result&&result.opened) toast('info',`已開啟《${a.name}》觀看視窗`);
     }).catch(e=>toast('error','觀看視窗開啟失敗：'+e.message));
@@ -1423,7 +1473,56 @@ async function markWatched(){
 }
 function reopenTab(){ if(playingAnime&&playingAnime.link) window.open(playingAnime.link,'_blank'); }
 
+// ── 看完彈窗（桌面版水墨自製，取代原生系統對話框）──
+let watchCtx=null, watchN=1;
+function openWatchModal(p){
+  if(!p||!p.id) return;
+  const a=anime.find(x=>x.id===p.id);
+  watchCtx={ id:p.id, name:(a?a.name:p.title)||'未命名作品',
+    cur:(p.currentEp!=null?Number(p.currentEp):(a?a.episode:0))||0,
+    cover:p.cover||(a?a.imageUrl:'')||'' };
+  watchN=1;
+  const ov=document.getElementById('watchOverlay'); ov.classList.remove('done');
+  const img=document.getElementById('watchCover');
+  img.onerror=()=>{ img.onerror=null; img.src=FALLBACK(watchCtx.name); };
+  img.src=watchCtx.cover||FALLBACK(watchCtx.name);
+  document.getElementById('watchTitle').textContent=watchCtx.name;
+  document.getElementById('watchFrom').textContent='第 '+watchCtx.cur+' 集';
+  renderWatchN(); ov.classList.add('show');
+  setTimeout(()=>document.getElementById('watchConfirmBtn').focus(),50);
+}
+function renderWatchN(){
+  document.getElementById('watchN').textContent=watchN;
+  document.getElementById('watchTo').textContent='第 '+(watchCtx.cur+watchN)+' 集';
+  document.getElementById('watchConfirmBtn').textContent='看完 +'+watchN;
+  document.getElementById('watchMinus').disabled=watchN<=1;
+}
+function watchStep(d){ if(!watchCtx) return; watchN=Math.max(1,Math.min(99,watchN+d)); renderWatchN(); }
+function closeWatch(){ document.getElementById('watchOverlay').classList.remove('show'); }
+async function watchConfirm(){
+  if(!watchCtx) return;
+  const newEp=watchCtx.cur+watchN;
+  if(await dbUpdate(watchCtx.id,{episode:newEp})){
+    toast('success',`《${watchCtx.name}》已更新至第 ${newEp} 集`);
+    watchCtx.cur=newEp;
+    document.getElementById('watchFrom').textContent='第 '+newEp+' 集';
+    document.getElementById('watchOverlay').classList.add('done');
+  }
+}
+async function watchFinish(){
+  if(!watchCtx) return;
+  if(await dbUpdate(watchCtx.id,{finished:true})){ toast('success',`《${watchCtx.name}》已標記完結`); closeWatch(); }
+}
+function watchContinue(){ if(!watchCtx) return; const id=watchCtx.id; closeWatch(); openPlayer(id); }
+document.getElementById('watchMinus').addEventListener('click',()=>watchStep(-1));
+document.getElementById('watchPlus').addEventListener('click',()=>watchStep(1));
+document.getElementById('watchConfirmBtn').addEventListener('click',watchConfirm);
+document.getElementById('watchFinishBtn').addEventListener('click',watchFinish);
+document.getElementById('watchContinueBtn').addEventListener('click',watchContinue);
+document.getElementById('watchOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeWatch(); });
+
 if(IS_ELECTRON){
+  window.electronAPI.onViewerClosed(p=>openWatchModal(p));
   window.electronAPI.onEpisodeUpdated(async payload=>{
     if(!payload||!payload.id) return;
     const a=anime.find(x=>x.id===payload.id);
@@ -1663,7 +1762,7 @@ grid.addEventListener('drop',e=>{
 
 // ═══════════════════ KEYBOARD ═══════════════════
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ closeEdit(); closeConfirm(); closeHelp(); closeFloatingBar(); return; }
+  if(e.key==='Escape'){ closeEdit(); closeConfirm(); closeHelp(); closeWatch(); closeFloatingBar(); return; }
   const tag=(e.target.tagName||'').toLowerCase();
   if(tag==='input'||tag==='textarea'||e.target.isContentEditable) return;
   if(document.getElementById('appScreen').classList.contains('active')===false) return;
