@@ -49,6 +49,7 @@
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body.electron-shell{padding-top:38px}
 body::before{content:'';position:fixed;inset:0;background:
   radial-gradient(900px 600px at 82% -12%,rgba(181,70,52,0.18),transparent 62%),
   radial-gradient(760px 520px at 2% 8%,rgba(47,156,132,0.15),transparent 58%),
@@ -64,6 +65,32 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.14);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.26)}
 ::selection{background:var(--accent);color:#fff}
+
+/* Electron frameless titlebar */
+.electron-titlebar{display:none}
+body.electron-shell .electron-titlebar{
+  position:fixed;top:0;left:0;right:0;height:38px;z-index:12000;
+  display:flex;align-items:center;justify-content:space-between;
+  background:
+    radial-gradient(280px 46px at 18% 0,rgba(47,156,132,.22),transparent 70%),
+    linear-gradient(90deg,rgba(9,10,8,.96),rgba(20,21,17,.92) 58%,rgba(9,10,8,.98));
+  border-bottom:1px solid rgba(220,203,158,.16);
+  box-shadow:0 12px 32px -26px rgba(0,0,0,.9);
+  -webkit-app-region:drag;user-select:none
+}
+.electron-titlebar::after{
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:.28;
+  background:repeating-linear-gradient(90deg,rgba(246,241,225,.09) 0 1px,transparent 1px 9px)
+}
+.electron-titlebar-brand{display:flex;align-items:center;gap:9px;padding-left:13px;min-width:0;color:var(--paper);font-size:.82rem;font-weight:700;letter-spacing:.08em;position:relative;z-index:1}
+.electron-titlebar-brand img{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+.electron-titlebar-sub{color:var(--muted);font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.window-controls{display:flex;height:100%;position:relative;z-index:1;-webkit-app-region:no-drag}
+.window-control{width:46px;height:38px;border:0;background:transparent;color:rgba(246,241,225,.72);display:grid;place-items:center;cursor:pointer;font:16px/1 var(--mono);transition:background .16s,color .16s}
+.window-control:hover{background:rgba(246,241,225,.10);color:var(--fg)}
+.window-control.close:hover{background:var(--cinnabar);color:#fff}
+body.electron-shell .app-header{top:38px}
+body.electron-shell .tab-nav{top:102px}
 
 /* ── SCREEN SYSTEM ── */
 .screen{display:none;min-height:100vh;position:relative;z-index:1}
@@ -748,6 +775,19 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
 </head>
 <body>
 
+<div class="electron-titlebar" id="electronTitlebar" aria-label="App 視窗列">
+  <div class="electron-titlebar-brand">
+    <img src="enso-play-icon.png" alt="">
+    <span>追劇小幫手</span>
+    <span class="electron-titlebar-sub">Ink Shell</span>
+  </div>
+  <div class="window-controls" aria-label="視窗控制">
+    <button class="window-control" id="windowMinimize" type="button" aria-label="最小化" title="最小化">−</button>
+    <button class="window-control" id="windowMaximize" type="button" aria-label="最大化" title="最大化">□</button>
+    <button class="window-control close" id="windowClose" type="button" aria-label="關閉" title="關閉">×</button>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div id="loadingOverlay"><div class="spinner"></div><div class="loading-text">載入中…</div></div>
 
@@ -1062,6 +1102,10 @@ const CATS={tv:'番劇',movie:'劇場版',watchlist:'想看清單'};
 const FALLBACK=n=>`https://ui-avatars.com/api/?name=${encodeURIComponent(n||'?')}&size=600&background=11120f&color=d8bd72&bold=true&font-size=0.34`;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const IS_ELECTRON=!!window.electronAPI;
+if(IS_ELECTRON){
+  document.body.classList.add('electron-shell');
+  initElectronTitlebar();
+}
 const DRAFT_PREVIEW=!IS_ELECTRON&&!localStorage.getItem('sb_url')&&!localStorage.getItem('sb_key');
 const SAMPLE_ANIME=[
   {id:'sample-1',name:'凡人修仙傳',link:'#',episode:123,totalEpisodes:null,imageUrl:'',updateDay:new Date().getDay().toString(),finished:false,addedDate:'2026-06-14T10:00:00.000Z',rating:5,notes:'',category:'tv'},
@@ -1072,6 +1116,32 @@ const SAMPLE_ANIME=[
 ];
 
 // ═══════════════════ INIT ═══════════════════
+function initElectronTitlebar(){
+  const bar=document.getElementById('electronTitlebar');
+  const minBtn=document.getElementById('windowMinimize');
+  const maxBtn=document.getElementById('windowMaximize');
+  const closeBtn=document.getElementById('windowClose');
+  const setMaxIcon=isMax=>{
+    if(!maxBtn) return;
+    maxBtn.textContent=isMax?'❐':'□';
+    maxBtn.title=isMax?'還原':'最大化';
+    maxBtn.setAttribute('aria-label',isMax?'還原':'最大化');
+  };
+  minBtn&&minBtn.addEventListener('click',()=>window.electronAPI.minimizeWindow());
+  const toggleMax=async()=>{
+    const isMax=await window.electronAPI.toggleMaximizeWindow();
+    setMaxIcon(isMax);
+  };
+  maxBtn&&maxBtn.addEventListener('click',toggleMax);
+  bar&&bar.addEventListener('dblclick',e=>{
+    if(e.target.closest('.window-controls')) return;
+    toggleMax();
+  });
+  closeBtn&&closeBtn.addEventListener('click',()=>window.electronAPI.closeWindow());
+  window.electronAPI.isWindowMaximized&&window.electronAPI.isWindowMaximized().then(setMaxIcon).catch(()=>{});
+  window.electronAPI.onWindowMaximizedChanged&&window.electronAPI.onWindowMaximizedChanged(setMaxIcon);
+}
+
 async function init(){
   const url=localStorage.getItem('sb_url'), key=localStorage.getItem('sb_key');
   if(DRAFT_PREVIEW){
@@ -1480,7 +1550,8 @@ function openWatchModal(p){
   const a=anime.find(x=>x.id===p.id);
   watchCtx={ id:p.id, name:(a?a.name:p.title)||'未命名作品',
     cur:(p.currentEp!=null?Number(p.currentEp):(a?a.episode:0))||0,
-    cover:p.cover||(a?a.imageUrl:'')||'' };
+    cover:p.cover||(a?a.imageUrl:'')||'',
+    lastUrl:p.lastUrl||'' };
   watchN=1;
   const ov=document.getElementById('watchOverlay'); ov.classList.remove('done');
   const img=document.getElementById('watchCover');
@@ -1502,8 +1573,13 @@ function closeWatch(){ document.getElementById('watchOverlay').classList.remove(
 async function watchConfirm(){
   if(!watchCtx) return;
   const newEp=watchCtx.cur+watchN;
-  if(await dbUpdate(watchCtx.id,{episode:newEp})){
-    toast('success',`《${watchCtx.name}》已更新至第 ${newEp} 集`);
+  const a=anime.find(x=>x.id===watchCtx.id);
+  const next={episode:newEp};
+  const lastUrl=String(watchCtx.lastUrl||'').trim();
+  const shouldUpdateLink=/^https?:\/\//i.test(lastUrl)&&(!a||a.link!==lastUrl);
+  if(shouldUpdateLink) next.link=lastUrl;
+  if(await dbUpdate(watchCtx.id,next)){
+    toast('success',`《${watchCtx.name}》已更新至第 ${newEp} 集${shouldUpdateLink?'，並已記住這次播放網址':''}`);
     watchCtx.cur=newEp;
     document.getElementById('watchFrom').textContent='第 '+newEp+' 集';
     document.getElementById('watchOverlay').classList.add('done');

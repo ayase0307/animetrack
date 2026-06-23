@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
@@ -7,6 +7,15 @@ let mainWindow;
 
 const dataDir = path.join(__dirname, 'data');
 const dataFile = path.join(dataDir, 'anime.json');
+
+function wireWindowStateEvents(win) {
+  const sendMaximizedState = () => {
+    if (!win || win.isDestroyed()) return;
+    win.webContents.send('window:maximized-changed', win.isMaximized());
+  };
+  win.on('maximize', sendMaximizedState);
+  win.on('unmaximize', sendMaximizedState);
+}
 
 function setupAutoUpdate() {
   if (!app.isPackaged) return;
@@ -100,6 +109,9 @@ function createMainWindow() {
     height: 860,
     minWidth: 1024,
     minHeight: 720,
+    frame: false,
+    titleBarStyle: 'hidden',
+    autoHideMenuBar: true,
     backgroundColor: '#10110e',
     title: '追劇小幫手',
     icon: path.join(__dirname, 'enso-play-icon.png'),
@@ -110,7 +122,9 @@ function createMainWindow() {
     }
   });
 
+  mainWindow.setMenuBarVisibility(false);
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  wireWindowStateEvents(mainWindow);
 }
 
 app.whenReady().then(() => {
@@ -130,6 +144,37 @@ app.on('window-all-closed', () => {
 ipcMain.handle('anime:load', () => readAnimeList());
 
 ipcMain.handle('anime:save', (_event, animeList) => writeAnimeList(animeList));
+
+ipcMain.handle('window:minimize', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win && !win.isDestroyed()) win.minimize();
+});
+
+ipcMain.handle('window:toggle-maximize', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return false;
+  if (win.isMaximized()) win.unmaximize();
+  else win.maximize();
+  return win.isMaximized();
+});
+
+ipcMain.handle('window:close', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win && !win.isDestroyed()) win.close();
+});
+
+ipcMain.handle('window:is-maximized', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  return !!(win && !win.isDestroyed() && win.isMaximized());
+});
+
+ipcMain.handle('window:toggle-fullscreen', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return false;
+  const next = !win.isFullScreen();
+  win.setFullScreen(next);
+  return next;
+});
 
 ipcMain.handle('viewer:open', async (event, payload) => {
   const sourceWindow = BrowserWindow.fromWebContents(event.sender);
@@ -155,16 +200,32 @@ ipcMain.handle('viewer:open', async (event, payload) => {
     height: 820,
     minWidth: 900,
     minHeight: 640,
+    frame: false,
+    titleBarStyle: 'hidden',
     title: anime.title,
     parent: sourceWindow,
+    autoHideMenuBar: true,
     backgroundColor: '#10110e',
+    icon: path.join(__dirname, 'enso-play-icon.png'),
     webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webviewTag: true
     }
   });
 
-  viewer.loadURL(anime.url);
+  viewer.setMenuBarVisibility(false);
+  viewer.__lastViewerUrl = anime.url;
+  wireWindowStateEvents(viewer);
+  viewer.loadFile(path.join(__dirname, 'viewer.html'), {
+    query: {
+      title: anime.title,
+      url: anime.url,
+      currentEp: String(anime.currentEp),
+      cover: anime.cover
+    }
+  });
 
   viewer.on('closed', () => {
     if (!sourceWindow || sourceWindow.isDestroyed()) return;
@@ -173,10 +234,26 @@ ipcMain.handle('viewer:open', async (event, payload) => {
     sourceWindow.webContents.send('viewer:closed', {
       id: anime.id,
       title: anime.title,
+      lastUrl: viewer.__lastViewerUrl || anime.url,
       currentEp: anime.currentEp,
       cover: anime.cover
     });
   });
 
   return { opened: true };
+});
+
+ipcMain.handle('viewer:update-url', (event, url) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  const safeUrl = typeof url === 'string' ? url : '';
+  if (!win || win.isDestroyed() || !/^https?:\/\//i.test(safeUrl)) return false;
+  win.__lastViewerUrl = safeUrl;
+  return true;
+});
+
+ipcMain.handle('viewer:open-external', async (event, url) => {
+  const safeUrl = typeof url === 'string' ? url : '';
+  if (!/^https?:\/\//i.test(safeUrl)) return false;
+  await shell.openExternal(safeUrl);
+  return true;
 });

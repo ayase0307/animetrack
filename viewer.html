@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>播放視窗｜追劇小幫手</title>
+  <style>
+    :root {
+      --ink: #10110e;
+      --ink-2: #181a15;
+      --paper: #f7f1e5;
+      --paper-soft: rgba(247, 241, 229, 0.72);
+      --muted: rgba(247, 241, 229, 0.62);
+      --line: rgba(247, 241, 229, 0.14);
+      --jade: #2f9c84;
+      --cinnabar: #b54634;
+      --shadow: rgba(0, 0, 0, 0.34);
+      --font-display: "Noto Serif TC", "Iowan Old Style", "Songti TC", serif;
+      --font-body: "Noto Serif TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 16% 0%, rgba(47, 156, 132, 0.22), transparent 28%),
+        radial-gradient(circle at 86% 10%, rgba(181, 70, 52, 0.16), transparent 24%),
+        linear-gradient(135deg, #0f100d 0%, #171912 52%, #0c0d0b 100%);
+      color: var(--paper);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      background-image:
+        linear-gradient(rgba(247, 241, 229, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(247, 241, 229, 0.035) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black 0%, transparent 82%);
+    }
+
+    .viewer-shell {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-rows: 48px 34px 1fr 28px;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid rgba(247, 241, 229, 0.12);
+      border-radius: 0;
+      background: var(--ink);
+    }
+
+    .titlebar {
+      -webkit-app-region: drag;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 12px 0 16px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(247, 241, 229, 0.08), rgba(247, 241, 229, 0.02)),
+        rgba(13, 14, 11, 0.88);
+    }
+
+    .identity {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .seal {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      background: color-mix(in srgb, var(--cinnabar) 82%, black);
+      color: var(--paper);
+      font: 600 15px/1 var(--font-display);
+      box-shadow: inset 0 0 0 1px rgba(247, 241, 229, 0.18);
+    }
+
+    .title-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .eyebrow {
+      color: var(--jade);
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .title {
+      overflow: hidden;
+      color: var(--paper);
+      font: 600 14px/1.25 var(--font-display);
+      letter-spacing: 0.01em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      -webkit-app-region: no-drag;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(247, 241, 229, 0.12);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(247, 241, 229, 0.055);
+      color: var(--paper-soft);
+      font: 600 14px/1 var(--font-body);
+      cursor: pointer;
+      transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease, border-color 0.16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(247, 241, 229, 0.24);
+      background: rgba(247, 241, 229, 0.11);
+      color: var(--paper);
+    }
+
+    button:disabled {
+      opacity: 0.34;
+      cursor: default;
+      transform: none;
+    }
+
+    .close:hover {
+      border-color: rgba(181, 70, 52, 0.72);
+      background: rgba(181, 70, 52, 0.24);
+    }
+
+    .content {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      background:
+        linear-gradient(180deg, rgba(247, 241, 229, 0.045), transparent 22%),
+        var(--ink);
+    }
+
+    .episode-strip {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(247, 241, 229, 0.10);
+      background:
+        linear-gradient(90deg, rgba(47, 156, 132, 0.10), transparent 46%),
+        rgba(15, 16, 13, 0.94);
+      color: var(--paper-soft);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .episode-meta,
+    .episode-hint {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .episode-meta b {
+      color: var(--paper);
+      font-weight: 600;
+    }
+
+    .episode-hint {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.02em;
+    }
+
+    .progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      overflow: hidden;
+      background: rgba(247, 241, 229, 0.08);
+      z-index: 3;
+    }
+
+    .progress span {
+      display: block;
+      width: 34%;
+      height: 100%;
+      transform: translateX(-120%);
+      background: linear-gradient(90deg, transparent, var(--jade), transparent);
+      animation: loading 1.15s ease-in-out infinite;
+    }
+
+    .progress[data-hidden="true"] { opacity: 0; }
+
+    @keyframes loading {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(320%); }
+    }
+
+    webview {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+      overflow: hidden;
+      background: #0b0c0a;
+    }
+
+    .fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 28px;
+      border: 0;
+      border-radius: 0;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(47, 156, 132, 0.18), transparent 42%),
+        rgba(12, 13, 10, 0.96);
+      text-align: center;
+      z-index: 4;
+    }
+
+    .fallback.show { display: grid; }
+
+    .fallback h1 {
+      margin: 0 0 10px;
+      font: 600 24px/1.2 var(--font-display);
+      letter-spacing: -0.01em;
+    }
+
+    .fallback p {
+      max-width: 46ch;
+      margin: 0 auto 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .fallback .primary {
+      width: auto;
+      min-width: 132px;
+      padding: 0 16px;
+      border-color: rgba(47, 156, 132, 0.48);
+      background: rgba(47, 156, 132, 0.18);
+      color: var(--paper);
+    }
+
+    .statusbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 0 14px;
+      border-top: 1px solid rgba(247, 241, 229, 0.10);
+      background: rgba(13, 14, 11, 0.96);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .status-text,
+    .host-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status-text::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 8px;
+      border-radius: 99px;
+      background: var(--jade);
+      box-shadow: 0 0 12px rgba(47, 156, 132, 0.55);
+      vertical-align: 1px;
+    }
+  </style>
+</head>
+<body>
+  <main class="viewer-shell">
+    <header class="titlebar" id="titlebar">
+      <div class="identity">
+        <div class="seal" aria-hidden="true">追</div>
+        <div class="title-copy">
+          <div class="eyebrow">Now Playing</div>
+          <div class="title" id="anime-title">播放視窗</div>
+        </div>
+      </div>
+      <div class="toolbar" aria-label="播放視窗控制">
+        <button type="button" id="back" title="上一頁" aria-label="上一頁">‹</button>
+        <button type="button" id="reload" title="重新整理" aria-label="重新整理">↻</button>
+        <button type="button" id="external" title="用瀏覽器開啟" aria-label="用瀏覽器開啟">↗</button>
+        <button type="button" id="minimize" title="最小化" aria-label="最小化">−</button>
+        <button type="button" id="maximize" title="最大化或還原" aria-label="最大化或還原">□</button>
+        <button type="button" class="close" id="close" title="關閉" aria-label="關閉">×</button>
+      </div>
+    </header>
+
+    <section class="episode-strip" aria-label="劇集資訊">
+      <div class="episode-meta" id="episode-meta">目前集數：<b>—</b></div>
+      <div class="episode-hint" id="episode-hint">關閉後可更新觀看進度</div>
+    </section>
+
+    <section class="content" aria-label="動畫播放內容">
+      <div class="progress" id="progress"><span></span></div>
+      <webview id="player" allowpopups></webview>
+      <div class="fallback" id="fallback">
+        <div>
+          <h1>這個網站無法在內嵌播放區載入</h1>
+          <p>有些播放網站會阻擋桌面 App 內嵌瀏覽。你仍可以用外部瀏覽器開啟，關閉此播放視窗後，追劇小幫手一樣會詢問是否看完本集。</p>
+          <button type="button" class="primary" id="fallback-external">用瀏覽器開啟</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="statusbar" aria-label="播放狀態">
+      <div class="status-text" id="status-text">準備載入</div>
+      <div class="host-text" id="host-text">—</div>
+    </footer>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const title = params.get('title') || '播放視窗';
+    const url = params.get('url') || '';
+    const currentEp = Number(params.get('currentEp')) || 0;
+
+    const player = document.getElementById('player');
+    const progress = document.getElementById('progress');
+    const titleEl = document.getElementById('anime-title');
+    const fallback = document.getElementById('fallback');
+    const maximize = document.getElementById('maximize');
+    const back = document.getElementById('back');
+    const statusText = document.getElementById('status-text');
+    const hostText = document.getElementById('host-text');
+    const episodeMeta = document.getElementById('episode-meta');
+    const episodeHint = document.getElementById('episode-hint');
+    let currentUrl = url;
+
+    titleEl.textContent = title;
+    document.title = `${title}｜追劇小幫手`;
+    back.disabled = true;
+    episodeMeta.innerHTML = `目前集數：<b>第 ${currentEp} 集</b>`;
+    episodeHint.textContent = `關閉後可確認是否看完第 ${currentEp + 1} 集`;
+
+    function setHost(nextUrl) {
+      try {
+        hostText.textContent = nextUrl ? new URL(nextUrl).hostname.replace(/^www\./, '') : '未提供網址';
+      } catch (_) {
+        hostText.textContent = '網址格式異常';
+      }
+    }
+
+    function rememberUrl(nextUrl) {
+      if (!/^https?:\/\//i.test(nextUrl || '')) return;
+      currentUrl = nextUrl;
+      setHost(currentUrl);
+      if (window.electronAPI) window.electronAPI.updateViewerUrl(currentUrl);
+    }
+
+    setHost(url);
+
+    if (/^https?:\/\//i.test(url)) {
+      player.src = url;
+      rememberUrl(url);
+    } else {
+      fallback.classList.add('show');
+      progress.dataset.hidden = 'true';
+    }
+
+    function setLoading(isLoading) {
+      progress.dataset.hidden = isLoading ? 'false' : 'true';
+      statusText.textContent = isLoading ? '載入中' : '就緒';
+    }
+
+    function openExternal() {
+      if (window.electronAPI && currentUrl) window.electronAPI.openViewerExternal(currentUrl);
+    }
+
+    function updateNavigationState() {
+      if (!player.canGoBack) return;
+      back.disabled = !player.canGoBack();
+    }
+
+    player.addEventListener('did-start-loading', () => setLoading(true));
+    player.addEventListener('did-stop-loading', () => {
+      setLoading(false);
+      updateNavigationState();
+    });
+    player.addEventListener('did-navigate', (event) => {
+      rememberUrl(event.url);
+      updateNavigationState();
+    });
+    player.addEventListener('did-navigate-in-page', (event) => {
+      rememberUrl(event.url);
+      updateNavigationState();
+    });
+    player.addEventListener('did-fail-load', (event) => {
+      if (event && event.isMainFrame) {
+        fallback.classList.add('show');
+        setLoading(false);
+        statusText.textContent = '內嵌載入受阻';
+      }
+    });
+    player.addEventListener('new-window', (event) => {
+      if (event && event.url && window.electronAPI) {
+        window.electronAPI.openViewerExternal(event.url);
+      }
+    });
+
+    back.addEventListener('click', () => {
+      if (player.canGoBack && player.canGoBack()) player.goBack();
+    });
+    document.getElementById('reload').addEventListener('click', () => {
+      fallback.classList.remove('show');
+      player.reload();
+    });
+    document.getElementById('external').addEventListener('click', openExternal);
+    document.getElementById('fallback-external').addEventListener('click', openExternal);
+    document.getElementById('minimize').addEventListener('click', () => {
+      if (window.electronAPI) window.electronAPI.minimizeWindow();
+    });
+    document.getElementById('maximize').addEventListener('click', async () => {
+      if (!window.electronAPI) return;
+      const isMaximized = await window.electronAPI.toggleMaximizeWindow();
+      maximize.textContent = isMaximized ? '❐' : '□';
+    });
+    document.getElementById('close').addEventListener('click', () => {
+      if (window.electronAPI) window.electronAPI.closeWindow();
+    });
+    window.addEventListener('keydown', async (event) => {
+      if (event.defaultPrevented) return;
+      const key = event.key;
+      if (key === 'Escape') {
+        event.preventDefault();
+        if (window.electronAPI) window.electronAPI.closeWindow();
+      } else if ((event.ctrlKey || event.metaKey) && key.toLowerCase() === 'r') {
+        event.preventDefault();
+        fallback.classList.remove('show');
+        player.reload();
+      } else if (event.altKey && key === 'ArrowLeft') {
+        event.preventDefault();
+        if (player.canGoBack && player.canGoBack()) player.goBack();
+      } else if (key === 'F11') {
+        event.preventDefault();
+        if (window.electronAPI) await window.electronAPI.toggleFullscreenWindow();
+      }
+    });
+    document.getElementById('titlebar').addEventListener('dblclick', async (event) => {
+      if (event.target.closest('button') || !window.electronAPI) return;
+      const isMaximized = await window.electronAPI.toggleMaximizeWindow();
+      maximize.textContent = isMaximized ? '❐' : '□';
+    });
+
+    if (window.electronAPI) {
+      window.electronAPI.isWindowMaximized().then((isMaximized) => {
+        maximize.textContent = isMaximized ? '❐' : '□';
+      });
+      window.electronAPI.onWindowMaximizedChanged((isMaximized) => {
+        maximize.textContent = isMaximized ? '❐' : '□';
+      });
+    }
+  </script>
+</body>
+</html>
