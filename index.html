@@ -522,21 +522,23 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 .anime-card:hover{transform:translateY(-5px);border-color:rgba(216,189,114,.42);box-shadow:var(--shadow-card),0 18px 52px -42px rgba(216,189,114,.55)}
 .anime-card.drop-target{border-color:var(--gold);box-shadow:0 0 0 2px rgba(216,189,114,.25)}
 .card-cover{background:linear-gradient(135deg,rgba(246,241,225,.08),rgba(47,156,132,.08))}
-/* hover 描金卷軸四角外框（水墨） */
-.card-frame{position:absolute;inset:9px;z-index:5;pointer-events:none;border-radius:8px;opacity:0;transition:opacity .28s ease,inset .3s cubic-bezier(.2,.8,.25,1);
-  --bc:rgba(216,189,114,.92);--t:2px;--l:20px;
-  background:
-    linear-gradient(var(--bc),var(--bc)) 0 0/var(--l) var(--t) no-repeat,
-    linear-gradient(var(--bc),var(--bc)) 0 0/var(--t) var(--l) no-repeat,
-    linear-gradient(var(--bc),var(--bc)) 100% 0/var(--l) var(--t) no-repeat,
-    linear-gradient(var(--bc),var(--bc)) 100% 0/var(--t) var(--l) no-repeat,
-    linear-gradient(var(--bc),var(--bc)) 0 100%/var(--l) var(--t) no-repeat,
-    linear-gradient(var(--bc),var(--bc)) 0 100%/var(--t) var(--l) no-repeat,
-    linear-gradient(var(--bc),var(--bc)) 100% 100%/var(--l) var(--t) no-repeat,
-    linear-gradient(var(--bc),var(--bc)) 100% 100%/var(--t) var(--l) no-repeat;}
-.card-frame::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(101,214,194,.34),inset 0 0 22px -8px rgba(216,189,114,.6)}
-.anime-card:hover .card-frame{opacity:1;inset:7px}
-@media (prefers-reduced-motion:reduce){.card-frame{transition:opacity .2s ease}}
+/* hover：整張卡明顯動畫（浮起＋放大＋描金光暈呼吸） */
+.anime-card{transition:transform .32s cubic-bezier(.2,.85,.25,1),border-color .3s ease,box-shadow .3s ease}
+.anime-card:hover{transform:translateY(-10px) scale(1.03);border-color:rgba(216,189,114,.85);z-index:4;animation:cardBreath 2.6s ease-in-out infinite}
+@keyframes cardBreath{
+  0%,100%{box-shadow:0 24px 60px -26px rgba(0,0,0,.72),0 0 0 1px rgba(216,189,114,.5),0 0 26px -4px rgba(216,189,114,.42),0 0 56px -22px rgba(47,156,132,.4)}
+  50%{box-shadow:0 32px 74px -26px rgba(0,0,0,.78),0 0 0 1px rgba(216,189,114,.92),0 0 42px -2px rgba(216,189,114,.66),0 0 88px -16px rgba(47,156,132,.62)}
+}
+@media (prefers-reduced-motion:reduce){.anime-card:hover{animation:none;box-shadow:0 24px 60px -26px rgba(0,0,0,.72),0 0 0 1px rgba(216,189,114,.7)}}
+/* 靈訊橫幅的國漫少女（持玉卷軸） */
+.today-banner{position:relative;overflow:visible;padding-right:148px}
+.spirit-char{position:absolute;right:14px;bottom:-4px;height:118px;width:auto;pointer-events:none;z-index:2;
+  filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));transform-origin:bottom center;
+  animation:spiritFloat 5s ease-in-out infinite,spiritIn .7s ease both}
+@keyframes spiritFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes spiritIn{from{opacity:0}to{opacity:1}}
+@media (max-width:680px){.spirit-char{display:none}.today-banner{padding-right:18px}}
+@media (prefers-reduced-motion:reduce){.spirit-char{animation:spiritIn .4s ease both}}
 .card-cover::after{
   content:'';
   position:absolute;
@@ -875,6 +877,7 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
       <div class="today-banner" id="todayBanner">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         <div><strong id="todayBannerText"></strong><span>記得去追進度！</span></div>
+        <img class="spirit-char" src="assets/xianxia-girl-jade-scroll-1024x1280.png" alt="" aria-hidden="true">
       </div>
       <div class="drag-hint" id="dragHint">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
@@ -1385,7 +1388,6 @@ function cardHTML(a,fin,drag){
     <div class="card-cover">
       <img src="${esc(img)}" alt="${esc(a.name)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(FALLBACK(a.name))}'">
       <div class="card-scrim"></div>
-      <div class="card-frame" aria-hidden="true"></div>
       <div class="card-badges">${badges}</div>
       ${catTag}
       <button class="change-img-btn" onclick="changeImg('${a.id}')" title="更換封面" aria-label="更換封面"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></button>
