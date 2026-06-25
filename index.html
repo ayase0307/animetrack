@@ -531,14 +531,41 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 }
 @media (prefers-reduced-motion:reduce){.anime-card:hover{animation:none;box-shadow:0 24px 60px -26px rgba(0,0,0,.72),0 0 0 1px rgba(216,189,114,.7)}}
 /* 靈訊橫幅的國漫少女（持玉卷軸） */
-.today-banner{position:relative;overflow:visible;padding-right:148px}
-.spirit-char{position:absolute;right:14px;bottom:-4px;height:118px;width:auto;pointer-events:none;z-index:2;
+.today-banner{position:relative;overflow:visible;padding-right:156px;min-height:74px}
+.today-banner::after{
+  content:'';
+  position:absolute;
+  inset:1px;
+  border-radius:inherit;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(17,18,15,.22),transparent 28% 72%,rgba(17,18,15,.32));
+  z-index:1;
+}
+.today-banner > svg,.today-banner > div{position:relative;z-index:4}
+/* 中段水墨：飄移雲氣＋遠山剪影（純 CSS/SVG，無方框、方向固定） */
+.banner-mist{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;border-radius:inherit;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 72%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 16%,#000 72%,transparent)}
+.banner-mist::before{content:'';position:absolute;inset:0;
+  background-image:
+    radial-gradient(70px 22px at 16% 58%,rgba(101,214,194,.16),transparent 70%),
+    radial-gradient(96px 28px at 42% 74%,rgba(246,241,225,.12),transparent 72%),
+    radial-gradient(74px 24px at 68% 52%,rgba(216,189,114,.11),transparent 70%),
+    radial-gradient(108px 30px at 90% 78%,rgba(101,214,194,.12),transparent 72%);
+  background-repeat:repeat-x;background-size:50% 100%;animation:mistDrift 26s linear infinite}
+.banner-mist::after{content:'';position:absolute;left:0;right:0;bottom:0;height:64%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='60' viewBox='0 0 240 60'%3E%3Cpath d='M0 60V42c26-12 44-6 70 2s44 4 66-4 56-6 104 6v18z' fill='%2365d6c2' fill-opacity='.12'/%3E%3Cpath d='M0 60V50c30-8 52 2 84 6s60-8 90-4 44 6 66 4v4z' fill='%23d8bd72' fill-opacity='.10'/%3E%3C/svg%3E");
+  background-repeat:repeat-x;background-size:auto 100%;animation:ridgeDrift 44s linear infinite}
+@keyframes mistDrift{from{background-position:0 0}to{background-position:-50% 0}}
+@keyframes ridgeDrift{from{background-position:0 0}to{background-position:-240px 0}}
+/* 右側：玉卷軸少女（透明 PNG，乾淨無框） */
+.spirit-char{position:absolute;right:14px;bottom:-4px;height:118px;width:auto;pointer-events:none;z-index:3;
   filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));transform-origin:bottom center;
   animation:spiritFloat 5s ease-in-out infinite,spiritIn .7s ease both}
 @keyframes spiritFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes spiritIn{from{opacity:0}to{opacity:1}}
 @media (max-width:680px){.spirit-char{display:none}.today-banner{padding-right:18px}}
-@media (prefers-reduced-motion:reduce){.spirit-char{animation:spiritIn .4s ease both}}
+@media (prefers-reduced-motion:reduce){.spirit-char{animation:spiritIn .4s ease both}.banner-mist::before,.banner-mist::after{animation:none}}
 .card-cover::after{
   content:'';
   position:absolute;
@@ -877,6 +904,7 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
       <div class="today-banner" id="todayBanner">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         <div><strong id="todayBannerText"></strong><span>記得去追進度！</span></div>
+        <div class="banner-mist" aria-hidden="true"></div>
         <img class="spirit-char" src="assets/xianxia-girl-jade-scroll-1024x1280.png" alt="" aria-hidden="true">
       </div>
       <div class="drag-hint" id="dragHint">
