@@ -14,6 +14,10 @@
 
 ## 2026-07-11（第二批）— v0.2.0 功能更新：主題、Bangumi、系統匣、通知（by Claude Code）
 
+> **已部署**：線上版＝push main 後 GitHub Pages 自動更新（https://ayase0307.github.io/animetrack/）；
+> 桌面版＝https://github.com/ayase0307/animetrack/releases/tag/v0.2.0 （exe＋blockmap＋latest.yml 三件都要上傳，electron-updater 才收得到）。
+> 之後發版 SOP：改 version → commit/push → `npx electron-builder --win --publish never` → `gh release create vX.Y.Z dist/AnimeTrack-Setup-X.Y.Z.exe dist/*.blockmap dist/latest.yml`。
+
 ### 新增功能（`index.html`）
 1. **宣紙／夜墨雙主題**：header 新增日月切換鈕。實作方式＝`html[data-theme="light"]` 覆蓋 `:root` 設計變數＋少數材質層（body 紋理、`.screen.active` 背景、捲軸），元件規則完全共用。持久化 key：`localStorage.v4_theme`（預設 `dark`）。`<head>` 有一行 inline script 在繪製前套主題防閃爍。**淺色模式下 `--paper` 變數轉為墨色前景**（該變數只當文字色用）；淺色下 `--fantasy-bg-image` 設為 `none`（不用暗色玄幻背景圖）。
 2. **Bangumi 自動填入**：新增表單「作品名稱」旁有「自動填入」鈕 → `api.bgm.tv` 搜尋（legacy search API）→ 點選結果 → v0 subject API 帶回封面（URL 模式）、總集數、更新日（infobox 放送星期）。新 CSS class：`.name-fetch-row`、`.bgm-results`、`.bgm-item`。
