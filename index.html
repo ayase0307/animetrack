@@ -1140,7 +1140,7 @@ const CATS={tv:'番劇',movie:'劇場版',watchlist:'想看清單'};
 const FALLBACK=n=>`https://ui-avatars.com/api/?name=${encodeURIComponent(n||'?')}&size=600&background=11120f&color=d8bd72&bold=true&font-size=0.34`;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const IS_ELECTRON=!!window.electronAPI;
-const DRAFT_PREVIEW=!IS_ELECTRON&&!localStorage.getItem('sb_url')&&!localStorage.getItem('sb_key');
+const DRAFT_PREVIEW=!IS_ELECTRON&&window.self!==window.top&&!localStorage.getItem('sb_url')&&!localStorage.getItem('sb_key'); // 僅在 OD 預覽 iframe 內顯示範例，正式站走登入
 const SAMPLE_ANIME=[
   {id:'sample-1',name:'凡人修仙傳',link:'#',episode:123,totalEpisodes:null,imageUrl:'',updateDay:new Date().getDay().toString(),finished:false,addedDate:'2026-06-14T10:00:00.000Z',rating:5,notes:'',category:'tv'},
   {id:'sample-2',name:'滄元圖',link:'#',episode:38,totalEpisodes:52,imageUrl:'',updateDay:'5',finished:false,addedDate:'2026-05-22T10:00:00.000Z',rating:4,notes:'',category:'tv'},
