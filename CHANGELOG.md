@@ -12,6 +12,29 @@
 
 ---
 
+## 2026-07-11（第四批）— v0.3.0 七項設計／功能：卷軸開場、卡片生滅、快速面板、求籤等（by Claude Code）
+
+僅動 `index.html`（＋版本號）。使用者核准全部七項提案：
+
+### 動畫
+1. **卷軸開場** `playScrollOpen()`：進入 app 畫面時兩半卷軸（`#scrollOpen`，含金軸 `.rod`）向外滾開。`sessionStorage.scrollOpened` 保證每次啟動只播一次；reduced-motion 直接跳過；有 2.6s 保險絲強制移除 overlay。
+2. **卡片生滅套組**：
+   - 落墨而生 `.ink-born`：`submitAdd` 設 `pendingBornId` → `renderTrack` 渲染後對新卡片套 clip-path 墨暈動畫。
+   - 墨散而逝 `.ink-dissolve`：`delAnime` 確認後先播 0.52s 散墨再真正 `dbDelete`。
+   - 鎏金拂過：`.card-cover::before` 金色 sheen，hover 掃過（**注意 `.card-cover::after` 已被佔用**做色調覆蓋，sheen 只能用 `::before`）。
+3. **今日更新呼吸墨暈** `.is-today`：`cardHTML()` 對今天更新且未完結的卡片加 class，非 hover 時 4.5s 玉青呼吸光暈。
+4. **時辰問候** `#shichen`：header logo 旁，十二時辰＋古風短語，每 10 分鐘刷新；窄於 820px 隱藏。
+
+### 功能
+5. **Ctrl+K 快速面板** `#quickOverlay`：搜尋作品，↑↓ 選、Enter 播放（`openPlayer`）、Ctrl+Enter +1 集（`incEp`）、Esc 關。快捷鍵說明 modal 已加一列。
+6. **求籤** `#omikujiOverlay`：header「籤」鈕 → 籤筒搖晃 0.95s → 從未完結作品隨機抽一部，顯示籤等（大吉…）＋籤詩＋「就看這部」。
+7. **追番總結圖** `exportSummaryImg()`：設定區「生成總結圖」鈕，canvas 畫 1080×1350 夜墨風統計卡（累計集數、追蹤中/已完結/最常更新日、正在追前三部、朱印），直接下載 PNG。等 `document.fonts.ready` 再畫，Noto Serif TC 才會生效。
+
+### 給 Open Design 的補充
+- 所有新動畫都收在同一個 reduced-motion 區塊（搜 `ink-born,.anime-card.ink-dissolve`）。
+- `Escape` 全域處理多了 `closeQuick()`、`closeOmikuji()`；新 overlay 沿用 `.modal-overlay`＋`.show` 機制。
+- 求籤籤詩在 `OMI_POEMS` 陣列、時辰短語在 `SHICHEN_LINES`，改文案直接改陣列即可。
+
 ## 2026-07-11（第三批）— v0.2.1 視覺升級：墨暈換主題、毛筆進度條、蓋印儀式（by Claude Code）
 
 僅動 `index.html`，三個視覺提案（使用者從提案清單選了 1＋2＋4）：
