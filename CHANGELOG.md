@@ -12,6 +12,16 @@
 
 ---
 
+## 2026-07-11（第三批）— v0.2.1 視覺升級：墨暈換主題、毛筆進度條、蓋印儀式（by Claude Code）
+
+僅動 `index.html`，三個視覺提案（使用者從提案清單選了 1＋2＋4）：
+
+1. **墨暈換主題**：`toggleTheme(event)` 改用 View Transition API——新主題從日月按鈕的點擊位置以圓形 `clip-path` 暈開（560ms）。切換期間 `<html>` 掛 `theme-vt` class 停用預設 crossfade，**該 class 的 CSS 規則（`html.theme-vt::view-transition-*`）不可刪**，否則會跟分頁過場互相打架。不支援 VT 或 reduced-motion 時直接切換。
+2. **毛筆進度條**：`.progress-fill` 套 SVG 筆觸 mask（data URI，`preserveAspectRatio='none'` 隨寬度拉伸，筆尾收尖）。完結卡片的進度條轉朱砂漸層（`.is-finished .progress-fill`）。mask 寫了 `-webkit-mask` 和 `mask` 兩份，改的時候兩份要同步。
+3. **蓋印升級**：
+   - `sealDrop` 改為高空落下＋回彈（-140px、2.15x 起手，62% 落地過衝）；新增 `.seal-blot` 墨漬在落地時暈開。reduced-motion 下印章靜態顯示後淡出、環與墨漬隱藏。
+   - **完結卡片封面右上角永久蓋 `.cover-seal` 朱印**（「完」＋完結年份，旋轉 8°，`cardHTML()` 內 `fin` 分支輸出）。分類標籤 `.cat-tag` 在完結卡片上讓位下移（`top:60px`）。
+
 ## 2026-07-11（第二批）— v0.2.0 功能更新：主題、Bangumi、系統匣、通知（by Claude Code）
 
 > **已部署**：線上版＝push main 後 GitHub Pages 自動更新（https://ayase0307.github.io/animetrack/）；
