@@ -1,9 +1,28 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 
 let mainWindow;
+let tray = null;
+let isQuitting = false;
+
+function showMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  mainWindow.show();
+  mainWindow.focus();
+}
+
+function createTray() {
+  tray = new Tray(path.join(__dirname, 'enso-play-icon.png'));
+  tray.setToolTip('追劇小幫手');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: '開啟追劇小幫手', click: showMainWindow },
+    { type: 'separator' },
+    { label: '結束', click: () => { isQuitting = true; app.quit(); } }
+  ]));
+  tray.on('click', showMainWindow);
+}
 
 // 打包後 __dirname 位於唯讀的 app.asar，寫檔會失敗、更新也會洗掉資料，
 // 因此正式版資料一律放 userData；開發模式維持專案內 data/ 方便直接檢視
@@ -132,6 +151,14 @@ function createMainWindow() {
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
   wireWindowStateEvents(mainWindow);
+
+  // 按 X 縮到系統匣常駐，不直接結束；要退出走系統匣選單的「結束」
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
 }
 
 // 影音站廣告彈窗一律擋掉（含 webview 內的 window.open），
@@ -144,14 +171,19 @@ app.on('web-contents-created', (_event, contents) => {
 });
 
 app.whenReady().then(() => {
+  app.setAppUserModelId('com.ayase0307.animetrack'); // Windows 桌面通知需要
   ensureDataFile();
   createMainWindow();
+  createTray();
   setupAutoUpdate();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
+    else showMainWindow();
   });
 });
+
+app.on('before-quit', () => { isQuitting = true; });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();

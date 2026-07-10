@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>追劇小幫手</title>
+<script>document.documentElement.dataset.theme=localStorage.getItem('v4_theme')||'dark';</script>
 <link rel="icon" type="image/png" href="enso-play-icon.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,6 +48,74 @@
   --font-ui:'Noto Serif TC','Songti TC','PMingLiU',serif;
   --mono:'SF Mono',ui-monospace,'JetBrains Mono',Menlo,monospace;
 }
+/* ── 宣紙（淺色）主題：只覆蓋設計變數與少數材質層，元件規則共用 ── */
+html[data-theme="light"]{
+  --bg:#ede6d4;
+  --bg-elev:rgba(252,248,238,.92);
+  --surface:rgba(38,32,22,.055);
+  --surface-2:rgba(38,32,22,.09);
+  --surface-hover:rgba(38,32,22,.14);
+  --modal:#f8f3e6;
+  --fg:#2b2519;
+  --muted:#71664d;
+  --faint:rgba(43,37,25,.45);
+  --border:rgba(84,68,36,.22);
+  --border-strong:rgba(84,68,36,.42);
+  --accent:#1f7a63;
+  --accent-2:#a63c2a;
+  --accent-soft:rgba(31,122,99,.13);
+  --accent-border:rgba(31,122,99,.45);
+  --success:#2e7d4f;
+  --success-soft:rgba(46,125,79,.14);
+  --warn:#8a6a12;
+  --danger:#b0432f;
+  --info:#3d6b7d;
+  --paper:#2b2519; /* 淺色下「紙色」轉為墨色前景（此變數僅作文字色使用） */
+  --gold:#8a6f28;
+  --cinnabar:#a63c2a;
+  --jade:#1f7a63;
+  --fantasy-bg-image:none;
+  --shadow:0 24px 70px -30px rgba(60,45,20,.4);
+  --shadow-card:0 14px 36px -22px rgba(60,45,20,.32);
+}
+html[data-theme="light"] body::before{background:
+  radial-gradient(900px 600px at 82% -12%,rgba(166,60,42,.09),transparent 62%),
+  radial-gradient(760px 520px at 2% 8%,rgba(31,122,99,.09),transparent 58%),
+  repeating-linear-gradient(90deg,rgba(43,37,25,.02) 0 1px,transparent 1px 9px)}
+html[data-theme="light"] body::after{mix-blend-mode:multiply;opacity:.4;background-image:
+  radial-gradient(circle at 18% 28%,rgba(60,45,20,.16) 0 1px,transparent 1px),
+  radial-gradient(circle at 72% 62%,rgba(60,45,20,.1) 0 1px,transparent 1px)}
+html[data-theme="light"] ::-webkit-scrollbar-thumb{background:rgba(43,37,25,.22)}
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover{background:rgba(43,37,25,.38)}
+html[data-theme="light"] .btn-secondary{background:rgba(38,32,22,.05)}
+html[data-theme="light"] #ink-cursor{mix-blend-mode:multiply}
+html[data-theme="light"] .screen.active{background:
+  radial-gradient(900px 560px at 50% 30%,rgba(255,252,244,.55),transparent 70%),
+  radial-gradient(1000px 520px at 18% 4%,rgba(31,122,99,.09),transparent 62%),
+  radial-gradient(760px 460px at 86% 18%,rgba(138,111,40,.08),transparent 64%),
+  var(--bg)}
+html[data-theme="light"] .screen.active::before{background:
+  radial-gradient(720px 360px at 18% 16%,rgba(31,122,99,.08),transparent 72%),
+  radial-gradient(620px 360px at 82% 12%,rgba(138,111,40,.07),transparent 70%),
+  repeating-linear-gradient(0deg,rgba(43,37,25,.02) 0 1px,transparent 1px 118px)}
+html[data-theme="dark"] .ic-sun{display:none}
+html[data-theme="light"] .ic-moon{display:none}
+
+/* ── 名稱列＋Bangumi 自動填入 ── */
+.name-fetch-row{display:flex;gap:8px}
+.name-fetch-row .form-control{flex:1}
+.name-fetch-row .btn{flex-shrink:0;padding:11px 14px}
+.bgm-results{margin-top:8px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg-elev);overflow:hidden}
+.bgm-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--fg);font-family:var(--font);font-size:.88rem;cursor:pointer;text-align:left;transition:background .15s}
+.bgm-item:last-child{border-bottom:none}
+.bgm-item:hover{background:var(--surface-hover)}
+.bgm-item img{width:34px;height:46px;object-fit:cover;border-radius:4px;flex-shrink:0;background:var(--surface)}
+.bgm-item span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bgm-item b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bgm-item small{color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── 水墨空狀態 ── */
+.empty-ink .empty-char{width:110px;height:110px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:3.4rem;font-weight:900;font-family:var(--font);color:var(--gold);border:2px solid var(--border-strong);border-radius:50% 48% 52% 50%/48% 52% 50% 50%;opacity:.75}
 html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 body::before{content:'';position:fixed;inset:0;background:
@@ -882,6 +951,10 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
     <img class="header-logo" src="logo-transparent.png" alt="追劇小幫手">
     <div class="header-actions">
       <div class="sync-pill synced" id="syncPill"><div class="sync-dot"></div><span id="syncText">已同步</span></div>
+      <button class="icon-btn" onclick="toggleTheme()" title="切換宣紙／夜墨主題" aria-label="切換淺色深色主題">
+        <svg class="ic-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="ic-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
       <button class="icon-btn" onclick="toggleHelp()" title="鍵盤快捷鍵 (?)" aria-label="鍵盤快捷鍵">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
       </button>
@@ -942,9 +1015,10 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
         拖曳卡片即可調整自訂順序，會自動記住。
       </div>
       <div id="animeGrid" class="anime-grid"></div>
-      <div class="empty" id="trackEmpty" style="display:none">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <h3>這裡還空空的</h3><p>切到「新增動漫」開始建立你的追劇清單吧</p>
+      <div class="empty empty-ink" id="trackEmpty" style="display:none">
+        <div class="empty-char" aria-hidden="true">空</div>
+        <h3>硯臺還是乾的</h3><p>添上第一部作品，讓這裡開始落墨</p>
+        <button class="btn btn-primary" onclick="switchTab('add')" style="margin-top:14px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添上一筆</button>
       </div>
     </div>
 
@@ -980,7 +1054,13 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
         <h2>新增動漫</h2>
         <p class="sub">加入一部新作品到你的清單</p>
         <form id="addForm" onsubmit="submitAdd(event)">
-          <div class="form-group"><label>作品名稱 *</label><input class="form-control" id="addName" required placeholder="例如：葬送的芙莉蓮"></div>
+          <div class="form-group"><label>作品名稱 *</label>
+            <div class="name-fetch-row">
+              <input class="form-control" id="addName" required placeholder="例如：葬送的芙莉蓮">
+              <button type="button" class="btn btn-secondary" id="bgmFetchBtn" onclick="bgmSearch()" title="從 Bangumi 番組計畫自動抓封面、總集數、更新日">自動填入</button>
+            </div>
+            <div id="bgmResults" class="bgm-results" style="display:none"></div>
+          </div>
           <div class="form-group"><label>觀看連結</label><input class="form-control" id="addLink" placeholder="https://..."></div>
           <div class="form-row">
             <div class="form-group"><label>目前集數</label><input class="form-control" type="number" min="0" id="addEp" value="0"></div>
@@ -1137,7 +1217,19 @@ let dbHasCategory=true; // 偵測到 DB 沒有 category 欄位時自動翻 false
 
 const DAYS={'0':'週日','1':'週一','2':'週二','3':'週三','4':'週四','5':'週五','6':'週六'};
 const CATS={tv:'番劇',movie:'劇場版',watchlist:'想看清單'};
-const FALLBACK=n=>`https://ui-avatars.com/api/?name=${encodeURIComponent(n||'?')}&size=600&background=11120f&color=d8bd72&bold=true&font-size=0.34`;
+// 本地生成書法字卡封面（取代 ui-avatars 外部服務：離線可用、風格一致）
+const FALLBACK=n=>{
+  const ch=String(n==null?'':n).trim().charAt(0).replace(/[&<>"']/g,'')||'？';
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">`
+    +`<rect width="600" height="800" fill="#11120f"/>`
+    +`<rect x="26" y="26" width="548" height="748" fill="none" stroke="#d8bd72" stroke-opacity=".3" stroke-width="2"/>`
+    +`<circle cx="300" cy="380" r="205" fill="none" stroke="#d8bd72" stroke-opacity=".14" stroke-width="10" stroke-dasharray="1120 170" transform="rotate(-64 300 380)"/>`
+    +`<text x="300" y="478" font-family="Noto Serif TC,Songti TC,PMingLiU,serif" font-size="290" font-weight="900" fill="#d8bd72" fill-opacity=".9" text-anchor="middle">${ch}</text>`
+    +`<rect x="486" y="676" width="66" height="66" rx="7" fill="#b54634"/>`
+    +`<text x="519" y="726" font-family="Noto Serif TC,Songti TC,PMingLiU,serif" font-size="42" font-weight="700" fill="#f6f1e1" text-anchor="middle">追</text>`
+    +`</svg>`;
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const IS_ELECTRON=!!window.electronAPI;
 const DRAFT_PREVIEW=!IS_ELECTRON&&window.self!==window.top&&!localStorage.getItem('sb_url')&&!localStorage.getItem('sb_key'); // 僅在 OD 預覽 iframe 內顯示範例，正式站走登入
@@ -1281,7 +1373,7 @@ async function loadData(){
   if(cached){ try{ anime=JSON.parse(cached); renderAll(); }catch(e){} }
   const {data,error}=await sb.from('anime_list').select('*').eq('user_id',user.id).order('added_date',{ascending:false});
   if(error){ setSyncing('offline'); if(!cached) toast('error','載入失敗：'+error.message); return; }
-  anime=data.map(mapRow); saveCache(); ensureOrder(); await migrateLocalCategories(); setSyncing('synced'); renderAll();
+  anime=data.map(mapRow); saveCache(); ensureOrder(); await migrateLocalCategories(); setSyncing('synced'); renderAll(); notifyToday();
 }
 async function dbAdd(p){
   setSyncing('syncing');
@@ -1594,7 +1686,7 @@ function openWatchModal(p){
     cover:p.cover||(a?a.imageUrl:'')||'',
     lastUrl,
     originalUrl:(a?a.link:'')||'' };
-  watchN=1;
+  watchN=guessNextN(lastUrl,watchCtx.cur);
   const ov=document.getElementById('watchOverlay'); ov.classList.remove('done');
   const img=document.getElementById('watchCover');
   img.onerror=()=>{ img.onerror=null; img.src=FALLBACK(watchCtx.name); };
@@ -1906,6 +1998,84 @@ function focusSearch(){
 document.getElementById('editOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeEdit(); });
 document.getElementById('confirmOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeConfirm(); });
 document.getElementById('helpOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeHelp(); });
+
+// ═══════════════════ THEME（宣紙／夜墨） ═══════════════════
+function toggleTheme(){
+  const t=document.documentElement.dataset.theme==='light'?'dark':'light';
+  document.documentElement.dataset.theme=t;
+  localStorage.setItem('v4_theme',t);
+}
+
+// ═══════════════════ 今日更新桌面通知（僅桌面版，每天一次） ═══════════════════
+function notifyToday(){
+  if(!IS_ELECTRON||typeof Notification==='undefined') return;
+  const key='notif_'+new Date().toISOString().slice(0,10);
+  if(localStorage.getItem(key)) return;
+  const today=new Date().getDay().toString();
+  const list=anime.filter(a=>!a.finished&&a.updateDay===today&&getCat(a.id)!=='watchlist');
+  if(!list.length) return;
+  Object.keys(localStorage).forEach(k=>{ if(k.startsWith('notif_')) localStorage.removeItem(k); });
+  localStorage.setItem(key,'1');
+  try{ new Notification('今日更新 · '+list.length+' 部',{body:list.map(a=>a.name).join('、'),silent:true}); }catch(e){}
+}
+
+// ═══════════════════ 集數推測（從最後觀看網址猜看到第幾集） ═══════════════════
+// ponytail: 純正則啟發式，網址尾端剛好是無關數字時會猜錯，但有 1–99 的差值上限擋住離譜值，使用者仍可 +/- 修正
+function guessNextN(url,cur){
+  const u=String(url||'');
+  const m=u.match(/[?&](?:ep|episode)=(\d{1,4})/i)
+    ||u.match(/(?:ep|episode|第)[-_ ]?(\d{1,4})/i)
+    ||u.match(/[-_/](\d{1,4})(?:\.html?)?(?:[?#].*)?$/);
+  if(!m) return 1;
+  const n=parseInt(m[1],10)-(Number(cur)||0);
+  return n>=1&&n<=99?n:1;
+}
+
+// ═══════════════════ BANGUMI 自動填入 ═══════════════════
+async function bgmSearch(){
+  const name=document.getElementById('addName').value.trim();
+  const box=document.getElementById('bgmResults');
+  if(!name){ toast('info','請先輸入作品名稱再自動填入'); return; }
+  const btn=document.getElementById('bgmFetchBtn'); btn.disabled=true; btn.textContent='搜尋中…';
+  try{
+    const r=await fetch(`https://api.bgm.tv/search/subject/${encodeURIComponent(name)}?type=2&responseGroup=medium&max_results=6`);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    const list=(j&&j.list)||[];
+    if(!list.length){ toast('info','Bangumi 找不到這部作品，可改試日文或簡體名'); box.style.display='none'; return; }
+    box.innerHTML=list.slice(0,6).map(s=>
+      `<button type="button" class="bgm-item" onclick="bgmPick(${Number(s.id)})">`
+      +`<img src="${esc((s.images&&(s.images.grid||s.images.common))||'')}" alt="" onerror="this.style.visibility='hidden'">`
+      +`<span><b>${esc(s.name_cn||s.name)}</b><small>${esc(s.name||'')}${s.air_date?' · '+esc(s.air_date):''}</small></span></button>`
+    ).join('');
+    box.style.display='block';
+  }catch(e){ toast('error','Bangumi 搜尋失敗：'+e.message); }
+  finally{ btn.disabled=false; btn.textContent='自動填入'; }
+}
+async function bgmPick(id){
+  document.getElementById('bgmResults').style.display='none';
+  try{
+    const r=await fetch('https://api.bgm.tv/v0/subjects/'+id);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const s=await r.json();
+    if(s.name_cn||s.name) document.getElementById('addName').value=s.name_cn||s.name;
+    const total=Number(s.total_episodes||s.eps)||0;
+    if(total) document.getElementById('addTotal').value=total;
+    const img=s.images&&(s.images.large||s.images.common);
+    if(img){
+      setImgMode('url');
+      const u=document.getElementById('addImgUrl');
+      u.value=img; u.dispatchEvent(new Event('input'));
+    }
+    const wk=(s.infobox||[]).find(x=>x&&x.key==='放送星期');
+    if(wk&&typeof wk.value==='string'){
+      const map={'日':'0','一':'1','二':'2','三':'3','四':'4','五':'5','六':'6'};
+      const c=map[wk.value.replace(/星期|週|周/g,'').trim().charAt(0)];
+      if(c!=null) document.getElementById('addDay').value=c;
+    }
+    toast('success','已自動填入 Bangumi 資訊，儲存前可再調整');
+  }catch(e){ toast('error','取得作品詳情失敗：'+e.message); }
+}
 
 // ═══════════════════ START ═══════════════════
 const _initTimeout=setTimeout(()=>{ if(!document.getElementById('appScreen').classList.contains('active')) showScreen('auth'); },8000);

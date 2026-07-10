@@ -12,6 +12,29 @@
 
 ---
 
+## 2026-07-11（第二批）— v0.2.0 功能更新：主題、Bangumi、系統匣、通知（by Claude Code）
+
+### 新增功能（`index.html`）
+1. **宣紙／夜墨雙主題**：header 新增日月切換鈕。實作方式＝`html[data-theme="light"]` 覆蓋 `:root` 設計變數＋少數材質層（body 紋理、`.screen.active` 背景、捲軸），元件規則完全共用。持久化 key：`localStorage.v4_theme`（預設 `dark`）。`<head>` 有一行 inline script 在繪製前套主題防閃爍。**淺色模式下 `--paper` 變數轉為墨色前景**（該變數只當文字色用）；淺色下 `--fantasy-bg-image` 設為 `none`（不用暗色玄幻背景圖）。
+2. **Bangumi 自動填入**：新增表單「作品名稱」旁有「自動填入」鈕 → `api.bgm.tv` 搜尋（legacy search API）→ 點選結果 → v0 subject API 帶回封面（URL 模式）、總集數、更新日（infobox 放送星期）。新 CSS class：`.name-fetch-row`、`.bgm-results`、`.bgm-item`。
+3. **今日更新桌面通知**：`notifyToday()`，僅桌面版（`IS_ELECTRON`），每天最多一次（`localStorage.notif_YYYY-MM-DD`），在 `loadData()` 成功後觸發。
+4. **看完集數自動推測**：`guessNextN()` 從最後觀看網址的 ep/episode/第N/結尾數字猜「+N」預設值（差值限 1–99，猜錯可用 +/- 修正）。
+5. **封面 fallback 改本地書法字卡**：`FALLBACK()` 改為生成 SVG data URI（墨底、金色首字、enso 圈、朱砂「追」印），**不再依賴 ui-avatars.com 外部服務**（離線可用）。
+6. **空狀態重設計**：`#trackEmpty` 改為水墨風（「空」字圓框＋「硯臺還是乾的」＋「添上一筆」按鈕）。新 CSS：`.empty-ink`。
+
+### 桌面版（`main.js`）
+- **系統匣常駐**：按 X 縮到系統匣不退出；系統匣選單「開啟／結束」。退出要走 `isQuitting` flag（`before-quit` 會設 true，autoUpdater 的 quitAndInstall 也走這條路）。
+- `app.setAppUserModelId()`：Windows 通知必需，勿移除。
+
+### 修正
+- `package.json` `build.files` 補上 `assets/*.png` —— 今日橫幅的仙俠少女圖（`assets/xianxia-girl-jade-scroll-1024x1280.png`）之前沒被打包，桌面版會破圖。
+- 版本號 0.1.2 → 0.2.0。
+
+### 給 Open Design 的補充紅線
+- 主題切換依賴 `html[data-theme]` 屬性選擇器，改版時**保留 `<head>` 的主題 inline script** 與 `.ic-moon`/`.ic-sun` 顯示規則。
+- 淺色主題只靠變數覆蓋；若新增元件請一律用 `var(--…)` 取色，不要寫死 `rgba(246,241,225,…)` 這類紙色常數，否則淺色模式會壞。
+- 淺色主題是第一版，紙色細節（硬編碼的紙色 tint、卡片 scrim）尚未逐一調整，OD 可在此基礎上打磨。
+
 ## 2026-07-11 — 修復資料儲存、更新發佈方式、webview 安全（by Claude Code）
 
 ### 1. 修 bug：打包後資料存不進去、更新會洗掉紀錄（`main.js`）
