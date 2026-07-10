@@ -14,3 +14,7 @@ desktop.ini
 # 相依套件與打包輸出
 node_modules/
 dist/
+
+# 安裝檔改由 GitHub Releases 發佈，不進版控
+updates/
+*.tmp

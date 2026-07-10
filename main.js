@@ -5,7 +5,11 @@ const fs = require('fs');
 
 let mainWindow;
 
-const dataDir = path.join(__dirname, 'data');
+// 打包後 __dirname 位於唯讀的 app.asar，寫檔會失敗、更新也會洗掉資料，
+// 因此正式版資料一律放 userData；開發模式維持專案內 data/ 方便直接檢視
+const dataDir = app.isPackaged
+  ? path.join(app.getPath('userData'), 'data')
+  : path.join(__dirname, 'data');
 const dataFile = path.join(dataDir, 'anime.json');
 
 function wireWindowStateEvents(win) {
@@ -99,7 +103,10 @@ function readAnimeList() {
 function writeAnimeList(animeList) {
   ensureDataFile();
   const safeList = Array.isArray(animeList) ? animeList : [];
-  fs.writeFileSync(dataFile, JSON.stringify({ animeList: safeList }, null, 2), 'utf8');
+  // 先寫暫存檔再改名，避免寫到一半當機毀掉整份資料
+  const tmpFile = `${dataFile}.tmp`;
+  fs.writeFileSync(tmpFile, JSON.stringify({ animeList: safeList }, null, 2), 'utf8');
+  fs.renameSync(tmpFile, dataFile);
   return safeList;
 }
 
@@ -126,6 +133,15 @@ function createMainWindow() {
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
   wireWindowStateEvents(mainWindow);
 }
+
+// 影音站廣告彈窗一律擋掉（含 webview 內的 window.open），
+// 並禁止導向 http/https 以外的協定；要開外部連結走 viewer:open-external
+app.on('web-contents-created', (_event, contents) => {
+  contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  contents.on('will-navigate', (event, url) => {
+    if (!/^https?:\/\//i.test(url)) event.preventDefault();
+  });
+});
 
 app.whenReady().then(() => {
   ensureDataFile();

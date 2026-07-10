@@ -17,7 +17,6 @@
       "preload.js",
       "index.html",
       "viewer.html",
-      "data/**/*",
       "*.png",
       "*.svg"
     ],
@@ -28,8 +27,9 @@
     },
     "publish": [
       {
-        "provider": "generic",
-        "url": "https://ayase0307.github.io/animetrack/updates/"
+        "provider": "github",
+        "owner": "ayase0307",
+        "repo": "animetrack"
       }
     ]
   },
