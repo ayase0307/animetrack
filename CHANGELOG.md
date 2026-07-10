@@ -12,6 +12,16 @@
 
 ---
 
+## 2026-07-11（第五批）— v0.3.1 修復視窗控制鈕、Supabase 設定遺失、滑鼠特效改版（by Claude Code）
+
+### 修 bug
+1. **視窗控制鈕回歸**（`index.html`）：主視窗是 `frame:false`，國漫改版時自訂標題列按鈕遺失了（viewer.html 一直有、index.html 沒有）。新增 `#winDrag` 拖曳區（頂部 26px，右側讓出 138px）＋ `.win-controls` 最小化／最大化／關閉鈕，**只在 `body.electron` 顯示**（`IS_ELECTRON` 時 JS 加 class），web 版完全隱藏。最大化狀態靠 `body.maximized` class 切換圖示（`onWindowMaximizedChanged`）。關閉鈕行為＝縮到系統匣（沿用 close-to-tray）。
+2. **Supabase 設定每次開啟都遺失**（`main.js`）：根因是**沒有單一實例鎖**——關窗縮到系統匣後再點捷徑會開出第二個實例，localStorage（LevelDB）被第一個實例鎖住讀不到 `sb_url`/`sb_key`，看起來像設定消失。加 `app.requestSingleInstanceLock()`，搶不到鎖就 `app.exit(0)`，`second-instance` 事件喚回原視窗。**這條鎖不可移除**。
+
+### 滑鼠特效改版（使用者從四個選項中選了「墨滴漣漪（點擊限定）」）
+- 移除整段「水墨拖尾鼠標特效」（跟隨圓環＋移動撒墨點），改為**點擊限定**的墨滴漣漪：mousedown 時兩圈玉青漣漪自指尖暈開（560ms），移動時零特效。淺色主題有對應色。觸控裝置與 reduced-motion 不啟用。
+- 舊的 `#ink-cursor`／`.ink-dot` CSS 與相關淺色覆蓋規則已全部移除，新 class 是 `.ink-ripple`。
+
 ## 2026-07-11（第四批）— v0.3.0 七項設計／功能：卷軸開場、卡片生滅、快速面板、求籤等（by Claude Code）
 
 僅動 `index.html`（＋版本號）。使用者核准全部七項提案：

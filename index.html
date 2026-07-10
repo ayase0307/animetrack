@@ -88,7 +88,6 @@ html[data-theme="light"] body::after{mix-blend-mode:multiply;opacity:.4;backgrou
 html[data-theme="light"] ::-webkit-scrollbar-thumb{background:rgba(43,37,25,.22)}
 html[data-theme="light"] ::-webkit-scrollbar-thumb:hover{background:rgba(43,37,25,.38)}
 html[data-theme="light"] .btn-secondary{background:rgba(38,32,22,.05)}
-html[data-theme="light"] #ink-cursor{mix-blend-mode:multiply}
 html[data-theme="light"] .screen.active{background:
   radial-gradient(900px 560px at 50% 30%,rgba(255,252,244,.55),transparent 70%),
   radial-gradient(1000px 520px at 18% 4%,rgba(31,122,99,.09),transparent 62%),
@@ -188,6 +187,17 @@ html[data-theme="light"] .ic-moon{display:none}
   .omikuji-tube.shake,.omikuji-card.reveal{animation:none}
   #scrollOpen{display:none!important}
 }
+
+/* ── 桌面版無邊框視窗：拖曳區＋視窗控制鈕（僅 body.electron 顯示） ── */
+#winDrag,.win-controls{display:none}
+body.electron #winDrag{display:block;position:fixed;top:0;left:0;right:138px;height:26px;z-index:99980;-webkit-app-region:drag}
+body.electron .win-controls{display:flex;position:fixed;top:0;right:0;z-index:99981;-webkit-app-region:no-drag}
+.win-controls button{width:46px;height:30px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--muted);cursor:pointer;transition:background .15s,color .15s}
+.win-controls button:hover{background:var(--surface-hover);color:var(--fg)}
+.win-controls .wc-close:hover{background:#b0432f;color:#fff}
+body.electron .app-header{padding-right:150px}
+body.maximized .ic-max{display:none}
+body:not(.maximized) .ic-restore{display:none}
 
 /* ── 水墨空狀態 ── */
 .empty-ink .empty-char{width:110px;height:110px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:3.4rem;font-weight:900;font-family:var(--font);color:var(--gold);border:2px solid var(--border-strong);border-radius:50% 48% 52% 50%/48% 52% 50% 50%;opacity:.75}
@@ -1246,6 +1256,17 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
 </div>
 
 <!-- SHORTCUTS HELP MODAL -->
+<!-- 桌面版視窗控制（web 版隱藏） -->
+<div id="winDrag" aria-hidden="true"></div>
+<div class="win-controls">
+  <button onclick="window.electronAPI&&electronAPI.minimizeWindow()" title="最小化" aria-label="最小化"><svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.4"><line x1="1" y1="6" x2="11" y2="6"/></svg></button>
+  <button onclick="window.electronAPI&&electronAPI.toggleMaximizeWindow()" title="最大化／還原" aria-label="最大化或還原">
+    <svg class="ic-max" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="1.5" width="9" height="9" rx="1"/></svg>
+    <svg class="ic-restore" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="7" height="7" rx="1"/><path d="M3.5 3.5v-2h7v7h-2"/></svg>
+  </button>
+  <button class="wc-close" onclick="window.electronAPI&&electronAPI.closeWindow()" title="關閉（縮到系統匣）" aria-label="關閉視窗"><svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.4"><line x1="1.5" y1="1.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="1.5" x2="1.5" y2="10.5"/></svg></button>
+</div>
+
 <!-- CTRL+K 快速面板 -->
 <div class="modal-overlay" id="quickOverlay">
   <div class="quick-panel">
@@ -1368,6 +1389,11 @@ const FALLBACK=n=>{
 };
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const IS_ELECTRON=!!window.electronAPI;
+if(IS_ELECTRON){
+  document.body.classList.add('electron');
+  electronAPI.isWindowMaximized().then(m=>document.body.classList.toggle('maximized',!!m));
+  electronAPI.onWindowMaximizedChanged(m=>document.body.classList.toggle('maximized',!!m));
+}
 const DRAFT_PREVIEW=!IS_ELECTRON&&window.self!==window.top&&!localStorage.getItem('sb_url')&&!localStorage.getItem('sb_key'); // 僅在 OD 預覽 iframe 內顯示範例，正式站走登入
 const SAMPLE_ANIME=[
   {id:'sample-1',name:'凡人修仙傳',link:'#',episode:123,totalEpisodes:null,imageUrl:'',updateDay:new Date().getDay().toString(),finished:false,addedDate:'2026-06-14T10:00:00.000Z',rating:5,notes:'',category:'tv'},
@@ -2380,59 +2406,32 @@ const _initTimeout=setTimeout(()=>{ if(!document.getElementById('appScreen').cla
 init().finally(()=>clearTimeout(_initTimeout));
 </script>
 
-<!-- ══════════ 水墨拖尾鼠標特效 ══════════ -->
+<!-- ══════════ 墨滴漣漪點擊特效（點擊限定，移動無拖尾） ══════════ -->
 <style>
-  #ink-cursor{position:fixed;left:0;top:0;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;
-    border:1.5px solid rgba(47,156,132,.5);
-    background:radial-gradient(circle at 50% 42%,rgba(47,156,132,.18),transparent 70%);
-    pointer-events:none;z-index:99999;mix-blend-mode:screen;
-    transition:width .18s,height .18s,border-color .18s,opacity .3s;will-change:transform}
-  #ink-cursor.tap{width:38px;height:38px;margin:-19px 0 0 -19px;border-color:rgba(216,189,114,.85)}
-  .ink-dot{position:fixed;border-radius:50% 50% 50% 60%;pointer-events:none;z-index:99998;will-change:transform,opacity}
-  @media (hover:none),(pointer:coarse){#ink-cursor{display:none}}
+  .ink-ripple{position:fixed;border-radius:50%;pointer-events:none;z-index:99998;
+    border:2px solid rgba(47,156,132,.45);
+    background:radial-gradient(circle,rgba(47,156,132,.15),transparent 65%);will-change:transform,opacity}
+  html[data-theme="light"] .ink-ripple{border-color:rgba(31,122,99,.5);background:radial-gradient(circle,rgba(31,122,99,.13),transparent 65%)}
 </style>
 <script>
 (function(){
-  if(matchMedia('(hover:none),(pointer:coarse)').matches) return;            // 觸控裝置不啟用
-  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;          // 尊重減少動態
-  var ring=document.createElement('div'); ring.id='ink-cursor'; document.body.appendChild(ring);
-  var mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my,last=0;
-  var INK=['rgba(47,156,132,','rgba(216,189,114,','rgba(181,70,52,']; // 玉青 / 金 / 朱砂
-  addEventListener('mousemove',function(e){
-    mx=e.clientX; my=e.clientY;
-    if(reduce) return;
-    var now=performance.now();
-    if(now-last>30){ last=now; spawn(e.clientX,e.clientY); }
+  if(matchMedia('(hover:none),(pointer:coarse)').matches) return;   // 觸控裝置不啟用
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return; // 尊重減少動態
+  addEventListener('mousedown',function(e){
+    for(var i=0;i<2;i++){
+      var s=10+i*6, el=document.createElement('div');
+      el.className='ink-ripple';
+      el.style.cssText+='left:'+(e.clientX-s/2)+'px;top:'+(e.clientY-s/2)+'px;width:'+s+'px;height:'+s+'px;opacity:.8';
+      document.body.appendChild(el);
+      (function(d,delay){
+        requestAnimationFrame(function(){
+          d.style.transition='transform '+(560+delay)+'ms cubic-bezier(.2,.7,.3,1) '+delay+'ms,opacity '+(560+delay)+'ms ease '+delay+'ms';
+          d.style.transform='scale(4.5)'; d.style.opacity='0';
+        });
+        setTimeout(function(){ d.remove(); },1400);
+      })(el,i*90);
+    }
   });
-  addEventListener('mousedown',function(){ ring.classList.add('tap'); spawnBurst(mx,my); });
-  addEventListener('mouseup',function(){ ring.classList.remove('tap'); });
-  function dot(x,y,size,color,dx,dy,life){
-    var d=document.createElement('div'); d.className='ink-dot';
-    d.style.cssText='left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;margin:'+(-size/2)+'px 0 0 '+(-size/2)+'px;'+
-      'background:radial-gradient(circle,'+color+'.55),'+color+'0) 72%);opacity:.72';
-    document.body.appendChild(d);
-    requestAnimationFrame(function(){
-      d.style.transition='transform '+life+'ms cubic-bezier(.2,.7,.3,1),opacity '+life+'ms ease';
-      d.style.transform='translate('+dx+'px,'+dy+'px) scale(.18)';
-      d.style.opacity='0';
-    });
-    setTimeout(function(){ d.remove(); },life+50);
-  }
-  function spawn(x,y){
-    var c=INK[Math.random()<0.82?0:(Math.random()<0.6?1:2)];
-    dot(x,y,4+Math.random()*7,c,(Math.random()-0.5)*14,6+Math.random()*12,900);
-  }
-  function spawnBurst(x,y){                                                   // 點擊時墨花綻開
-    for(var i=0;i<8;i++){var a=Math.PI*2*i/8,r=14+Math.random()*10;
-      dot(x,y,5+Math.random()*6,INK[i%2?1:0],Math.cos(a)*r,Math.sin(a)*r,700);}
-  }
-  function loop(){
-    var k=reduce?1:0.18;
-    rx+=(mx-rx)*k; ry+=(my-ry)*k;
-    ring.style.transform='translate('+rx+'px,'+ry+'px)';
-    requestAnimationFrame(loop);
-  }
-  loop();
 })();
 </script>
 </body>

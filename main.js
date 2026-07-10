@@ -7,6 +7,13 @@ let mainWindow;
 let tray = null;
 let isQuitting = false;
 
+// 單一實例鎖：關窗縮到系統匣後再點捷徑，喚回原視窗而不是開第二個實例
+// （第二個實例的 localStorage 會被鎖住，導致 Supabase 設定每次都讀不到）
+if (!app.requestSingleInstanceLock()) {
+  app.exit(0);
+}
+app.on('second-instance', () => showMainWindow());
+
 function showMainWindow() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   mainWindow.show();
