@@ -566,6 +566,36 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 @keyframes spiritIn{from{opacity:0}to{opacity:1}}
 @media (max-width:680px){.spirit-char{display:none}.today-banner{padding-right:18px}}
 @media (prefers-reduced-motion:reduce){.spirit-char{animation:spiritIn .4s ease both}.banner-mist::before,.banner-mist::after{animation:none}}
+/* +1 集數翻動＋墨水進度填充 */
+.anime-card.just-updated{animation:cardTap .55s ease}
+@keyframes cardTap{0%{box-shadow:0 0 0 0 rgba(216,189,114,.55)}100%{box-shadow:0 0 0 14px rgba(216,189,114,0)}}
+.anime-card.just-updated .ep-num b{animation:numPop .6s cubic-bezier(.2,1.5,.4,1)}
+@keyframes numPop{0%{transform:translateY(7px) scale(.6);opacity:0;color:#f2e2a6}55%{transform:translateY(-2px) scale(1.28);opacity:1}100%{transform:none}}
+.anime-card.just-updated .progress-fill{animation:inkPour .8s ease}
+@keyframes inkPour{0%{transform:scaleX(.5);transform-origin:left;filter:brightness(2.3) saturate(1.25)}60%{filter:brightness(1.4)}100%{transform:scaleX(1);filter:none}}
+/* 標記完結：朱砂印章落下＋墨漬擴散 */
+.seal-fx{position:fixed;inset:0;z-index:3000;pointer-events:none;display:grid;place-items:center}
+.seal-fx .seal-stamp{width:150px;height:150px;border-radius:14px;display:grid;place-items:center;font-family:var(--font);font-size:64px;font-weight:800;color:#fff8ef;
+  background:linear-gradient(135deg,#b54634,#8f2d22);border:4px solid rgba(255,240,235,.5);box-shadow:0 22px 60px -12px rgba(0,0,0,.72),inset 0 0 26px rgba(0,0,0,.32);
+  animation:sealDrop .5s cubic-bezier(.2,1.3,.35,1) both,sealOut .38s ease .82s forwards}
+.seal-fx .seal-ring{position:absolute;width:150px;height:150px;border-radius:16px;border:3px solid rgba(181,70,52,.6);animation:sealRing .95s ease-out forwards}
+@keyframes sealDrop{0%{transform:translateY(-46px) scale(1.7) rotate(-8deg);opacity:0}60%{opacity:1}100%{transform:none;opacity:1}}
+@keyframes sealOut{to{opacity:0;transform:scale(.9)}}
+@keyframes sealRing{0%{transform:scale(.82);opacity:.72}100%{transform:scale(2.5);opacity:0}}
+/* 追番週曆熱力圖 */
+.week-heat{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px}
+.heat-cell{position:relative;border:1px solid var(--border);border-radius:12px;padding:12px 6px;background:var(--hb,rgba(47,156,132,.12));color:var(--paper);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform .15s,box-shadow .15s;font-family:var(--font)}
+.heat-cell:hover{transform:translateY(-3px);box-shadow:0 10px 22px -14px rgba(0,0,0,.7)}
+.heat-cell.today{outline:2px solid var(--gold);outline-offset:1px}
+.heat-cell .heat-d{font-size:.82rem;color:var(--muted)}
+.heat-cell .heat-c{font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums}
+.heat-cell .heat-n{font-size:.68rem;color:var(--faint);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.heat-cell.empty{cursor:default;color:var(--muted);background:rgba(246,241,225,.045)}
+.heat-cell.empty:hover{transform:none;box-shadow:none}
+@media (max-width:560px){.week-heat{gap:5px}.heat-cell{padding:9px 3px}}
+/* 分頁水墨過場（View Transitions） */
+@media (prefers-reduced-motion:no-preference){::view-transition-old(root),::view-transition-new(root){animation-duration:.34s}}
+@media (prefers-reduced-motion:reduce){.anime-card.just-updated,.anime-card.just-updated .ep-num b,.anime-card.just-updated .progress-fill{animation:none}}
 .card-cover::after{
   content:'';
   position:absolute;
@@ -985,6 +1015,8 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
     <!-- TAB: STATS -->
     <div class="tab-content" id="statsTab">
       <div class="stats-grid" id="statsGrid"></div>
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>追番週曆 · 更新熱力</div>
+      <div class="week-heat" id="weekHeat"></div>
       <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>每週更新排程</div>
       <div class="week-grid" id="weekGrid"></div>
       <div class="data-actions">
@@ -1412,7 +1444,7 @@ function cardHTML(a,fin,drag){
        <button class="btn btn-success btn-sm btn-icon" onclick="incEp('${a.id}')" title="看完一集 +1" aria-label="看完一集"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
        <button class="btn btn-success btn-sm btn-icon" onclick="toggleFinished('${a.id}')" title="標記完結" aria-label="標記完結"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>`;
   return `
-  <div class="anime-card${fin?' is-finished':''}"${drag?` draggable="true" data-id="${a.id}"`:''}>
+  <div class="anime-card${fin?' is-finished':''}" data-id="${a.id}"${drag?' draggable="true"':''}>
     <div class="card-cover">
       <img src="${esc(img)}" alt="${esc(a.name)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(FALLBACK(a.name))}'">
       <div class="card-scrim"></div>
@@ -1451,23 +1483,54 @@ function renderStats(){
   ].map(([icon,val,lbl])=>`<div class="stat-card"><div class="stat-icon">${icon}</div><div class="stat-val">${val}</div><div class="stat-label">${lbl}</div></div>`).join('');
   const today=new Date().getDay().toString();
   const dayOrder=['1','2','3','4','5','6','0'], dayLbl=['一','二','三','四','五','六','日'];
+  const weekItemsByDay=dayOrder.map(d=>anime.filter(a=>!a.finished&&a.updateDay===d&&getCat(a.id)!=='watchlist'));
+  const maxDay=Math.max(1,...weekItemsByDay.map(items=>items.length));
+  document.getElementById('weekHeat').innerHTML=dayOrder.map((d,i)=>{
+    const items=weekItemsByDay[i];
+    const isT=d===today;
+    const level=items.length/maxDay;
+    const bg=items.length
+      ? `linear-gradient(135deg,rgba(47,156,132,${0.12+level*.32}),rgba(216,189,114,${0.06+level*.18}))`
+      : 'rgba(246,241,225,.045)';
+    const names=items.map(a=>a.name).join('、')||'本日暫無更新';
+    return `<button type="button" class="heat-cell${isT?' today':''}${items.length?'':' empty'}" style="--hb:${bg}" title="${esc(names)}" data-day="${d}" ${items.length?'':'disabled'}><span class="heat-d">週${dayLbl[i]}</span><span class="heat-c">${items.length}</span><span class="heat-n">${items[0]?esc(items[0].name):'—'}</span></button>`;
+  }).join('');
+  document.querySelectorAll('.heat-cell[data-day]:not(:disabled)').forEach(cell=>{
+    cell.onclick=()=>{ curFilter=cell.dataset.day; localStorage.setItem('v4_filter',curFilter); document.getElementById('filterSelect').value=curFilter; switchTab('track'); renderTrack(); };
+  });
+  document.getElementById('weekGrid').className='week-grid';
   document.getElementById('weekGrid').innerHTML=dayOrder.map((d,i)=>{
-    const items=anime.filter(a=>!a.finished&&a.updateDay===d&&getCat(a.id)!=='watchlist');
+    const items=weekItemsByDay[i];
     const isT=d===today;
     return `<div class="week-col"><div class="week-label${isT?' today':''}">週${dayLbl[i]}</div><div class="week-items">${items.map(a=>`<div class="week-item${isT?' today-item':''}" title="${esc(a.name)}">${esc(a.name)}</div>`).join('')||'<div class="week-item" style="opacity:.4">—</div>'}</div></div>`;
   }).join('');
 }
 
 // ═══════════════════ ACTIONS ═══════════════════
+function highlightUpdatedCard(id){
+  const card=Array.from(document.querySelectorAll('.anime-card[data-id]')).find(el=>el.dataset.id===String(id));
+  if(!card) return;
+  card.classList.remove('just-updated');
+  void card.offsetWidth;
+  card.classList.add('just-updated');
+  setTimeout(()=>card.classList.remove('just-updated'),980);
+}
+function showSealFx(){
+  const fx=document.createElement('div');
+  fx.className='seal-fx';
+  fx.innerHTML='<div class="seal-ring"></div><div class="seal-stamp">完</div>';
+  document.body.appendChild(fx);
+  setTimeout(()=>fx.remove(),1250);
+}
 async function incEp(id){
   const a=anime.find(x=>x.id===id); if(!a) return;
   const newEp=a.episode+1;
-  if(await dbUpdate(id,{episode:newEp})) toast('success',`《${a.name}》已更新至第 ${newEp} 集`);
+  if(await dbUpdate(id,{episode:newEp})){ highlightUpdatedCard(id); toast('success',`《${a.name}》已更新至第 ${newEp} 集`); }
 }
 async function toggleFinished(id){
   const a=anime.find(x=>x.id===id); if(!a) return;
   const nv=!a.finished;
-  if(await dbUpdate(id,{finished:nv})) toast('success',`《${a.name}》已標記為${nv?'完結':'追蹤中'}`);
+  if(await dbUpdate(id,{finished:nv})){ if(nv) showSealFx(); toast('success',`《${a.name}》已標記為${nv?'完結':'追蹤中'}`); }
 }
 function delAnime(id){
   const a=anime.find(x=>x.id===id); if(!a) return;
@@ -1515,6 +1578,7 @@ async function markWatched(){
   await dbUpdate(playingAnime.id,{episode:newEp});
   playingAnime.episode=newEp;
   document.getElementById('fbEp').textContent=`下一集：第 ${newEp+1} 集`;
+  highlightUpdatedCard(playingAnime.id);
   toast('success',`已記錄第 ${newEp} 集`);
 }
 function reopenTab(){ if(playingAnime&&playingAnime.link) window.open(playingAnime.link,'_blank'); }
@@ -1524,9 +1588,12 @@ let watchCtx=null, watchN=1;
 function openWatchModal(p){
   if(!p||!p.id) return;
   const a=anime.find(x=>x.id===p.id);
+  const lastUrl=/^https?:\/\//i.test(p.lastUrl||'')?p.lastUrl:'';
   watchCtx={ id:p.id, name:(a?a.name:p.title)||'未命名作品',
     cur:(p.currentEp!=null?Number(p.currentEp):(a?a.episode:0))||0,
-    cover:p.cover||(a?a.imageUrl:'')||'' };
+    cover:p.cover||(a?a.imageUrl:'')||'',
+    lastUrl,
+    originalUrl:(a?a.link:'')||'' };
   watchN=1;
   const ov=document.getElementById('watchOverlay'); ov.classList.remove('done');
   const img=document.getElementById('watchCover');
@@ -1548,16 +1615,23 @@ function closeWatch(){ document.getElementById('watchOverlay').classList.remove(
 async function watchConfirm(){
   if(!watchCtx) return;
   const newEp=watchCtx.cur+watchN;
-  if(await dbUpdate(watchCtx.id,{episode:newEp})){
+  const patch={episode:newEp};
+  if(watchCtx.lastUrl&&watchCtx.lastUrl!==watchCtx.originalUrl) patch.link=watchCtx.lastUrl;
+  if(await dbUpdate(watchCtx.id,patch)){
+    highlightUpdatedCard(watchCtx.id);
     toast('success',`《${watchCtx.name}》已更新至第 ${newEp} 集`);
+    if(patch.link) toast('info','已把觀看連結更新為剛才最後停留的網址');
     watchCtx.cur=newEp;
+    watchCtx.originalUrl=watchCtx.lastUrl||watchCtx.originalUrl;
     document.getElementById('watchFrom').textContent='第 '+newEp+' 集';
     document.getElementById('watchOverlay').classList.add('done');
   }
 }
 async function watchFinish(){
   if(!watchCtx) return;
-  if(await dbUpdate(watchCtx.id,{finished:true})){ toast('success',`《${watchCtx.name}》已標記完結`); closeWatch(); }
+  const patch={finished:true};
+  if(watchCtx.lastUrl&&watchCtx.lastUrl!==watchCtx.originalUrl) patch.link=watchCtx.lastUrl;
+  if(await dbUpdate(watchCtx.id,patch)){ showSealFx(); toast('success',`《${watchCtx.name}》已標記完結`); if(patch.link) toast('info','已同步最後觀看網址'); closeWatch(); }
 }
 function watchContinue(){ if(!watchCtx) return; const id=watchCtx.id; closeWatch(); openPlayer(id); }
 document.getElementById('watchMinus').addEventListener('click',()=>watchStep(-1));
@@ -1771,9 +1845,16 @@ function compressImg(file,maxW=800,q=0.82){
 
 // ═══════════════════ TABS / VIEW / SEARCH / SORT ═══════════════════
 function switchTab(name){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id===name+'Tab'));
-  window.scrollTo({top:0,behavior:'smooth'});
+  const paint=()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id===name+'Tab'));
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+  if(document.startViewTransition&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.startViewTransition(paint);
+  }else{
+    paint();
+  }
 }
 document.querySelectorAll('.tab-btn[data-tab]').forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
 document.querySelectorAll('.view-btn[data-view]').forEach(btn=>{
