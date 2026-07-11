@@ -12,7 +12,40 @@
 
 ---
 
-## 2026-07-11（第七批）— v0.4.1 自動更新改水墨卡片（by Claude Code）
+## 2026-07-12（第九批）— 併入 v0.5.0
+
+使用者選七項：山水視差背景（素材向）＋成就集印冊、守護獸互動深化、封卷典禮、評分墨韻圖、追番香火 streak、開坑儀式（純代碼）。年鑑未選。全部只動 `index.html`。
+
+- **多層山水視差**：`initParallax()` 依序建三層 `#paraFx .para-layer`（far/mid/near，`assets/bg-far/mid/near.png`），**逐張 probe、缺圖該層直接跳過**；層序用「先建 div 後補圖」保證不亂。滾動＋滑鼠 rAF 節流位移，reduced-motion 顯示靜態層不動。`z-index:-1` 靠 `.screen.active` 的 `isolation:isolate` 墊在內容下、背景上。淺色主題用 filter 反轉降飽和。**素材尚未生成，生成前此功能不可見**。
+- **評分墨韻圖**：統計頁「評分墨韻」區＝五星分布毛筆橫條（不規則圓角＋青金漸層）＋分類佔比 conic-gradient 墨環（mask 挖洞）＋圖例。`renderInkCharts()`。
+- **追番香火 streak**：`v4_streak`（localStorage，不動 DB）記 `{last,days}`，`bumpStreak()` 掛在 `highlightUpdatedCard`（覆蓋所有 +1 路徑）。**日期用本地 `_dkey()` 不用 toISOString（UTC+8 跨日會錯）**。斷火＝最後紀錄早於昨天。統計頁香爐 SVG＋煙霧三檔（1/7/30 天）。
+- **成就集印冊**：九枚篆刻印（初墨/小成/十全/百集/化蛟/化龍/知音/香火/問籤），`SEALS` 條件函數陣列，達成永久記入 `v4_seals`（刪資料不掉印）。新達成播 `sealEarn` 蓋印動畫＋toast。求籤旗標 `v4_omi_used` 設在 `openOmikuji`。
+- **封卷典禮**：`showSealFx` 改分流——reduced-motion 走原簡易蓋印；否則 `showFinishRite()` 全屏儀式：兩半卷軸 0.62s 閉合→0.72s 朱印「完」落下（SFX.seal 對準 0.7s）→金粉飄落→1.75s 淡出。z-index 6500。
+- **開坑儀式**：`submitEdit` 偵測分類 watchlist→非 watchlist，`playKaikeng()`：橫卷「開卷」scaleX 展開＋墨滴落下＋古琴聲，toast「開坑大吉！」。reduce 只 toast。
+- **守護獸互動深化**：(1) `spiritSay()` 墨泡吐字（+1 集觸發，2.2s）；(2) pointer 拖曳換位存 `v4_spirit_pos`（位移 <6px 視為點擊，維持原搖擺互動）；(3) 每 5 分鐘 25% 機率本尊複製體 `spirit-cross` 游過螢幕 9s（reduce／隱藏分頁不觸發）。
+- **移除統計頁熱力圖後遺**：無（第八批補充已清乾淨）。
+- 驗證：語法全過；Electron 截圖：統計頁三新區（墨韻條、墨環、香爐 5 天、印冊四紅五灰）、封卷典禮中段（閉合＋朱印＋金粉）、開坑橫卷、守護獸吐字「妙哉」。
+- 山水視差素材三張已到位並驗證（深色透明度調降為 .4/.42/.36 避免搶卡片；淺色 filter 反轉後呈宣紙淡墨效果極佳）。v0.5.0 全部內容至此完成，待發版。
+
+2026-07-12（第八批補充）
+
+- 使用者 Codex 素材四張已到位（spirit-koi/jiao/long、koi-top），Electron 截圖驗證：錦鯉池游動、漣漪、守護獸三階段與進化 toast 全通。錦鯉游向已修正（順時針軌道 `--face:180deg`、逆時針 `0deg`）。
+- **移除統計頁「追番週曆 · 更新熱力」**（使用者要求）：HTML 區塊、renderStats 內 weekHeat 渲染與點擊跳轉、`.week-heat`/`.heat-cell` 全部 CSS（含淺色覆寫）一併清除。每週更新排程（weekGrid）保留。
+
+2026-07-12（第八批）— v0.5.0（實作完成，待素材與發版）
+
+使用者選了六項：屏風摺頁過場、追番長卷、古琴音效包、節日彩蛋（純代碼四項）＋水墨守護獸養成、錦鯉池空狀態（素材向兩項）。全部只動 `index.html`。
+
+- **屏風摺頁過場**：分頁切換的 view-transition 改為四摺屏風開合（comb 形 clip-path 的 `screenFold`/`screenUnfold`）。**技術地雷：規則掛在 `html:not(.theme-vt)` 上**，主題切換的墨暈（`html.theme-vt`）機制不受影響，兩者不可互蓋。reduced-motion 時 JS 既有分流直接跳過 VT。
+- **追番長卷**：統計頁新增 `#scrollTl` 橫向手卷時間軸（入卷／完結事件、完結朱印帶星等、上下交錯、金軸卷邊）。事件取自 `addedDate`/`finishedDate`，`renderAll` 內呼叫 `renderScrollTl()`。支援拖曳與滾輪橫捲，渲染後自動捲到卷尾（最新）。
+- **古琴音效包**：Web Audio 純合成（無音檔）：+1 集古琴泛音（掛在 `highlightUpdatedCard`，覆蓋 incEp/markWatched/Ctrl+Enter）、蓋印鈍響＋磬聲餘韻（`showSealFx`）、求籤搖筒沙響（`drawOmikuji`，reduce 時不播）。header 新增「音」鈕（`#sfxBtn`，`aria-pressed`），**預設關閉**，`localStorage v4_sfx`。所有播放包 try/catch。
+- **節日彩蛋**：`initFestivalFx()` 依日期查 `FESTIVALS` 表（**農曆節日 2026–2031 寫死查表，到期補表**）：春節雙紅燈籠（連三天）、中秋滿月、端午龍舟 SVG 掠過下緣、七夕星河鵲橋。`#festFx` 疊層 z-index:2、pointer-events:none，reduced-motion 整層不建。每個節日當天第一次開啟會 toast 問候（`fest_greet_*`）。
+- **水墨守護獸**：`updateSpirit()`（`renderAll` 內呼叫）依累積集數升階：0 錦鯉→300 蛟→1000 龍（`SPIRIT_STAGES` 寫死）。素材 `assets/spirit-koi.png`/`spirit-jiao.png`/`spirit-long.png`，**用 Image probe，缺圖自動不顯示**。左下角浮動、點擊搖擺＋短語 toast、升階播金光進化動畫（localStorage `v4_spirit` 記上次階段，只在升階時報喜）。<820px 隱藏。
+- **錦鯉池空狀態**：追蹤列表空狀態時 `#trackEmpty` 前置 `.koi-pond`（三尾 `assets/koi-top.png` 以旋轉軌道游動、負 delay 錯開），**缺圖退回原本墨字「空」**（`has-pond` class 控制）。點水面起漣漪＋魚群加速散開 1.6s。
+- 驗證：三段 inline script `new Function` 語法檢查全過；Electron offscreen 截圖驗證統計頁長卷（深／淺色）、音效鈕開啟態、中秋滿月、春節燈籠。
+- **待辦**：使用者用 Codex 生成四張素材（spirit-koi/jiao/long、koi-top）丟進 `assets/` 即生效；錦鯉朝向（`--face`/`--flip`）可能需依實際素材方向微調。版本號尚未 bump（發版時一併 0.5.0）。
+
+2026-07-11（第七批）— v0.4.1 自動更新改水墨卡片（by Claude Code）
 
 使用者問「桌面版是否要手動雙擊安裝檔」——其實 v0.2.0 起 autoUpdater 就會在開啟 3 秒後查 GitHub Releases，只是用**原生系統對話框**，看起來不像 app 的一部分。本批把整個更新 UX 改成右下角水墨更新卡片。
 
