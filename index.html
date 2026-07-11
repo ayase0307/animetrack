@@ -997,6 +997,111 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
   #syncText{display:none}
   .form-card{padding:22px 18px}
 }
+
+/* ══════════ v0.4.0 ══════════ */
+/* ── 週曆分頁：七曜更新時刻 ── */
+.week-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+.wc-col{border:1px solid var(--border);border-radius:var(--r-lg);padding:10px 8px;display:flex;flex-direction:column;gap:9px;min-height:150px;
+  background:linear-gradient(145deg,rgba(246,241,225,.055),rgba(246,241,225,.02))}
+.wc-col.today{border-color:rgba(216,189,114,.55);background:linear-gradient(180deg,rgba(216,189,114,.10),rgba(47,156,132,.06));box-shadow:0 0 26px -12px rgba(216,189,114,.5)}
+.wc-head{text-align:center;font-family:var(--font);font-weight:800;font-size:.94rem;color:var(--muted);padding:3px 0 9px;border-bottom:1px solid var(--border)}
+.wc-col.today .wc-head{color:var(--gold)}
+.wc-head small{display:block;font-size:.64rem;font-weight:600;color:var(--cinnabar);letter-spacing:.3em;margin-top:2px}
+.wc-card{position:relative;border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--border);aspect-ratio:3/4;background:var(--surface-2);transition:transform .2s,border-color .2s,box-shadow .2s}
+.wc-card:hover{transform:translateY(-3px);border-color:rgba(216,189,114,.55);box-shadow:0 12px 26px -14px rgba(0,0,0,.6)}
+.wc-card img{width:100%;height:100%;object-fit:cover;display:block}
+.wc-info{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 7px;background:linear-gradient(180deg,transparent,rgba(10,10,8,.9));color:#f6f1e1}
+.wc-name{font-size:.74rem;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wc-ep{font-size:.66rem;color:rgba(246,241,225,.72);font-variant-numeric:tabular-nums}
+.wc-plus{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(9,10,8,.62);color:#fff;font-size:16px;line-height:1;cursor:pointer;opacity:0;transition:opacity .15s,background .15s;backdrop-filter:blur(4px)}
+.wc-card:hover .wc-plus{opacity:1}
+.wc-plus:hover{background:var(--jade)}
+.wc-none{color:var(--faint);font-size:.78rem;text-align:center;padding:16px 0}
+.wc-note{margin-top:14px;color:var(--faint);font-size:.8rem;text-align:center}
+@media(max-width:900px){.week-cal{grid-template-columns:repeat(2,1fr)}}
+
+/* ── 卡片翻面：點封面如折扇翻轉看詳情 ──
+   注意：.card-cover 有 overflow:hidden 會 flatten preserve-3d，
+   所以正反兩面各自 rotateY，不能整個容器翻 */
+.card-cover{perspective:1000px}
+.card-cover img{backface-visibility:hidden;transition:transform .62s cubic-bezier(.3,.7,.3,1)}
+.anime-card.flip .card-cover img{transform:rotateY(180deg)}
+.card-scrim,.card-badges,.cat-tag,.cover-seal,.change-img-btn{transition:opacity .3s}
+.anime-card.flip .card-scrim,.anime-card.flip .card-badges,.anime-card.flip .cat-tag,.anime-card.flip .cover-seal,.anime-card.flip .change-img-btn,.anime-card.flip .card-cover::before,.anime-card.flip .card-cover::after{opacity:0;pointer-events:none}
+.cover-back{position:absolute;inset:0;transform:rotateY(-180deg);backface-visibility:hidden;transition:transform .62s cubic-bezier(.3,.7,.3,1);background:var(--modal);padding:16px 15px;display:flex;flex-direction:column;gap:7px;font-size:.76rem;color:var(--muted);overflow:hidden;cursor:pointer}
+.anime-card.flip .cover-back{transform:rotateY(0)}
+.cover-back::after{content:'';position:absolute;inset:7px;border:1px solid rgba(216,189,114,.3);border-radius:8px;pointer-events:none}
+.cover-back h4{font-family:var(--font);font-size:.92rem;color:var(--fg);font-weight:800;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:2px}
+.cb-row{display:flex;justify-content:space-between;gap:8px;flex-shrink:0}
+.cb-row b{color:var(--fg);font-weight:700;text-align:right}
+.cb-row .cb-stars{color:var(--gold)}
+.cb-notes{flex:1;min-height:0;overflow:hidden;line-height:1.6;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.cb-hint{font-size:.64rem;color:var(--faint);text-align:center;flex-shrink:0}
+
+/* ── 磨墨入硯：+1 集時墨滴落入進度條 ── */
+.progress-bar{position:relative}
+.ink-drip{position:absolute;top:-30px;width:7px;height:11px;margin-left:-3px;pointer-events:none;
+  border-radius:50% 50% 52% 48%/62% 62% 38% 38%;
+  background:radial-gradient(circle at 42% 30%,var(--jade),#123d34);
+  animation:dripFall .45s cubic-bezier(.5,.05,.8,.5) forwards}
+@keyframes dripFall{0%{transform:translateY(0) scale(.65);opacity:0}25%{opacity:1}100%{transform:translateY(30px) scale(1);opacity:1}}
+.ink-splash{position:absolute;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;pointer-events:none;
+  border:2px solid rgba(47,156,132,.55);animation:splashOut .5s ease-out .4s both}
+@keyframes splashOut{0%{transform:scale(.2);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+
+/* ── 四季節氣氛圍層 ── */
+#seasonFx{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.sfx{position:absolute;top:-4vh;display:block;will-change:transform,opacity;animation:sfxFall linear infinite}
+.sfx.petal{width:10px;height:8px;border-radius:60% 40% 55% 45%/50% 60% 40% 50%;background:linear-gradient(135deg,rgba(233,160,180,.85),rgba(196,110,140,.6))}
+.sfx.leaf{width:11px;height:9px;border-radius:0 62% 0 62%;background:linear-gradient(135deg,rgba(202,140,58,.8),rgba(148,90,40,.55))}
+.sfx.snow{width:6px;height:6px;border-radius:50%;background:rgba(240,240,235,.8);filter:blur(.4px)}
+html[data-theme="light"] .sfx.snow{background:rgba(110,120,145,.5)}
+.sfx.firefly{width:5px;height:5px;border-radius:50%;top:auto;background:#ffe9a8;box-shadow:0 0 8px 2px rgba(255,220,130,.6);
+  animation:fireflyDrift ease-in-out infinite alternate,fireflyBlink 2.4s ease-in-out infinite}
+html[data-theme="light"] .sfx.firefly{background:#a8821e;box-shadow:0 0 7px 2px rgba(150,115,30,.4)}
+@keyframes sfxFall{
+  0%{transform:translateY(-5vh) translateX(0) rotate(0)}
+  25%{transform:translateY(26vh) translateX(26px) rotate(95deg)}
+  50%{transform:translateY(54vh) translateX(-14px) rotate(200deg)}
+  75%{transform:translateY(80vh) translateX(20px) rotate(300deg)}
+  100%{transform:translateY(108vh) translateX(-6px) rotate(390deg)}}
+@keyframes fireflyDrift{from{transform:translate(0,0)}to{transform:translate(46px,-64px)}}
+@keyframes fireflyBlink{0%,100%{opacity:.05}50%{opacity:.9}}
+
+@media (prefers-reduced-motion:reduce){
+  #seasonFx{display:none}
+  .card-cover img,.cover-back{transition:none}
+  .ink-drip,.ink-splash{display:none}
+}
+
+/* ── 宣紙主題打磨：國漫暗色覆蓋層在淺色下的對應版 ── */
+html[data-theme="light"] .auth-box,html[data-theme="light"] .form-card,html[data-theme="light"] .modal,html[data-theme="light"] .floating-bar,html[data-theme="light"] .toast{
+  background:linear-gradient(135deg,rgba(255,252,244,.92),rgba(244,237,220,.96));
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.6)}
+html[data-theme="light"] .app-header{background:linear-gradient(180deg,rgba(248,243,230,.96),rgba(248,243,230,.78));border-bottom-color:rgba(138,111,40,.3)}
+html[data-theme="light"] .tab-nav{background:rgba(237,230,212,.85);border-bottom-color:rgba(138,111,40,.22)}
+html[data-theme="light"] .tab-btn{color:rgba(43,37,25,.6)}
+html[data-theme="light"] .tab-btn.active{color:var(--fg)}
+html[data-theme="light"] .search-input,html[data-theme="light"] .ctrl-select,html[data-theme="light"] .form-control{background:rgba(255,252,244,.7);border-color:rgba(84,68,36,.26);color:var(--fg)}
+html[data-theme="light"] .toolbar{background:linear-gradient(135deg,rgba(255,252,244,.55),rgba(43,37,25,.03));border-color:rgba(84,68,36,.18)}
+html[data-theme="light"] .anime-card{background:linear-gradient(145deg,rgba(255,252,244,.92),rgba(246,240,226,.9));border-color:rgba(84,68,36,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+html[data-theme="light"] .anime-card::before{opacity:.22}
+html[data-theme="light"] .card-cover::after{background:linear-gradient(180deg,rgba(255,252,244,.03),rgba(43,37,25,.1)),radial-gradient(260px 72px at 50% 100%,rgba(31,122,99,.12),transparent 70%)}
+html[data-theme="light"] .sync-pill,html[data-theme="light"] .icon-btn,html[data-theme="light"] .user-btn,html[data-theme="light"] .view-toggle,html[data-theme="light"] .img-mode{background:rgba(43,37,25,.05);border-color:rgba(84,68,36,.2)}
+html[data-theme="light"] .chip{background:rgba(43,37,25,.045);border-color:rgba(84,68,36,.18)}
+html[data-theme="light"] .icon-btn:hover,html[data-theme="light"] .user-btn:hover,html[data-theme="light"] .btn-secondary:hover,html[data-theme="light"] .view-btn:hover,html[data-theme="light"] .chip:hover{background:rgba(43,37,25,.1);border-color:rgba(138,111,40,.5)}
+html[data-theme="light"] .summary-pill,html[data-theme="light"] .stat-card,html[data-theme="light"] .week-col,html[data-theme="light"] .setup-step,html[data-theme="light"] .wc-col{background:linear-gradient(145deg,rgba(255,252,244,.85),rgba(43,37,25,.035));border-color:rgba(84,68,36,.2)}
+html[data-theme="light"] .wc-col.today{background:linear-gradient(180deg,rgba(138,111,40,.12),rgba(31,122,99,.06));border-color:rgba(138,111,40,.5)}
+html[data-theme="light"] .progress-bar{background:rgba(43,37,25,.12)}
+html[data-theme="light"] .card-stars .star:not(.filled){color:rgba(43,37,25,.18)}
+html[data-theme="light"] kbd{background:rgba(43,37,25,.06);border-color:rgba(84,68,36,.35)}
+html[data-theme="light"] .empty{background:linear-gradient(145deg,rgba(255,252,244,.6),rgba(31,122,99,.05));border-color:rgba(138,111,40,.4)}
+html[data-theme="light"] .today-banner,html[data-theme="light"] .drag-hint{
+  background:radial-gradient(circle at 18% 50%,rgba(31,122,99,.1),transparent 22%),linear-gradient(110deg,rgba(138,111,40,.14),rgba(31,122,99,.07),rgba(255,252,244,.4));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+html[data-theme="light"] .today-banner::after{background:linear-gradient(90deg,rgba(255,252,244,.25),transparent 28% 72%,rgba(255,252,244,.3))}
+html[data-theme="light"] .heat-cell.empty{background:rgba(43,37,25,.04)}
+html[data-theme="light"] .btn-secondary{background:rgba(43,37,25,.05);color:var(--fg);border-color:rgba(84,68,36,.22)}
 </style>
 </head>
 <body>
@@ -1080,6 +1185,7 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
 
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="track"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>追蹤列表<span class="tab-badge" id="trackBadge">0</span></button>
+    <button class="tab-btn" data-tab="week"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>週曆</button>
     <button class="tab-btn" data-tab="finished"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>完結作品<span class="tab-badge" id="finishedBadge">0</span></button>
     <button class="tab-btn" data-tab="add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增動漫</button>
     <button class="tab-btn" data-tab="stats"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>統計</button>
@@ -1160,6 +1266,13 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
       </div>
     </div>
 
+    <!-- TAB: WEEK 週曆 -->
+    <div class="tab-content" id="weekTab">
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>七曜更新時刻 · 點封面直接觀看</div>
+      <div class="week-cal" id="weekCal"></div>
+      <div class="wc-note" id="weekNote" style="display:none"></div>
+    </div>
+
     <!-- TAB: ADD -->
     <div class="tab-content" id="addTab">
       <div class="form-card">
@@ -1213,8 +1326,10 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
       <div class="week-grid" id="weekGrid"></div>
       <div class="data-actions">
         <button class="btn btn-secondary" onclick="exportData()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>匯出備份</button>
-        <label class="btn btn-secondary" for="importFile"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>匯入資料</label>
+        <label class="btn btn-secondary" for="importFile" title="清除現有資料後匯入備份"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>匯入（覆蓋）</label>
         <input type="file" id="importFile" accept="application/json" style="display:none">
+        <label class="btn btn-secondary" for="importMergeFile" title="保留現有資料，只加入備份中沒有的作品"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/><line x1="19" y1="5" x2="19" y2="11" stroke-width="2.4"/><line x1="16" y1="8" x2="22" y2="8" stroke-width="2.4"/></svg>匯入（合併）</label>
+        <input type="file" id="importMergeFile" accept="application/json" style="display:none">
         <button class="btn btn-secondary" onclick="exportSummaryImg()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>生成總結圖</button>
       </div>
     </div>
@@ -1307,7 +1422,7 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
         <div class="kbd-row"><span>快速面板（搜尋／播放／+1）</span><div class="kbd-keys"><kbd>Ctrl</kbd><kbd>K</kbd></div></div>
         <div class="kbd-row"><span>聚焦搜尋框</span><div class="kbd-keys"><kbd>/</kbd></div></div>
         <div class="kbd-row"><span>切到「新增動漫」</span><div class="kbd-keys"><kbd>N</kbd></div></div>
-        <div class="kbd-row"><span>切換分頁</span><div class="kbd-keys"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></div></div>
+        <div class="kbd-row"><span>切換分頁</span><div class="kbd-keys"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd><kbd>5</kbd></div></div>
         <div class="kbd-row"><span>關閉視窗 / 浮動列</span><div class="kbd-keys"><kbd>Esc</kbd></div></div>
         <div class="kbd-row"><span>顯示這個說明</span><div class="kbd-keys"><kbd>?</kbd></div></div>
       </div>
@@ -1614,7 +1729,7 @@ function reorder(srcId,destId){
 }
 
 // ═══════════════════ RENDER ═══════════════════
-function renderAll(){ renderChips(); renderTrack(); renderFinished(); renderStats();
+function renderAll(){ renderChips(); renderTrack(); renderFinished(); renderStats(); renderWeekCal();
   document.getElementById('trackBadge').textContent=anime.filter(a=>!a.finished).length;
   document.getElementById('finishedBadge').textContent=anime.filter(a=>a.finished).length;
 }
@@ -1705,13 +1820,23 @@ function cardHTML(a,fin,drag){
        <button class="btn btn-success btn-sm btn-icon" onclick="toggleFinished('${a.id}')" title="標記完結" aria-label="標記完結"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>`;
   return `
   <div class="anime-card${fin?' is-finished':''}${!fin&&a.updateDay===String(new Date().getDay())?' is-today':''}" data-id="${a.id}"${drag?' draggable="true"':''}>
-    <div class="card-cover">
+    <div class="card-cover" onclick="flipCard(event)" title="點擊翻面看詳情">
       <img src="${esc(img)}" alt="${esc(a.name)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(FALLBACK(a.name))}'">
       <div class="card-scrim"></div>
       <div class="card-badges">${badges}</div>
       ${fin?`<div class="cover-seal" aria-hidden="true">完${a.finishedDate?`<i>${new Date(a.finishedDate).getFullYear()}</i>`:''}</div>`:''}
       ${catTag}
       <button class="change-img-btn" onclick="changeImg('${a.id}')" title="更換封面" aria-label="更換封面"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></button>
+      <div class="cover-back" aria-hidden="true">
+        <h4>${esc(a.name)}</h4>
+        <div class="cb-row"><span>${fin?'完結集數':'進度'}</span><b>${a.episode}${!fin&&a.totalEpisodes?' / '+a.totalEpisodes:''} 集</b></div>
+        <div class="cb-row"><span>分類</span><b>${CATS[cat]}</b></div>
+        ${!fin&&a.updateDay?`<div class="cb-row"><span>更新日</span><b>${DAYS[a.updateDay]}</b></div>`:''}
+        ${a.rating?`<div class="cb-row"><span>評分</span><b class="cb-stars">${'★'.repeat(a.rating)}</b></div>`:''}
+        <div class="cb-row"><span>${fin?'完結於':'加入於'}</span><b>${new Date((fin&&a.finishedDate)||a.addedDate).toLocaleDateString('zh-TW')}</b></div>
+        <div class="cb-notes">${a.notes?esc(a.notes):'<span style="color:var(--faint)">尚無備註</span>'}</div>
+        <div class="cb-hint">再點一下翻回封面</div>
+      </div>
     </div>
     <div class="card-body">
       <div class="card-title" title="${esc(a.name)}">${esc(a.name)}</div>
@@ -1767,7 +1892,36 @@ function renderStats(){
   }).join('');
 }
 
+// ═══════════════════ 週曆分頁 ═══════════════════
+function renderWeekCal(){
+  const el=document.getElementById('weekCal'); if(!el) return;
+  const today=new Date().getDay().toString();
+  const dayOrder=['1','2','3','4','5','6','0'], dayLbl=['一','二','三','四','五','六','日'];
+  el.innerHTML=dayOrder.map((d,i)=>{
+    const items=anime.filter(a=>!a.finished&&a.updateDay===d&&getCat(a.id)!=='watchlist');
+    return `<div class="wc-col${d===today?' today':''}">
+      <div class="wc-head">週${dayLbl[i]}${d===today?'<small>今日</small>':''}</div>
+      ${items.map(a=>`<div class="wc-card" onclick="openPlayer('${a.id}')" title="${esc(a.name)} · 點擊觀看">
+        <img src="${esc(a.imageUrl||FALLBACK(a.name))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${esc(FALLBACK(a.name))}'">
+        <button class="wc-plus" onclick="event.stopPropagation();incEp('${a.id}')" title="看完一集 +1" aria-label="看完一集">＋</button>
+        <div class="wc-info"><div class="wc-name">${esc(a.name)}</div><div class="wc-ep">第 ${a.episode} 集${a.totalEpisodes?' / '+a.totalEpisodes:''}</div></div>
+      </div>`).join('')||'<div class="wc-none">—</div>'}
+    </div>`;
+  }).join('');
+  const un=anime.filter(a=>!a.finished&&!a.updateDay&&getCat(a.id)!=='watchlist').length;
+  const note=document.getElementById('weekNote');
+  note.style.display=un?'block':'none';
+  if(un) note.textContent=`另有 ${un} 部追蹤中的作品未設定更新日，編輯作品即可排入週曆`;
+}
+
 // ═══════════════════ ACTIONS ═══════════════════
+// 點封面翻面看詳情（清單檢視、封面上的按鈕不觸發）
+function flipCard(e){
+  if(e.target.closest('.change-img-btn')) return;
+  const card=e.target.closest('.anime-card'); if(!card) return;
+  if(card.closest('.list-view')) return;
+  card.classList.toggle('flip');
+}
 function highlightUpdatedCard(id){
   const card=Array.from(document.querySelectorAll('.anime-card[data-id]')).find(el=>el.dataset.id===String(id));
   if(!card) return;
@@ -1775,6 +1929,16 @@ function highlightUpdatedCard(id){
   void card.offsetWidth;
   card.classList.add('just-updated');
   setTimeout(()=>card.classList.remove('just-updated'),980);
+  // 磨墨入硯：一滴墨自上方落入進度條末端，漣漪暈開
+  const bar=card.querySelector('.progress-bar');
+  if(bar&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+    const fill=bar.querySelector('.progress-fill');
+    const at=(fill&&fill.style.width)||'50%';
+    const drip=document.createElement('span'); drip.className='ink-drip'; drip.style.left=at;
+    const splash=document.createElement('span'); splash.className='ink-splash'; splash.style.left=at;
+    bar.append(drip,splash);
+    setTimeout(()=>{ drip.remove(); splash.remove(); },1100);
+  }
 }
 function showSealFx(){
   const fx=document.createElement('div');
@@ -2051,46 +2215,65 @@ function exportData(){
   const a=document.createElement('a'); a.href=url; a.download=`追劇清單_${new Date().toISOString().split('T')[0]}.json`;
   a.click(); URL.revokeObjectURL(url); toast('success','匯出成功！');
 }
-document.getElementById('importFile').addEventListener('change',async function(e){
-  const f=e.target.files[0]; if(!f) return;
+function importRow(item){
+  const r={
+    user_id:user.id,name:item.name||'未命名',link:item.link||item.animeLink||'',
+    episode:item.episode||0,total_episodes:item.totalEpisodes||item.total_episodes||null,
+    image_url:item.imageUrl||item.image_url||null,update_day:item.updateDay||item.update_day||null,
+    finished:item.finished||false,finished_date:item.finishedDate||item.finished_date||null,
+    added_date:item.addedDate||item.added_date||new Date().toISOString(),
+    rating:item.rating||null,notes:item.notes||null
+  };
+  if(dbHasCategory) r.category=item.category||'tv';
+  return r;
+}
+async function insertImported(data){
+  const rows=data.map(importRow), cats=data.map(item=>item.category||'tv');
+  const CHUNK=50; let inserted=[];
+  for(let i=0;i<rows.length;i+=CHUNK){
+    const {data:ins,error:insErr}=await sb.from('anime_list').insert(rows.slice(i,i+CHUNK)).select();
+    if(insErr){ toast('error','匯入失敗：'+insErr.message); setSyncing('offline'); return null; }
+    inserted=inserted.concat(ins);
+  }
+  inserted.forEach((row,i)=>{ catMap[row.id]=cats[i]||'tv'; }); saveCatMap();
+  return inserted;
+}
+function handleImportFile(file,mode,input){
   const reader=new FileReader();
   reader.onload=async ev=>{
     try{
       const data=JSON.parse(ev.target.result);
       if(!Array.isArray(data)) throw new Error('格式錯誤');
-      showConfirm(`確定要匯入 <strong>${data.length}</strong> 筆資料嗎？<br><small style="color:var(--danger)">這將清除現有所有資料！</small>`,'📥',async()=>{
-        setSyncing('syncing');
-        const {error:delErr}=await sb.from('anime_list').delete().eq('user_id',user.id);
-        if(delErr){ toast('error','清除舊資料失敗：'+delErr.message); setSyncing('offline'); return; }
-        const rows=data.map(item=>{
-          const r={
-            user_id:user.id,name:item.name||'未命名',link:item.link||item.animeLink||'',
-            episode:item.episode||0,total_episodes:item.totalEpisodes||item.total_episodes||null,
-            image_url:item.imageUrl||item.image_url||null,update_day:item.updateDay||item.update_day||null,
-            finished:item.finished||false,finished_date:item.finishedDate||item.finished_date||null,
-            added_date:item.addedDate||item.added_date||new Date().toISOString(),
-            rating:item.rating||null,notes:item.notes||null
-          };
-          if(dbHasCategory) r.category=item.category||'tv';
-          return r;
+      if(mode==='replace'){
+        showConfirm(`確定要匯入 <strong>${data.length}</strong> 筆資料嗎？<br><small style="color:var(--danger)">這將清除現有所有資料！</small>`,'📥',async()=>{
+          setSyncing('syncing');
+          const {error:delErr}=await sb.from('anime_list').delete().eq('user_id',user.id);
+          if(delErr){ toast('error','清除舊資料失敗：'+delErr.message); setSyncing('offline'); return; }
+          catMap={};
+          if(!await insertImported(data)) return;
+          customOrder=[]; saveOrder();
+          await loadData();
+          toast('success',`已成功匯入 ${data.length} 筆資料！`);
         });
-        const cats=data.map(item=>item.category||'tv');
-        const CHUNK=50; let inserted=[];
-        for(let i=0;i<rows.length;i+=CHUNK){
-          const {data:ins,error:insErr}=await sb.from('anime_list').insert(rows.slice(i,i+CHUNK)).select();
-          if(insErr){ toast('error','匯入失敗：'+insErr.message); setSyncing('offline'); return; }
-          inserted=inserted.concat(ins);
-        }
-        // restore categories by matching insertion order
-        catMap={}; inserted.forEach((row,i)=>{ catMap[row.id]=cats[i]||'tv'; }); saveCatMap();
-        customOrder=[]; saveOrder();
-        await loadData();
-        toast('success',`已成功匯入 ${data.length} 筆資料！`);
-      });
+      }else{
+        // 合併：同名（不分大小寫）視為已存在，略過；只加入清單裡沒有的作品
+        const existing=new Set(anime.map(a=>a.name.trim().toLowerCase()));
+        const fresh=data.filter(item=>item&&item.name&&!existing.has(String(item.name).trim().toLowerCase()));
+        const skipped=data.length-fresh.length;
+        if(!fresh.length){ toast('info','備份中的作品都已在清單裡，沒有可合併的項目'); return; }
+        showConfirm(`合併匯入 <strong>${fresh.length}</strong> 筆新作品${skipped?`<br><small style="color:var(--muted)">同名 ${skipped} 筆已存在，將略過</small>`:''}`,'📥',async()=>{
+          setSyncing('syncing');
+          if(!await insertImported(fresh)) return;
+          await loadData();
+          toast('success',`已合併匯入 ${fresh.length} 筆新作品！`);
+        });
+      }
     }catch(err){ toast('error','匯入失敗：'+err.message); }
   };
-  reader.readAsText(f); this.value='';
-});
+  reader.readAsText(file); input.value='';
+}
+document.getElementById('importFile').addEventListener('change',function(e){ const f=e.target.files[0]; if(f) handleImportFile(f,'replace',this); });
+document.getElementById('importMergeFile').addEventListener('change',function(e){ const f=e.target.files[0]; if(f) handleImportFile(f,'merge',this); });
 
 // ═══════════════════ IMAGE COMPRESSION ═══════════════════
 function compressImg(file,maxW=800,q=0.82){
@@ -2170,7 +2353,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='/'){ e.preventDefault(); focusSearch(); }
   else if(e.key==='?'){ toggleHelp(); }
   else if(e.key==='n'||e.key==='N'){ switchTab('add'); }
-  else if(e.key>='1'&&e.key<='4'){ switchTab(['track','finished','add','stats'][+e.key-1]); }
+  else if(e.key>='1'&&e.key<='5'){ switchTab(['track','week','finished','add','stats'][+e.key-1]); }
 });
 function focusSearch(){
   const finActive=document.getElementById('finishedTab').classList.contains('active');
@@ -2289,9 +2472,44 @@ const SHICHEN_LINES=['夜深了，再一集就好','萬籟俱寂，好夢勝追�
 function renderShichen(){
   const el=document.getElementById('shichen'); if(!el) return;
   const i=Math.floor(((new Date().getHours()+1)%24)/2);
-  el.textContent=SHICHEN_NAMES[i]+'時 · '+SHICHEN_LINES[i];
+  el.textContent=currentTerm()+' · '+SHICHEN_NAMES[i]+'時 · '+SHICHEN_LINES[i];
+}
+
+// ═══════════════════ 四季節氣氛圍 ═══════════════════
+// ponytail: 節氣用固定日期近似（實際每年差 ±1 天），氛圍顯示用途足夠，不引天文演算法
+const SOLAR_TERMS=[[1,5,'小寒'],[1,20,'大寒'],[2,4,'立春'],[2,19,'雨水'],[3,5,'驚蟄'],[3,20,'春分'],[4,5,'清明'],[4,20,'穀雨'],[5,5,'立夏'],[5,21,'小滿'],[6,6,'芒種'],[6,21,'夏至'],[7,7,'小暑'],[7,22,'大暑'],[8,7,'立秋'],[8,23,'處暑'],[9,7,'白露'],[9,23,'秋分'],[10,8,'寒露'],[10,23,'霜降'],[11,7,'立冬'],[11,22,'小雪'],[12,7,'大雪'],[12,21,'冬至']];
+function currentTerm(){
+  const now=new Date(),m=now.getMonth()+1,d=now.getDate();
+  let cur='冬至'; // 1/1–1/4 仍屬冬至
+  for(const [tm,td,name] of SOLAR_TERMS){ if(m>tm||(m===tm&&d>=td)) cur=name; }
+  return cur;
+}
+function initSeasonFx(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const m=new Date().getMonth()+1;
+  const kind=m>=3&&m<=5?'petal':m>=6&&m<=8?'firefly':m>=9&&m<=11?'leaf':'snow';
+  const wrap=document.createElement('div'); wrap.id='seasonFx'; wrap.setAttribute('aria-hidden','true');
+  const N=kind==='firefly'?7:12;
+  for(let i=0;i<N;i++){
+    const p=document.createElement('i'); p.className='sfx '+kind;
+    p.style.left=(Math.random()*100)+'vw';
+    p.style.scale=String(.7+Math.random()*.7);
+    if(kind==='firefly'){
+      p.style.bottom=(4+Math.random()*44)+'vh';
+      p.style.animationDuration=(7+Math.random()*8)+'s,'+(1.8+Math.random()*2.2)+'s';
+      p.style.animationDelay=(Math.random()*6)+'s,'+(Math.random()*2)+'s';
+    }else{
+      const dur=9+Math.random()*10;
+      p.style.animationDuration=dur+'s';
+      p.style.animationDelay=(-Math.random()*dur)+'s'; // 負延遲讓開場即散佈全畫面
+      p.style.opacity=String(.35+Math.random()*.5);
+    }
+    wrap.appendChild(p);
+  }
+  document.body.appendChild(wrap);
 }
 renderShichen(); setInterval(renderShichen,10*60*1000);
+initSeasonFx();
 
 // ═══════════════════ CTRL+K 快速面板 ═══════════════════
 let quickSel=0, quickItems=[];

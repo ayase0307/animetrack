@@ -12,6 +12,23 @@
 
 ---
 
+## 2026-07-11（第六批）— v0.4.0 週曆分頁、匯入合併、淺色打磨、四季節氣、卡片翻面、磨墨 +1（by Claude Code）
+
+僅動 `index.html`（＋版本號）。使用者選了六項：週更時間表、匯出匯入補強、淺色主題打磨＋設計提案三項（四季節氣、卡片翻面、磨墨入硯）。
+
+### 功能
+1. **週曆分頁**（新第 2 個分頁）：七欄（週一～週日）封面縮圖卡，今日欄描金高亮＋「今日」朱字。點卡片＝`openPlayer`，hover 出現「＋」＝`incEp`。想看清單與未設更新日者不排入；底部顯示未設定更新日的數量提示。快捷鍵 1–5 對應五個分頁（原 1–4），說明 modal 已更新。`renderWeekCal()` 掛在 `renderAll()`。
+2. **匯入合併模式**：原「匯入資料」改名「匯入（覆蓋）」，新增「匯入（合併）」——同名（不分大小寫）略過、只插入清單沒有的作品，不清除現有資料。共用 `importRow()`/`insertImported()`，覆蓋與合併兩條路都走它。
+
+### 設計
+3. **淺色主題打磨**：國漫暗色覆蓋層（header、tab-nav、卡片、toolbar、modal、toast、輸入框、statistic 卡、empty、today-banner…）全部補上 `html[data-theme="light"]` 對應版。**注意星星規則要用 `.star:not(.filled)`**，否則會蓋掉金色實星。
+4. **四季節氣氛圍**：`initSeasonFx()` 依月份生成粒子層 `#seasonFx`（春櫻瓣／夏螢火／秋葉／冬雪，z-index:2、pointer-events:none）。落下粒子用負 animation-delay 讓開場即散佈。時辰問候前面加當前節氣（`SOLAR_TERMS` 固定日期近似，±1 天誤差可接受）。**`SOLAR_TERMS` 宣告在 `renderShichen()` 呼叫之前執行——別把呼叫移回宣告前，會踩 TDZ**。reduced-motion 整層不生成。
+5. **卡片翻面**：點封面翻到背面（名稱、進度、分類、更新日、評分、加入/完結日、備註），再點翻回。**技術地雷：`.card-cover` 有 `overflow:hidden` 會 flatten `preserve-3d`，所以是 img 與 `.cover-back` 各自 rotateY，不是翻整個容器**。清單檢視不翻（JS 擋）；封面上的換圖按鈕不觸發翻面。
+6. **磨墨入硯**：`highlightUpdatedCard()` 在 +1 時於進度條末端（依 `progress-fill` 寬度定位）落一滴玉青墨滴＋漣漪（`.ink-drip`/`.ink-splash`），與既有 `just-updated` 動畫疊加。`.progress-bar` 因此加了 `position:relative`。
+
+### 驗證
+- 用本機靜態伺服器＋iframe（觸發 `DRAFT_PREVIEW` 範例資料）以 Playwright 實測：週曆七欄／今日高亮、翻面正反、墨滴漣漪、淺色主題全頁截圖，均通過；inline script 語法檢查通過。
+
 ## 2026-07-11（第五批）— v0.3.1 修復視窗控制鈕、Supabase 設定遺失、滑鼠特效改版（by Claude Code）
 
 ### 修 bug
