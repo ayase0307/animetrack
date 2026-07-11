@@ -12,6 +12,16 @@
 
 ---
 
+## 2026-07-11（第七批）— v0.4.1 自動更新改水墨卡片（by Claude Code）
+
+使用者問「桌面版是否要手動雙擊安裝檔」——其實 v0.2.0 起 autoUpdater 就會在開啟 3 秒後查 GitHub Releases，只是用**原生系統對話框**，看起來不像 app 的一部分。本批把整個更新 UX 改成右下角水墨更新卡片。
+
+1. **main.js**：`setupAutoUpdate()` 移除 `dialog.showMessageBox`／`showErrorBox`，改為 `mainWindow.webContents.send('update:event',{type,...})` 轉發四種事件（`available`／`progress`／`downloaded`／`error`），新增 `ipcMain.handle('update:download'/'update:install')`。`quitAndInstall` 會觸發 before-quit → `isQuitting=true`，不會被 close-to-tray 攔下（沿用既有機制，勿改）。
+2. **preload.js**：暴露 `downloadUpdate()`、`installUpdate()`、`onUpdateEvent(cb)`（回傳解除函式）。
+3. **index.html**：`#updateCard` 右下角固定卡片（金框、朱印「新」旋 -6°、`updateIn` 浮入動畫），三狀態：發現新版（稍後／下載更新）→ 下載中（**重用毛筆 `.progress-bar`/`.progress-fill`**＋百分比）→ 已備妥（稍後／重啟安裝）。錯誤走既有 `toast('error')`。淺色主題有對應覆蓋。「稍後」關卡片即可——electron-updater `autoInstallOnAppQuit` 預設 true，下載完的更新退出時會自動裝，卡片文案有說明。
+4. 驗證：三個檔案語法檢查通過；用 `npx electron` 載入 index.html 注入三種狀態截圖（深色 available/downloading、淺色 downloaded）比對風格。**測試坑：`show:false` 或從未顯示的視窗 `capturePage` 只會回首繪畫格**，要 `show:true` 才抓得到 DOM 變更。
+5. 注意：v0.4.0（含）以前的舊版收到 0.4.1 更新時，仍會用**舊的原生對話框**下載安裝；裝上 0.4.1 之後的更新才會看到水墨卡片。
+
 ## 2026-07-11（第六批）— v0.4.0 週曆分頁、匯入合併、淺色打磨、四季節氣、卡片翻面、磨墨 +1（by Claude Code）
 
 僅動 `index.html`（＋版本號）。使用者選了六項：週更時間表、匯出匯入補強、淺色主題打磨＋設計提案三項（四季節氣、卡片翻面、磨墨入硯）。

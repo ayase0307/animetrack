@@ -1102,6 +1102,31 @@ html[data-theme="light"] .today-banner,html[data-theme="light"] .drag-hint{
 html[data-theme="light"] .today-banner::after{background:linear-gradient(90deg,rgba(255,252,244,.25),transparent 28% 72%,rgba(255,252,244,.3))}
 html[data-theme="light"] .heat-cell.empty{background:rgba(43,37,25,.04)}
 html[data-theme="light"] .btn-secondary{background:rgba(43,37,25,.05);color:var(--fg);border-color:rgba(84,68,36,.22)}
+
+/* ── 更新卡片：桌面版自動更新的水墨通知（取代原生對話框） ── */
+.update-card{position:fixed;right:20px;bottom:20px;z-index:2500;width:308px;padding:16px 18px;border-radius:var(--r-lg);
+  border:1px solid rgba(216,189,114,.45);
+  background:linear-gradient(135deg,rgba(246,241,225,.105),rgba(246,241,225,.035)),rgba(23,24,20,.94);
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(246,241,225,.08);
+  display:flex;flex-direction:column;gap:11px;
+  animation:updateIn .55s cubic-bezier(.2,.9,.3,1.15) both}
+.update-card[hidden]{display:none}
+@keyframes updateIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+html[data-theme="light"] .update-card{background:linear-gradient(135deg,rgba(255,252,244,.94),rgba(244,237,220,.97));border-color:rgba(138,111,40,.5);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.6)}
+.update-head{display:flex;align-items:center;gap:11px}
+.update-seal{width:36px;height:36px;flex-shrink:0;border-radius:9px;display:grid;place-items:center;
+  font-family:var(--font);font-weight:800;font-size:17px;color:#fff3ea;transform:rotate(-6deg);
+  background:linear-gradient(140deg,rgba(181,70,52,.95),rgba(143,45,34,.95));
+  border:2px solid rgba(255,240,235,.4);box-shadow:0 6px 14px -6px rgba(0,0,0,.55),inset 0 0 8px rgba(0,0,0,.28)}
+.update-title{font-family:var(--font);font-weight:800;font-size:.98rem;color:var(--fg)}
+.update-sub{font-size:.8rem;color:var(--muted);line-height:1.55}
+.update-prog{display:none;align-items:center;gap:10px}
+.update-card.downloading .update-prog{display:flex}
+.update-card.downloading .update-actions{display:none}
+.update-prog .progress-bar{flex:1;margin:0}
+.update-pct{font-size:.76rem;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;min-width:38px;text-align:right}
+.update-actions{display:flex;gap:8px;justify-content:flex-end}
+@media (prefers-reduced-motion:reduce){.update-card{animation:none}}
 </style>
 </head>
 <body>
@@ -1472,6 +1497,25 @@ html[data-theme="light"] .btn-secondary{background:rgba(43,37,25,.05);color:var(
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- 更新卡片（桌面版 autoUpdater 事件驅動） -->
+<div class="update-card" id="updateCard" hidden role="status">
+  <div class="update-head">
+    <div class="update-seal" aria-hidden="true">新</div>
+    <div>
+      <div class="update-title" id="updTitle">新卷已至</div>
+      <div class="update-sub" id="updSub"></div>
+    </div>
+  </div>
+  <div class="update-prog">
+    <div class="progress-bar"><div class="progress-fill" id="updFill" style="width:0%"></div></div>
+    <span class="update-pct" id="updPct">0%</span>
+  </div>
+  <div class="update-actions">
+    <button class="btn btn-secondary btn-sm" id="updLater">稍後</button>
+    <button class="btn btn-primary btn-sm" id="updGo">下載更新</button>
+  </div>
+</div>
 
 <script>
 // ═══════════════════ STATE ═══════════════════
@@ -2073,6 +2117,41 @@ document.getElementById('watchConfirmBtn').addEventListener('click',watchConfirm
 document.getElementById('watchFinishBtn').addEventListener('click',watchFinish);
 document.getElementById('watchContinueBtn').addEventListener('click',watchContinue);
 document.getElementById('watchOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeWatch(); });
+
+// ═══════════════════ 桌面版自動更新（水墨卡片，取代原生對話框） ═══════════════════
+if(IS_ELECTRON&&window.electronAPI.onUpdateEvent){
+  const card=document.getElementById('updateCard');
+  const uTitle=document.getElementById('updTitle'), uSub=document.getElementById('updSub');
+  const uGo=document.getElementById('updGo');
+  let updPhase='idle';
+  document.getElementById('updLater').onclick=()=>{ card.hidden=true; };
+  uGo.onclick=()=>{
+    if(updPhase==='available'){ card.classList.add('downloading'); uSub.textContent='正在取回新卷，請稍候…'; electronAPI.downloadUpdate(); }
+    else if(updPhase==='downloaded'){ electronAPI.installUpdate(); }
+  };
+  electronAPI.onUpdateEvent(ev=>{
+    if(ev.type==='available'){
+      updPhase='available';
+      uTitle.textContent='新卷已至 · v'+ev.version;
+      uSub.textContent='研墨已畢，要現在下載新版本嗎？';
+      uGo.textContent='下載更新';
+      card.classList.remove('downloading'); card.hidden=false;
+    }else if(ev.type==='progress'){
+      document.getElementById('updFill').style.width=(ev.percent||0)+'%';
+      document.getElementById('updPct').textContent=(ev.percent||0)+'%';
+    }else if(ev.type==='downloaded'){
+      updPhase='downloaded';
+      uTitle.textContent='新卷已備妥';
+      uSub.textContent='重新啟動即可換上新版；選「稍後」則下次關閉程式時自動安裝。';
+      uGo.textContent='重啟安裝';
+      card.classList.remove('downloading'); card.hidden=false;
+    }else if(ev.type==='error'){
+      updPhase='idle';
+      card.hidden=true; card.classList.remove('downloading');
+      toast('error','更新失敗：'+(ev.message||'未知錯誤'));
+    }
+  });
+}
 
 if(IS_ELECTRON){
   window.electronAPI.onViewerClosed(p=>openWatchModal(p));

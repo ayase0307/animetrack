@@ -11,6 +11,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isWindowMaximized: () => ipcRenderer.invoke('window:is-maximized'),
   loadAnimeList: () => ipcRenderer.invoke('anime:load'),
   saveAnimeList: (animeList) => ipcRenderer.invoke('anime:save', animeList),
+  downloadUpdate: () => ipcRenderer.invoke('update:download'),
+  installUpdate: () => ipcRenderer.invoke('update:install'),
+  onUpdateEvent: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on('update:event', listener);
+    return () => ipcRenderer.removeListener('update:event', listener);
+  },
   onWindowMaximizedChanged: (callback) => {
     const listener = (_event, isMaximized) => callback(isMaximized);
     ipcRenderer.on('window:maximized-changed', listener);

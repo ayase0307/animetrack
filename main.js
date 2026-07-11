@@ -47,58 +47,31 @@ function wireWindowStateEvents(win) {
   win.on('unmaximize', sendMaximizedState);
 }
 
+// 更新流程改由前端水墨卡片呈現（取代原生系統對話框），
+// main 只負責轉發 electron-updater 事件與接收下載/安裝指令
 function setupAutoUpdate() {
   if (!app.isPackaged) return;
 
   autoUpdater.autoDownload = false;
 
-  autoUpdater.on('update-available', async (info) => {
+  const send = (type, payload = {}) => {
     if (!mainWindow || mainWindow.isDestroyed()) return;
+    mainWindow.webContents.send('update:event', { type, ...payload });
+  };
 
-    const result = await dialog.showMessageBox(mainWindow, {
-      type: 'info',
-      title: '發現新版本',
-      message: `追劇小幫手 ${info.version} 已可更新。`,
-      detail: '要現在下載更新檔嗎？下載完成後會再詢問是否重新啟動安裝。',
-      buttons: ['稍後再說', '下載更新'],
-      defaultId: 1,
-      cancelId: 0,
-      noLink: true
-    });
-
-    if (result.response === 1) {
-      autoUpdater.downloadUpdate().catch((error) => {
-        dialog.showErrorBox('更新下載失敗', error.message);
-      });
-    }
-  });
-
-  autoUpdater.on('update-not-available', () => {
-    console.log('No updates available.');
-  });
-
-  autoUpdater.on('update-downloaded', async () => {
-    if (!mainWindow || mainWindow.isDestroyed()) return;
-
-    const result = await dialog.showMessageBox(mainWindow, {
-      type: 'question',
-      title: '更新已下載',
-      message: '新版追劇小幫手已下載完成。',
-      detail: '要現在重新啟動並安裝更新嗎？',
-      buttons: ['稍後', '重新啟動安裝'],
-      defaultId: 1,
-      cancelId: 0,
-      noLink: true
-    });
-
-    if (result.response === 1) {
-      autoUpdater.quitAndInstall(false, true);
-    }
-  });
-
+  autoUpdater.on('update-available', (info) => send('available', { version: info.version }));
+  autoUpdater.on('download-progress', (p) => send('progress', { percent: Math.round(p.percent || 0) }));
+  autoUpdater.on('update-downloaded', () => send('downloaded'));
   autoUpdater.on('error', (error) => {
     console.error('Auto update failed:', error);
+    send('error', { message: error.message });
   });
+
+  ipcMain.handle('update:download', () => {
+    autoUpdater.downloadUpdate().catch((error) => send('error', { message: error.message }));
+  });
+  // quitAndInstall 會觸發 before-quit，isQuitting 因此設 true，不會被 close-to-tray 攔下
+  ipcMain.handle('update:install', () => autoUpdater.quitAndInstall(false, true));
 
   setTimeout(() => {
     autoUpdater.checkForUpdates().catch((error) => {
