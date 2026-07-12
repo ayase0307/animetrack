@@ -12,6 +12,52 @@
 
 ---
 
+## 2026-07-12（第十三批）— 星等篩選＋手動置頂（併第十～十二批發 v0.5.1）
+
+只動 `index.html`（＋版本號）。本批與第十～十二批一起發 v0.5.1（十、十一批動過 main.js/preload.js，需重跑 electron-builder）。
+
+- **星等篩選**：追蹤列表與完結作品工具列各加 `#starSelect`／`#finStarSelect`（全部星等／只看五星／四星以上／三星以上／未評分），共用 `starMatch(a,v)`（`'0'`＝未評分）。持久化 `v4_star`／`v4_finstar`。今日更新橫幅的「無篩選」條件加上 `curStar==='all'`。
+- **手動置頂**：置頂狀態存 localStorage `pin_<user.id>`（比照 catMap/customOrder，**不動 DB schema**，跨裝置不同步是已知取捨）。`getTrackList` 在 `sortList` 之後做穩定排序 `isPinned(b)-isPinned(a)`——任何排序模式（含自訂拖曳）置頂都在最前、組內維持原順序。UI：封面左下圖釘鈕 `.pin-btn`（hover 顯示、置頂常駐金色，沿用 `.change-img-btn` 樣式模式；清單檢視隱藏）＋封面左上金色「置頂」徽章（走既有 `.card-badges` 機制）。`flipCard` 排除 `.pin-btn`；`dbDelete` 同步清 pinSet。
+- 驗證：inline JS `node --check` 全過；Electron＋DRAFT_PREVIEW 測試 15/15（星等各檔位卡數、置頂排序／徽章／還原、完結頁篩選與空狀態文案）＋截圖比對。
+
+## 2026-07-12（第十二批）— 守護獸功能化＋季度新番（未發版）
+
+只動 `index.html`（本批**不動 main.js／preload.js**，不新增發版打包需求）。
+
+- **靈符扇形選單**：點守護獸改為展開 5～6 張符紙（`.spirit-fu`，fixed 定位、JS 算半圓座標並夾邊）：「追」快速 +1 最近播放（`v4_last_played`）、「籤」求籤、「尋」搜尋（Ctrl+K）、「計」統計分頁、「語」聊兩句（原點擊台詞彩蛋移到這）、「備」立即備份（僅桌面版，直呼 `writeBackup`）。睡眠中點擊維持原「被吵醒」台詞、不開選單；貼近頂端往下開扇；外點／Escape 關閉。
+- **通知使者**：`spiritLetter(txt,act)` 守護獸叼「信」徽章（`.spirit-letter`，pointerdown stopPropagation 避免觸發拖曳），點擊拆閱→吐字泡＋執行動作；佇列多封依序掛上。接線：`notifyToday`（改為線上版也走，Electron 才發原生通知；點信跳追蹤列表）、`autoBackup` 成功後叼信、自動更新 available 時吐字（原水墨更新卡**保留不動**）。守護獸不在（缺圖／窄螢幕隱藏）3 秒後退回 toast。
+- **拖曳餵番**：`spiritFeedCheck`——把守護獸拖放到卡片上＝該番 +1（`elementsFromPoint` 命中 `.anime-card[data-id]`，排除守護獸自身）。完結番不吃、想看分類回「這部還沒開坑呢」、睡眠中回「明天再吃」。
+- **親密度**：`v4_spirit_bond` 累積（選單動作 +1、餵番 +3、每日首開 +2，日增上限 10，`v4_bond_today` 記量）。四階：初識/相熟(40)/知音(120)/莫逆(300)；升階 toast＋吐字；title 顯示親密度；台詞池隨階擴充（`BOND_LINES`）；知音以上開選單 20% 機率翻滾（`spirit-flip`，reduced-motion 停用）。
+- **季度新番一覽**：頁首新增「新」鈕，`openSeason()` 拉 Bangumi `GET /calendar`（記憶體快取），依放送日分組、**今日排最前**（高亮玉色）。每項封面／中文名／放送日＋「收入想看」→ `dbAdd`（想看分類、帶封面與更新日 `weekday.id%7`）；已在片單（比對 name/name_cn）顯示停用。日曆 API 無 `eps` 欄位，總集數留空。Escape／點背景關閉。
+- 驗證：三段 inline script 語法全過；Electron iframe 測試（DRAFT_PREVIEW 樣本資料）截圖確認：扇形選單五符展開、語符吐字、叼信拆閱、親密度 title、想看卡婉拒餵食、新番面板（今日排序＋撞名停用）、Escape 全關，零 console 錯誤。真 Bangumi API 已實測回 7 天資料。
+- 測試坑（勿再犯）：`show:false` 的 BrowserWindow 裡 CSS `animation` 不推進，`.modal-overlay` 的 `fadeIn` 會凍在 opacity 0——截圖驗 modal 必須 `show:true`（`backgroundThrottling:false` 也救不了）；iframe 內頂層 `let/const`（`anime`、`_seasonData`）非 window 屬性，要用 `contentWindow.eval` 才碰得到。
+
+---
+
+## 2026-07-12（第十一批）— 實用補強＋趣味加值（未發版）
+
+六項：自動備份、Bangumi 一鍵同步、全域快捷鍵 +1（動 main.js＋preload.js）＋每日一筆、卡片墨痕等級、守護獸睡眠（index.html）。
+
+- **自動備份（桌面版）**：`renderAll` 內 `autoBackup()`（`v4_backup_date` 日期守門，每日一次）→ IPC `backup:write` 寫 `userData/backups/anime-backup-YYYY-MM-DD.json`，main.js 輪替保留 14 份。統計頁底部 `#backupLine` 顯示上次備份＋「開啟備份資料夾」（`backup:open-dir`／shell.openPath）。payload 上限 50MB 防呆。
+- **全域快捷鍵 +1（桌面版）**：main.js 註冊 `Ctrl+Alt+=`（try/catch，被占用靜默跳過；will-quit unregisterAll）→ `global:inc` → renderer 對 `v4_last_played`（launchUrl 時記錄）的未完結作品 incEp。preload 暴露 `onGlobalInc`。
+- **Bangumi 一鍵同步**：共用 `bgmFindInfo(name)`（search top1→subject 詳情→總集數＋放送星期）。編輯 modal 總集數 label 旁「同步 Bangumi」鈕填 editTotal/editDay；統計頁「同步 Bangumi 集數」批次跑追蹤中（排除想看），每部間隔 400ms 節流，只在總集數有變時 dbUpdate，結束 toast 統計。
+- **每日一筆**：header 新增 `#dailyLine`（36 句古風短句庫，依年中日輪換，點擊隨機抽），<1180px 隱藏。
+- **卡片墨痕等級**：cardHTML 依 episode 加 class——50 集 `ink-t1` 泛青框、100 集 `ink-t2` 鎏金框、200 集 `ink-t3` 金框＋右上朱紋角飾。純 CSS，深淺主題都有。
+- **守護獸睡眠**：23:00–07:00（子～卯時）`#spiritPet.sleeping`——浮動變 12s、降飽和、`::after` 冒 Zzz；點擊吵醒改抽 `SPIRIT_SLEEP_LINES` 不悅語。`spiritSleepCheck` 每 5 分鐘＋updateSpirit 後各跑一次。
+- 驗證：main/preload `node --check`＋inline script 全過；截圖：墨痕分級正確（123→t2、38→無、169→t2）、每日一筆、睡眠 Zzz、編輯 modal 同步鈕、統計頁備份列。自動備份與全域快捷鍵的 IPC 端需真桌面版驗（offscreen 測試無 preload）。
+
+## 2026-07-12（第十批）— 連結基礎功能優化（未發版）
+
+使用者痛點：連結都是單一網站、每部手動貼。四項全選，只動 `index.html`。
+
+- **link 欄位新相容格式**（不動 DB schema，TEXT 存多行）：單一網址（舊資料照舊）或多行「`站名|網址`」＝多來源；網址中 `{ep}` 播放時替換成「下一集」集數（`episode+1`）。核心：`parseLinks(a)`／`resolveLink(url,a)`。
+- **openPlayer 重構**：拆出 `launchUrl(a,url)`（Electron viewer／web window.open 共用）。多來源→`showSourcePicker` 水墨小選單（顯示站名＋網域，{ep} 連結顯示「第 N 集」）；無連結→改走預設搜尋站。
+- **預設搜尋站**：新增分頁底部「預設搜尋站（全域・選填）」輸入框，模板含 `{name}`，存 `localStorage v4_search_tpl`。無連結作品按播放＝用作品名搜尋，不再只報錯。
+- **貼上網址智慧辨識**：`attachLinkSmart` 掛在 addLink/editLink（已改 textarea 多行）。貼上網址即顯示網域；path/query 末位數字（1–2999 才視為集數）建議一鍵「換成 {ep} 模板」。openEdit 填值後 dispatch input 刷新提示。
+- **回寫保護（重要）**：viewer「最後停留網址」回寫 link 的機制，遇到多行或含 `{ep}` 的 link **不回寫**（`watchCtx.plainLink` 守門），否則會把多來源／模板整包蓋掉。
+- 驗證：parseLinks/resolveLink 單元測試 4/4；截圖確認智慧提示＋一鍵換模板 toast、多來源選單（B站 第124集／巴哈）、搜尋 fallback。
+- **測試坑**：測試腳本裡 `null.click()` 會讓 executeJavaScript rejection 懸住整個 electron 程序不退出——eval 一律用 `?.` 保護。
+
 ## 2026-07-12（第九批）— 併入 v0.5.0
 
 使用者選七項：山水視差背景（素材向）＋成就集印冊、守護獸互動深化、封卷典禮、評分墨韻圖、追番香火 streak、開坑儀式（純代碼）。年鑑未選。全部只動 `index.html`。

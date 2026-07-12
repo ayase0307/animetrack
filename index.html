@@ -361,10 +361,15 @@ textarea.form-control{resize:vertical;min-height:78px;line-height:1.6}
 .badge-today{background:var(--accent);color:#fff}
 .badge-finished{background:rgba(52,211,153,.9);color:#04150f}
 .badge-day{background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.18)}
+.badge-pin{background:rgba(20,16,8,.72);color:var(--gold);border:1px solid rgba(216,189,114,.5)}
 .cat-tag{position:absolute;top:9px;right:9px;padding:3px 9px;border-radius:7px;font-size:.68rem;font-weight:700;background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16)}
 .cat-tag.watchlist{background:var(--accent-soft);color:#ffb3c2;border-color:var(--accent-border)}
 .change-img-btn{position:absolute;bottom:9px;right:9px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;cursor:pointer;opacity:0;transition:opacity .2s,background .2s}
 .anime-card:hover .change-img-btn{opacity:1}
+.pin-btn{position:absolute;bottom:9px;left:9px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;cursor:pointer;opacity:0;transition:opacity .2s,color .2s,border-color .2s,background .2s}
+.anime-card:hover .pin-btn{opacity:1}
+.pin-btn:hover{background:var(--jade)}
+.pin-btn.pinned{opacity:1;color:var(--gold);border-color:rgba(216,189,114,.55);background:rgba(20,16,8,.62)}
 .change-img-btn:hover{background:var(--accent)}
 .card-body{padding:13px 14px 14px;display:flex;flex-direction:column;flex:1}
 .card-title{font-size:.98rem;font-weight:700;line-height:1.35;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
@@ -387,7 +392,7 @@ textarea.form-control{resize:vertical;min-height:78px;line-height:1.6}
 .list-view .card-cover{width:90px;flex-shrink:0;aspect-ratio:3/4}
 .list-view .card-body{flex:1}
 .list-view .card-title{-webkit-line-clamp:1;min-height:0}
-.list-view .change-img-btn{display:none}
+.list-view .change-img-btn,.list-view .pin-btn{display:none}
 .compact-view .card-body{padding:10px}
 .compact-view .card-title{font-size:.86rem}
 .compact-view .card-actions .btn-icon{width:30px;height:30px}
@@ -777,8 +782,9 @@ html.theme-vt::view-transition-new(root){mix-blend-mode:normal}
 .badge-day,.cat-tag{background:rgba(9,10,8,.62)}
 .badge-day::before{content:'令 '}
 .cat-tag.watchlist{background:rgba(181,70,52,.18);color:#ffd1c9;border-color:rgba(181,70,52,.42)}
-.change-img-btn{background:rgba(9,10,8,.62);border-color:rgba(246,241,225,.24)}
-.change-img-btn:hover{background:var(--jade)}
+.change-img-btn,.pin-btn{background:rgba(9,10,8,.62);border-color:rgba(246,241,225,.24)}
+.change-img-btn:hover,.pin-btn:hover{background:var(--jade)}
+.pin-btn.pinned{background:rgba(9,10,8,.62)}
 .card-body{padding:15px 15px 16px}
 .card-title{font-size:1.03rem;font-weight:700;color:var(--paper)}
 .ep-label{color:var(--muted);letter-spacing:.08em}
@@ -1337,7 +1343,82 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
 .spirit-cross{position:fixed;bottom:22vh;left:-140px;width:110px;z-index:59;pointer-events:none;
   filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));animation:spiritCross 9s linear forwards}
 .spirit-cross img{width:100%;display:block}
+
+/* ══════════ 連結優化：智慧提示、多來源選單、搜尋站設定 ══════════ */
+.link-hint{display:none;margin-top:6px;font-size:.76rem;color:var(--muted)}
+.link-hint .lh-host{color:var(--gold);font-weight:700}
+.link-hint b{color:var(--fg)}
+.lh-btn{margin-left:8px;font-size:.72rem;padding:2px 9px;border-radius:6px;border:1px solid var(--border-strong);background:rgba(216,189,114,.12);color:var(--gold);cursor:pointer;transition:background .15s}
+.lh-btn:hover{background:rgba(216,189,114,.24)}
+.form-hint-sub{margin-top:6px;font-size:.74rem;color:var(--muted)}
+textarea#addLink,textarea#editLink{resize:vertical;min-height:44px}
+.src-panel{background:var(--modal);border:1px solid var(--border-strong);border-radius:var(--r-lg);padding:20px;width:min(380px,90vw);box-shadow:var(--shadow)}
+.src-panel h3{font-family:var(--font);font-size:.98rem;margin-bottom:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src-row{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:11px 14px;margin-bottom:8px;border:1px solid var(--border);border-radius:var(--r-md);background:rgba(246,241,225,.04);color:var(--fg);cursor:pointer;font-size:.88rem;transition:border-color .15s,background .15s}
+.src-row:hover{border-color:var(--border-strong);background:rgba(216,189,114,.1)}
+.src-row span{color:var(--muted);font-size:.76rem;flex-shrink:0}
+html[data-theme="light"] .src-row{background:rgba(43,37,25,.04)}
+html[data-theme="light"] .src-row:hover{background:rgba(138,111,40,.1)}
+
+/* ══════════ 第十一批 ══════════ */
+/* 每日一筆 */
+.daily-line{margin-left:14px;background:none;border:none;padding:0;cursor:pointer;font-family:var(--font);font-size:.78rem;color:var(--faint);letter-spacing:.06em;white-space:nowrap;transition:color .2s}
+.daily-line:hover{color:var(--gold)}
+@media (max-width:1180px){.daily-line{display:none}}
+/* 卡片墨痕等級：50 集泛青、100 集鎏金、200 集朱紋 */
+.anime-card.ink-t1{border-color:rgba(47,156,132,.5)}
+.anime-card.ink-t2{border-color:rgba(216,189,114,.55);box-shadow:0 0 0 1px rgba(216,189,114,.18),0 14px 40px -22px rgba(0,0,0,.65)}
+.anime-card.ink-t3{border-color:rgba(216,189,114,.65);box-shadow:0 0 0 1px rgba(216,189,114,.25),0 14px 40px -22px rgba(0,0,0,.65)}
+.anime-card.ink-t3::before{content:'';position:absolute;top:-1px;right:-1px;width:26px;height:26px;z-index:3;pointer-events:none;border-radius:0 var(--r) 0 8px;
+  background:linear-gradient(225deg,rgba(168,58,38,.92) 0 46%,transparent 50%)}
+html[data-theme="light"] .anime-card.ink-t1{border-color:rgba(31,122,99,.45)}
+html[data-theme="light"] .anime-card.ink-t2,html[data-theme="light"] .anime-card.ink-t3{border-color:rgba(138,111,40,.55)}
+/* 守護獸睡眠 */
+#spiritPet.sleeping{animation:spiritFloat 12s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35)) saturate(.7) brightness(.85)}
+#spiritPet.sleeping::after{content:'Zzz';position:absolute;left:70%;bottom:88%;font-size:.72rem;font-weight:800;color:var(--faint);font-family:var(--font);animation:zzzFloat 3s ease-in-out infinite}
+@keyframes zzzFloat{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:.95;transform:translateY(-7px)}}
+@media (prefers-reduced-motion:reduce){#spiritPet.sleeping::after{animation:none;opacity:.6}}
+/* 備份狀態列 */
+.backup-line{margin-top:10px;font-size:.76rem;color:var(--muted)}
 @keyframes spiritCross{0%{transform:translateX(0) translateY(0) rotate(2deg)}25%{transform:translateX(28vw) translateY(-24px) rotate(-3deg)}50%{transform:translateX(56vw) translateY(6px) rotate(2deg)}75%{transform:translateX(84vw) translateY(-18px) rotate(-2deg)}100%{transform:translateX(118vw) translateY(0) rotate(2deg)}}
+
+/* ══════════ 第十二批 · 靈符選單／通知使者／親密度／季度新番 ══════════ */
+/* 靈符扇形選單：符紙按鈕 */
+.spirit-fu{position:fixed;z-index:61;width:34px;height:48px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#f3e9cf,#e8dab4);border:1px solid rgba(168,58,38,.55);border-radius:6px;
+  color:#7a1f12;font-family:var(--font);font-size:1.02rem;font-weight:800;cursor:pointer;user-select:none;
+  box-shadow:0 6px 16px -6px rgba(0,0,0,.5),inset 0 0 0 2px rgba(168,58,38,.14);
+  opacity:0;transform:scale(.3);transition:opacity .22s ease,transform .3s cubic-bezier(.2,.8,.3,1.35);transition-delay:calc(var(--i)*40ms)}
+.spirit-fu::after{content:'';position:absolute;inset:3px;border:1px dashed rgba(168,58,38,.35);border-radius:4px;pointer-events:none}
+.spirit-fu.show{opacity:1;transform:scale(1)}
+.spirit-fu:hover{filter:brightness(1.06);transform:scale(1.12);transition-delay:0s}
+@media (prefers-reduced-motion:reduce){.spirit-fu{transition:opacity .15s ease;transform:scale(1)}}
+/* 通知使者：守護獸叼信 */
+.spirit-letter{position:absolute;right:-8px;top:-10px;width:27px;height:20px;display:flex;align-items:center;justify-content:center;z-index:2;
+  background:linear-gradient(180deg,#f3e9cf,#e4d5ae);border:1px solid rgba(168,58,38,.6);border-radius:3px;cursor:pointer;
+  font-size:.66rem;font-weight:800;color:#7a1f12;font-family:var(--font);
+  box-shadow:0 4px 10px -4px rgba(0,0,0,.5);animation:letterBob 2.2s ease-in-out infinite}
+@keyframes letterBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.spirit-letter{animation:none}}
+/* 高親密度翻滾 */
+#spiritPet.spirit-flip{animation:spiritFlip 1s cubic-bezier(.3,.7,.3,1)}
+@keyframes spiritFlip{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#spiritPet.spirit-flip{animation:none}}
+/* 季度新番一覽 */
+.season-panel{background:var(--modal);border:1px solid var(--border-strong);border-radius:var(--r-lg);padding:22px;width:min(860px,94vw);max-height:84vh;overflow-y:auto;box-shadow:var(--shadow)}
+.season-panel h3{font-family:var(--font);font-size:1.05rem;margin-bottom:4px}
+.season-sub{font-size:.76rem;color:var(--muted);margin-bottom:12px}
+.season-day{font-family:var(--font);font-size:.9rem;font-weight:800;margin:16px 0 10px;padding-left:10px;border-left:3px solid var(--border-strong)}
+.season-day.today{border-left-color:var(--jade);color:var(--gold)}
+.season-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:12px}
+.season-item{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:rgba(246,241,225,.03);display:flex;flex-direction:column}
+.season-item img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:rgba(0,0,0,.2)}
+.season-item .sn{font-size:.74rem;font-weight:700;padding:7px 8px 2px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
+.season-item .sd{font-size:.66rem;color:var(--faint);padding:0 8px 6px}
+.season-add{margin:0 8px 8px;padding:5px 0;font-size:.72rem;border:1px solid var(--border-strong);border-radius:6px;background:rgba(216,189,114,.12);color:var(--gold);cursor:pointer;transition:background .15s}
+.season-add:hover{background:rgba(216,189,114,.24)}
+.season-add:disabled{opacity:.55;cursor:default;background:none;color:var(--muted)}
+html[data-theme="light"] .season-item{background:rgba(43,37,25,.03)}
 </style>
 </head>
 <body>
@@ -1401,10 +1482,12 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
   <header class="app-header">
     <img class="header-logo" src="logo-transparent.png" alt="追劇小幫手">
     <div class="shichen" id="shichen" aria-hidden="true"></div>
+    <button class="daily-line" id="dailyLine" title="每日一筆 · 點擊換一句" type="button"></button>
     <div class="header-actions">
       <div class="sync-pill synced" id="syncPill"><div class="sync-dot"></div><span id="syncText">已同步</span></div>
       <button class="icon-btn sfx-btn" id="sfxBtn" onclick="toggleSfx()" title="古琴音效（預設關閉）" aria-label="切換操作音效" aria-pressed="false">音</button>
       <button class="icon-btn omikuji-btn" onclick="openOmikuji()" title="求籤 · 不知道看哪部就抽一支" aria-label="求籤">籤</button>
+      <button class="icon-btn" onclick="openSeason()" title="季度新番 · Bangumi 本季放送表" aria-label="季度新番一覽">新</button>
       <button class="icon-btn" onclick="toggleTheme(event)" title="切換宣紙／夜墨主題" aria-label="切換淺色深色主題">
         <svg class="ic-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg class="ic-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -1440,6 +1523,13 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
           <option value="all">全部更新日</option>
           <option value="1">週一</option><option value="2">週二</option><option value="3">週三</option>
           <option value="4">週四</option><option value="5">週五</option><option value="6">週六</option><option value="0">週日</option>
+        </select>
+        <select class="ctrl-select" id="starSelect">
+          <option value="all">全部星等</option>
+          <option value="5">只看五星</option>
+          <option value="4">四星以上</option>
+          <option value="3">三星以上</option>
+          <option value="0">未評分</option>
         </select>
         <select class="ctrl-select" id="sortSelect">
           <option value="default">智慧排序</option>
@@ -1496,6 +1586,13 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
           <option value="name-asc">名稱 A→Z</option>
           <option value="ep-desc">集數多→少</option>
         </select>
+        <select class="ctrl-select" id="finStarSelect">
+          <option value="all">全部星等</option>
+          <option value="5">只看五星</option>
+          <option value="4">四星以上</option>
+          <option value="3">三星以上</option>
+          <option value="0">未評分</option>
+        </select>
       </div>
       <div id="finishedGrid" class="anime-grid"></div>
       <div class="empty" id="finishedEmpty" style="display:none">
@@ -1524,7 +1621,7 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
             </div>
             <div id="bgmResults" class="bgm-results" style="display:none"></div>
           </div>
-          <div class="form-group"><label>觀看連結</label><input class="form-control" id="addLink" placeholder="https://..."></div>
+          <div class="form-group"><label>觀看連結</label><textarea class="form-control" id="addLink" rows="2" placeholder="https://...&#10;可多行＝多來源（格式：站名|網址）；集數處可寫 {ep} 自動帶下一集"></textarea><div class="link-hint" id="addLinkHint"></div></div>
           <div class="form-row">
             <div class="form-group"><label>目前集數</label><input class="form-control" type="number" min="0" id="addEp" value="0"></div>
             <div class="form-group"><label>總集數（可空）</label><input class="form-control" type="number" min="0" id="addTotal" placeholder="如 28"></div>
@@ -1550,6 +1647,7 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
             <div id="urlPanel" style="display:none"><input class="form-control" id="addImgUrl" placeholder="https://...jpg"></div>
             <div class="img-preview" id="addImgPreview"></div>
           </div>
+          <div class="form-group"><label>預設搜尋站（全域・選填）</label><input class="form-control" id="searchTpl" placeholder="https://你常用的網站/search?q={name}"><div class="form-hint-sub">沒填連結的作品按播放時，會用作品名帶入 {name} 直接搜尋</div></div>
           <button type="submit" class="btn btn-primary btn-full" style="margin-top:6px" id="addSubmitBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增動漫</button>
         </form>
       </div>
@@ -1584,7 +1682,9 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
         <label class="btn btn-secondary" for="importMergeFile" title="保留現有資料，只加入備份中沒有的作品"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/><line x1="19" y1="5" x2="19" y2="11" stroke-width="2.4"/><line x1="16" y1="8" x2="22" y2="8" stroke-width="2.4"/></svg>匯入（合併）</label>
         <input type="file" id="importMergeFile" accept="application/json" style="display:none">
         <button class="btn btn-secondary" onclick="exportSummaryImg()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>生成總結圖</button>
+        <button class="btn btn-secondary" id="bgmSyncAllBtn" onclick="bgmSyncAll()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>同步 Bangumi 集數</button>
       </div>
+      <div class="backup-line" id="backupLine" style="display:none"></div>
     </div>
   </main>
 </div>
@@ -1597,10 +1697,10 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
       <div class="modal-body">
         <input type="hidden" id="editId">
         <div class="form-group"><label>作品名稱</label><input class="form-control" id="editName" required></div>
-        <div class="form-group"><label>觀看連結</label><input class="form-control" id="editLink"></div>
+        <div class="form-group"><label>觀看連結</label><textarea class="form-control" id="editLink" rows="2"></textarea><div class="link-hint" id="editLinkHint"></div></div>
         <div class="form-row">
           <div class="form-group"><label>目前集數</label><input class="form-control" type="number" min="0" id="editEp"></div>
-          <div class="form-group"><label>總集數</label><input class="form-control" type="number" min="0" id="editTotal"></div>
+          <div class="form-group"><label>總集數 <button type="button" class="lh-btn" id="bgmSyncBtn" onclick="bgmSyncEdit()" title="用 Bangumi 拉取總集數與放送星期">同步 Bangumi</button></label><input class="form-control" type="number" min="0" id="editTotal"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>分類</label><select class="form-control" id="editCat"><option value="tv">番劇</option><option value="movie">劇場版</option><option value="watchlist">想看清單</option></select></div>
@@ -1754,9 +1854,11 @@ let curSort=localStorage.getItem('v4_sort')||'default';
 let curFilter=localStorage.getItem('v4_filter')||'all';
 let curCat=localStorage.getItem('v4_cat')||'all';
 let finSort=localStorage.getItem('v4_finsort')||'date-new';
+let curStar=localStorage.getItem('v4_star')||'all';
+let finStar=localStorage.getItem('v4_finstar')||'all';
 let searchQ='', finSearchQ='';
 let playingAnime=null, confirmCb=null;
-let catMap={}, customOrder=[], dragId=null;
+let catMap={}, customOrder=[], pinSet=[], dragId=null;
 let dbHasCategory=true; // 偵測到 DB 沒有 category 欄位時自動翻 false，退回本機儲存
 
 const DAYS={'0':'週日','1':'週一','2':'週二','3':'週三','4':'週四','5':'週五','6':'週六'};
@@ -1874,7 +1976,9 @@ async function loadApp(){
   // reflect persisted controls
   document.getElementById('sortSelect').value=curSort;
   document.getElementById('filterSelect').value=curFilter;
+  document.getElementById('starSelect').value=curStar;
   document.getElementById('finSortSelect').value=finSort;
+  document.getElementById('finStarSelect').value=finStar;
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===curView));
   initStars('addStars','addRating',0);
   initStars('editStars','editRating',0);
@@ -1884,9 +1988,17 @@ async function loadApp(){
 function loadLocalMeta(){
   try{ catMap=JSON.parse(localStorage.getItem('cat_'+user.id)||'{}'); }catch(e){ catMap={}; }
   try{ customOrder=JSON.parse(localStorage.getItem('order_'+user.id)||'[]'); }catch(e){ customOrder=[]; }
+  try{ pinSet=JSON.parse(localStorage.getItem('pin_'+user.id)||'[]'); }catch(e){ pinSet=[]; }
 }
 function saveCatMap(){ try{ localStorage.setItem('cat_'+user.id,JSON.stringify(catMap)); }catch(e){} }
 function saveOrder(){ try{ localStorage.setItem('order_'+user.id,JSON.stringify(customOrder)); }catch(e){} }
+function savePins(){ try{ localStorage.setItem('pin_'+user.id,JSON.stringify(pinSet)); }catch(e){} }
+function isPinned(id){ return pinSet.includes(id); }
+function togglePin(id){
+  if(isPinned(id)) pinSet=pinSet.filter(x=>x!==id);
+  else pinSet=[...pinSet,id];
+  savePins(); renderTrack();
+}
 function getCat(id){
   const a=anime.find(x=>x.id===id);
   if(a&&a.category) return a.category;   // DB 來源優先
@@ -1970,6 +2082,7 @@ async function dbDelete(id){
   anime=anime.filter(a=>a.id!==id);
   delete catMap[id]; saveCatMap();
   customOrder=customOrder.filter(x=>x!==id); saveOrder();
+  pinSet=pinSet.filter(x=>x!==id); savePins();
   saveCache(); setSyncing('synced'); renderAll();
 }
 function saveCache(){
@@ -2001,7 +2114,7 @@ function reorder(srcId,destId){
 }
 
 // ═══════════════════ RENDER ═══════════════════
-function renderAll(){ renderChips(); renderTrack(); renderFinished(); renderStats(); renderWeekCal(); renderScrollTl(); updateSpirit(); renderInkCharts(); renderIncense(); renderSealBook();
+function renderAll(){ renderChips(); renderTrack(); renderFinished(); renderStats(); renderWeekCal(); renderScrollTl(); updateSpirit(); renderInkCharts(); renderIncense(); renderSealBook(); autoBackup();
   document.getElementById('trackBadge').textContent=anime.filter(a=>!a.finished).length;
   document.getElementById('finishedBadge').textContent=anime.filter(a=>a.finished).length;
 }
@@ -2032,14 +2145,17 @@ function getTrackList(){
   if(searchQ) list=list.filter(a=>a.name.toLowerCase().includes(searchQ));
   if(curCat!=='all') list=list.filter(a=>getCat(a.id)===curCat);
   if(curFilter!=='all') list=list.filter(a=>a.updateDay===curFilter);
-  return sortList(list,curSort);
+  if(curStar!=='all') list=list.filter(a=>starMatch(a,curStar));
+  sortList(list,curSort);
+  return list.sort((a,b)=>isPinned(b.id)-isPinned(a.id)); // sort 是穩定的：置頂永遠在前，組內維持原排序
 }
+function starMatch(a,v){ return v==='0' ? !a.rating : (a.rating||0)>=+v; }
 function renderTrack(){
   const grid=document.getElementById('animeGrid'), empty=document.getElementById('trackEmpty'), banner=document.getElementById('todayBanner');
   const list=getTrackList();
   const today=new Date().getDay().toString();
   const todayCount=anime.filter(a=>!a.finished&&a.updateDay===today&&getCat(a.id)!=='watchlist').length;
-  if(todayCount>0&&!searchQ&&curFilter==='all'&&curCat==='all'){
+  if(todayCount>0&&!searchQ&&curFilter==='all'&&curCat==='all'&&curStar==='all'){
     document.getElementById('todayBannerText').textContent=`今天有 ${todayCount} 部作品更新！`;
     banner.style.display='flex';
   } else banner.style.display='none';
@@ -2063,6 +2179,7 @@ function renderFinished(){
   document.getElementById('finishedCount').textContent=allFin;
   document.getElementById('avgRating').textContent=rated.length?(rated.reduce((s,a)=>s+a.rating,0)/rated.length).toFixed(1):'-';
   if(finSearchQ) list=list.filter(a=>a.name.toLowerCase().includes(finSearchQ));
+  if(finStar!=='all') list=list.filter(a=>starMatch(a,finStar));
   if(finSort==='date-new') list.sort((a,b)=>new Date(b.finishedDate||0)-new Date(a.finishedDate||0));
   else sortList(list,finSort);
   if(list.length===0){ grid.innerHTML=''; empty.style.display='block'; empty.querySelector('h3').textContent=allFin?'找不到符合的作品':'還沒有完結的作品'; return; }
@@ -2078,6 +2195,7 @@ function cardHTML(a,fin,drag){
   const img=a.imageUrl||FALLBACK(a.name);
   const cat=getCat(a.id);
   const badges=[
+    !fin&&isPinned(a.id)?'<span class="badge badge-pin">置頂</span>':'',
     fin?'<span class="badge badge-finished">完結</span>':'',
     isTodayUpd?'<span class="badge badge-today">今日更新</span>':'',
     !fin&&a.updateDay?`<span class="badge badge-day">${DAYS[a.updateDay]}</span>`:''
@@ -2091,10 +2209,11 @@ function cardHTML(a,fin,drag){
        <button class="btn btn-success btn-sm btn-icon" onclick="incEp('${a.id}')" title="看完一集 +1" aria-label="看完一集"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
        <button class="btn btn-success btn-sm btn-icon" onclick="toggleFinished('${a.id}')" title="標記完結" aria-label="標記完結"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>`;
   return `
-  <div class="anime-card${fin?' is-finished':''}${!fin&&a.updateDay===String(new Date().getDay())?' is-today':''}" data-id="${a.id}"${drag?' draggable="true"':''}>
+  <div class="anime-card${fin?' is-finished':''}${!fin&&a.updateDay===String(new Date().getDay())?' is-today':''}${(a.episode||0)>=200?' ink-t3':(a.episode||0)>=100?' ink-t2':(a.episode||0)>=50?' ink-t1':''}" data-id="${a.id}"${drag?' draggable="true"':''}>
     <div class="card-cover" onclick="flipCard(event)" title="點擊翻面看詳情">
       <img src="${esc(img)}" alt="${esc(a.name)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(FALLBACK(a.name))}'">
       <div class="card-scrim"></div>
+      ${!fin?`<button class="pin-btn${isPinned(a.id)?' pinned':''}" onclick="togglePin('${a.id}')" title="${isPinned(a.id)?'取消置頂':'置頂'}" aria-label="${isPinned(a.id)?'取消置頂':'置頂'}" aria-pressed="${isPinned(a.id)}"><svg width="13" height="13" viewBox="0 0 24 24" fill="${isPinned(a.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l1 6 3 4H5l3-4 1-6z"/></svg></button>`:''}
       <div class="card-badges">${badges}</div>
       ${fin?`<div class="cover-seal" aria-hidden="true">完${a.finishedDate?`<i>${new Date(a.finishedDate).getFullYear()}</i>`:''}</div>`:''}
       ${catTag}
@@ -2175,7 +2294,7 @@ function renderWeekCal(){
 // ═══════════════════ ACTIONS ═══════════════════
 // 點封面翻面看詳情（清單檢視、封面上的按鈕不觸發）
 function flipCard(e){
-  if(e.target.closest('.change-img-btn')) return;
+  if(e.target.closest('.change-img-btn')||e.target.closest('.pin-btn')) return;
   const card=e.target.closest('.anime-card'); if(!card) return;
   if(card.closest('.list-view')) return;
   card.classList.toggle('flip');
@@ -2244,14 +2363,26 @@ async function changeImg(id){
 }
 
 // ═══════════════════ PLAYER ═══════════════════
-function openPlayer(id){
+function openPlayer(id,srcIdx){
   const a=anime.find(x=>x.id===id); if(!a) return;
-  if(!a.link){ toast('error','此作品沒有設定觀看連結'); return; }
+  const links=parseLinks(a);
+  if(!links.length){
+    const tpl=(localStorage.getItem('v4_search_tpl')||'').trim();
+    if(tpl&&tpl.includes('{name}')){ launchUrl(a,tpl.replace('{name}',encodeURIComponent(a.name))); toast('info',`正在以「${a.name}」搜尋…`); }
+    else toast('error','此作品沒有觀看連結。可在「新增動漫」頁設定預設搜尋站，播放時自動用作品名搜尋');
+    return;
+  }
+  if(links.length>1&&srcIdx==null){ showSourcePicker(a,links); return; } // 多來源：先選站
+  launchUrl(a,resolveLink(links[srcIdx||0].url,a));
+}
+let playingUrl='';
+function launchUrl(a,url){
+  localStorage.setItem('v4_last_played',String(a.id)); // 全域快捷鍵 +1 的目標
   if(IS_ELECTRON){
     window.electronAPI.openViewer({
       id:a.id,
       title:a.name,
-      url:a.link,
+      url,
       currentEp:a.episode,
       cover:a.imageUrl||''
     }).then(result=>{
@@ -2259,8 +2390,8 @@ function openPlayer(id){
     }).catch(e=>toast('error','觀看視窗開啟失敗：'+e.message));
     return;
   }
-  playingAnime=a;
-  const w=window.open(a.link,'_blank');
+  playingAnime=a; playingUrl=url;
+  const w=window.open(url,'_blank');
   if(!w) toast('info','瀏覽器攔截了新分頁，請允許彈出視窗');
   document.getElementById('fbTitle').textContent=a.name;
   document.getElementById('fbEp').textContent=`下一集：第 ${a.episode+1} 集`;
@@ -2276,7 +2407,10 @@ async function markWatched(){
   highlightUpdatedCard(playingAnime.id);
   toast('success',`已記錄第 ${newEp} 集`);
 }
-function reopenTab(){ if(playingAnime&&playingAnime.link) window.open(playingAnime.link,'_blank'); }
+function reopenTab(){
+  if(playingUrl){ window.open(playingUrl,'_blank'); return; }
+  if(playingAnime){ const l=parseLinks(playingAnime); if(l.length) window.open(resolveLink(l[0].url,playingAnime),'_blank'); }
+}
 
 // ── 看完彈窗（桌面版水墨自製，取代原生系統對話框）──
 let watchCtx=null, watchN=1;
@@ -2288,7 +2422,8 @@ function openWatchModal(p){
     cur:(p.currentEp!=null?Number(p.currentEp):(a?a.episode:0))||0,
     cover:p.cover||(a?a.imageUrl:'')||'',
     lastUrl,
-    originalUrl:(a?a.link:'')||'' };
+    originalUrl:(a?a.link:'')||'',
+    plainLink:!/\n|\{ep\}/.test((a?a.link:'')||'') }; // 多來源或 {ep} 模板連結不回寫最後網址
   watchN=guessNextN(lastUrl,watchCtx.cur);
   const ov=document.getElementById('watchOverlay'); ov.classList.remove('done');
   const img=document.getElementById('watchCover');
@@ -2311,7 +2446,7 @@ async function watchConfirm(){
   if(!watchCtx) return;
   const newEp=watchCtx.cur+watchN;
   const patch={episode:newEp};
-  if(watchCtx.lastUrl&&watchCtx.lastUrl!==watchCtx.originalUrl) patch.link=watchCtx.lastUrl;
+  if(watchCtx.lastUrl&&watchCtx.lastUrl!==watchCtx.originalUrl&&watchCtx.plainLink) patch.link=watchCtx.lastUrl;
   if(await dbUpdate(watchCtx.id,patch)){
     highlightUpdatedCard(watchCtx.id);
     toast('success',`《${watchCtx.name}》已更新至第 ${newEp} 集`);
@@ -2325,7 +2460,7 @@ async function watchConfirm(){
 async function watchFinish(){
   if(!watchCtx) return;
   const patch={finished:true};
-  if(watchCtx.lastUrl&&watchCtx.lastUrl!==watchCtx.originalUrl) patch.link=watchCtx.lastUrl;
+  if(watchCtx.lastUrl&&watchCtx.lastUrl!==watchCtx.originalUrl&&watchCtx.plainLink) patch.link=watchCtx.lastUrl;
   if(await dbUpdate(watchCtx.id,patch)){ showSealFx(); toast('success',`《${watchCtx.name}》已標記完結`); if(patch.link) toast('info','已同步最後觀看網址'); closeWatch(); }
 }
 function watchContinue(){ if(!watchCtx) return; const id=watchCtx.id; closeWatch(); openPlayer(id); }
@@ -2350,6 +2485,7 @@ if(IS_ELECTRON&&window.electronAPI.onUpdateEvent){
   electronAPI.onUpdateEvent(ev=>{
     if(ev.type==='available'){
       updPhase='available';
+      spiritSay('新卷已至！');
       uTitle.textContent='新卷已至 · v'+ev.version;
       uSub.textContent='研墨已畢，要現在下載新版本嗎？';
       uGo.textContent='下載更新';
@@ -2442,6 +2578,7 @@ function openEdit(id){
   document.getElementById('editId').value=id;
   document.getElementById('editName').value=a.name;
   document.getElementById('editLink').value=a.link;
+  document.getElementById('editLink').dispatchEvent(new Event('input')); // 刷新連結智慧提示
   document.getElementById('editEp').value=a.episode;
   document.getElementById('editTotal').value=a.totalEpisodes||'';
   document.getElementById('editDay').value=a.updateDay||'';
@@ -2621,9 +2758,11 @@ document.querySelectorAll('.view-btn[data-view]').forEach(btn=>{
 });
 document.getElementById('searchInput').addEventListener('input',function(){ searchQ=this.value.toLowerCase().trim(); renderTrack(); });
 document.getElementById('filterSelect').addEventListener('change',function(){ curFilter=this.value; localStorage.setItem('v4_filter',curFilter); renderTrack(); });
+document.getElementById('starSelect').addEventListener('change',function(){ curStar=this.value; localStorage.setItem('v4_star',curStar); renderTrack(); });
 document.getElementById('sortSelect').addEventListener('change',function(){ curSort=this.value; localStorage.setItem('v4_sort',curSort); if(curSort==='custom') ensureOrder(); renderTrack(); });
 document.getElementById('finSearchInput').addEventListener('input',function(){ finSearchQ=this.value.toLowerCase().trim(); renderFinished(); });
 document.getElementById('finSortSelect').addEventListener('change',function(){ finSort=this.value; localStorage.setItem('v4_finsort',finSort); renderFinished(); });
+document.getElementById('finStarSelect').addEventListener('change',function(){ finStar=this.value; localStorage.setItem('v4_finstar',finStar); renderFinished(); });
 
 // ═══════════════════ DRAG REORDER ═══════════════════
 const grid=document.getElementById('animeGrid');
@@ -2648,7 +2787,7 @@ document.addEventListener('keydown',e=>{
     if(document.getElementById('appScreen').classList.contains('active')){ e.preventDefault(); openQuick(); }
     return;
   }
-  if(e.key==='Escape'){ closeEdit(); closeConfirm(); closeHelp(); closeWatch(); closeFloatingBar(); closeQuick(); closeOmikuji(); return; }
+  if(e.key==='Escape'){ closeEdit(); closeConfirm(); closeHelp(); closeWatch(); closeFloatingBar(); closeQuick(); closeOmikuji(); closeSpiritMenu(); closeSeason(); return; }
   const tag=(e.target.tagName||'').toLowerCase();
   if(tag==='input'||tag==='textarea'||e.target.isContentEditable) return;
   if(document.getElementById('appScreen').classList.contains('active')===false) return;
@@ -2687,7 +2826,6 @@ function toggleTheme(evt){
 
 // ═══════════════════ 今日更新桌面通知（僅桌面版，每天一次） ═══════════════════
 function notifyToday(){
-  if(!IS_ELECTRON||typeof Notification==='undefined') return;
   const key='notif_'+new Date().toISOString().slice(0,10);
   if(localStorage.getItem(key)) return;
   const today=new Date().getDay().toString();
@@ -2695,7 +2833,10 @@ function notifyToday(){
   if(!list.length) return;
   Object.keys(localStorage).forEach(k=>{ if(k.startsWith('notif_')) localStorage.removeItem(k); });
   localStorage.setItem(key,'1');
-  try{ new Notification('今日更新 · '+list.length+' 部',{body:list.map(a=>a.name).join('、'),silent:true}); }catch(e){}
+  if(IS_ELECTRON&&typeof Notification!=='undefined'){
+    try{ new Notification('今日更新 · '+list.length+' 部',{body:list.map(a=>a.name).join('、'),silent:true}); }catch(e){}
+  }
+  spiritLetter(`今日有 ${list.length} 部更新：${list.slice(0,3).map(a=>a.name).join('、')}${list.length>3?'…':''}`,()=>switchTab('track'));
 }
 
 // ═══════════════════ 集數推測（從最後觀看網址猜看到第幾集） ═══════════════════
@@ -3029,7 +3170,8 @@ const SPIRIT_STAGES=[[0,'koi','錦鯉'],[300,'jiao','蛟'],[1000,'long','龍']];
 const SPIRIT_LINES=['今天也一起追番吧','多看一集，離化龍更近一步','游來游去，等你開播','墨色正好，宜追番'];
 function spiritStage(){ const eps=anime.reduce((s,a)=>s+(Number(a.episode)||0),0); let st=SPIRIT_STAGES[0]; for(const s of SPIRIT_STAGES) if(eps>=s[0]) st=s; return {eps,st}; }
 function spiritTitle(eps,st){ const next=SPIRIT_STAGES[SPIRIT_STAGES.indexOf(st)+1];
-  return next?`守護獸 · ${st[2]}（累積 ${eps} 集，再看 ${next[0]-eps} 集進化為${next[2]}）`:`守護獸 · ${st[2]}（累積 ${eps} 集，已至化龍之境）`; }
+  const base=next?`守護獸 · ${st[2]}（累積 ${eps} 集，再看 ${next[0]-eps} 集進化為${next[2]}）`:`守護獸 · ${st[2]}（累積 ${eps} 集，已至化龍之境）`;
+  return base+`・親密度 ${bondVal()}（${BOND_TIERS[bondTier()][1]}）`; }
 function updateSpirit(){
   const {eps,st}=spiritStage(), cur=st[1];
   let el=document.getElementById('spiritPet');
@@ -3047,6 +3189,7 @@ function updateSpirit(){
     if(prevIdx>-1&&curIdx>prevIdx){ el.classList.add('evolve'); setTimeout(()=>el.classList.remove('evolve'),1500); toast('success',`守護獸進化了！${st[2]}現身`); }
     localStorage.setItem('v4_spirit',cur);
     el.dataset.stage=cur; el.title=spiritTitle(eps,st);
+    spiritSleepCheck(); renderSpiritLetter();
   };
   img.onerror=()=>{ if(el) el.remove(); };
   img.src=`assets/spirit-${cur}.png`;
@@ -3071,6 +3214,169 @@ function updateSpirit(){
     holder.prepend(pond); holder.classList.add('has-pond');
   };
   probe.src='assets/koi-top.png';
+})();
+
+// ═══════════════════ 自動備份（桌面版，每日一份，main.js 輪替保留 14 份） ═══════════════════
+async function autoBackup(){
+  if(!IS_ELECTRON||!window.electronAPI.writeBackup||!anime.length) return;
+  const key=_dkey(new Date());
+  if(localStorage.getItem('v4_backup_date')===key){ renderBackupLine(); return; }
+  try{
+    const out=anime.map(a=>({...a,category:getCat(a.id)}));
+    const r=await window.electronAPI.writeBackup(JSON.stringify(out,null,2));
+    if(r&&r.ok){ localStorage.setItem('v4_backup_date',key); localStorage.setItem('v4_backup_file',r.file); spiritLetter('今日書卷已備份妥當'); }
+  }catch(e){}
+  renderBackupLine();
+}
+function renderBackupLine(){
+  const el=document.getElementById('backupLine'); if(!el||!IS_ELECTRON) return;
+  const d=localStorage.getItem('v4_backup_date'), f=localStorage.getItem('v4_backup_file');
+  if(!d) return;
+  el.style.display='block';
+  el.innerHTML=`上次自動備份：${esc(d)}（${esc(f||'')}）<button type="button" class="lh-btn" onclick="window.electronAPI.openBackupDir()">開啟備份資料夾</button>`;
+}
+
+// ═══════════════════ 全域快捷鍵 +1（Ctrl+Alt+=，桌面版） ═══════════════════
+if(IS_ELECTRON&&window.electronAPI.onGlobalInc){
+  window.electronAPI.onGlobalInc(()=>{
+    const id=localStorage.getItem('v4_last_played');
+    const a=id&&anime.find(x=>String(x.id)===id&&!x.finished);
+    if(a) incEp(a.id);
+    else toast('info','還沒有最近播放的作品，先按一次播放吧');
+  });
+}
+
+// ═══════════════════ Bangumi 一鍵同步（總集數＋放送星期） ═══════════════════
+async function bgmFindInfo(name){
+  const r=await fetch(`https://api.bgm.tv/search/subject/${encodeURIComponent(name)}?type=2&responseGroup=small&max_results=1`);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const j=await r.json(), hit=(j&&j.list&&j.list[0])||null;
+  if(!hit) return null;
+  const d=await fetch('https://api.bgm.tv/v0/subjects/'+hit.id);
+  if(!d.ok) throw new Error('HTTP '+d.status);
+  const s=await d.json();
+  const wk=(s.infobox||[]).find(x=>x&&x.key==='放送星期');
+  let day=null;
+  if(wk&&typeof wk.value==='string'){
+    const map={'日':'0','一':'1','二':'2','三':'3','四':'4','五':'5','六':'6'};
+    day=map[wk.value.replace(/星期|週|周/g,'').trim().charAt(0)]??null;
+  }
+  return { total:Number(s.total_episodes||s.eps)||0, day };
+}
+async function bgmSyncEdit(){
+  const name=document.getElementById('editName').value.trim();
+  if(!name){ toast('info','作品名稱是空的'); return; }
+  const btn=document.getElementById('bgmSyncBtn'); btn.disabled=true; btn.textContent='同步中…';
+  try{
+    const info=await bgmFindInfo(name);
+    if(!info){ toast('info','Bangumi 找不到這部作品'); return; }
+    if(info.total) document.getElementById('editTotal').value=info.total;
+    if(info.day!=null) document.getElementById('editDay').value=info.day;
+    toast('success',`已同步：${info.total?`共 ${info.total} 集`:''}${info.day!=null?'・週'+'日一二三四五六'[+info.day]:''}，儲存前可再調整`);
+  }catch(e){ toast('error','Bangumi 同步失敗：'+e.message); }
+  finally{ btn.disabled=false; btn.textContent='同步 Bangumi'; }
+}
+async function bgmSyncAll(){
+  const targets=anime.filter(a=>!a.finished&&getCat(a.id)!=='watchlist');
+  if(!targets.length){ toast('info','沒有追蹤中的作品可同步'); return; }
+  const btn=document.getElementById('bgmSyncAllBtn'); btn.disabled=true;
+  let updated=0,failed=0;
+  for(let i=0;i<targets.length;i++){
+    const a=targets[i];
+    btn.textContent=`同步中 ${i+1}/${targets.length}…`;
+    try{
+      const info=await bgmFindInfo(a.name);
+      if(info&&info.total&&info.total!==a.totalEpisodes){
+        if(await dbUpdate(a.id,{totalEpisodes:info.total})) updated++;
+      }
+    }catch(e){ failed++; }
+    await new Promise(r=>setTimeout(r,400)); // ponytail: 固定 400ms 節流，對 Bangumi API 客氣點
+  }
+  btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>同步 Bangumi 集數';
+  toast(updated?'success':'info',`同步完成：更新 ${updated} 部總集數${failed?`，${failed} 部失敗`:''}`);
+}
+
+// ═══════════════════ 每日一筆（古風短句，依日期輪換，點擊抽下一句） ═══════════════════
+const DAILY_POOL=['墨未濃，茶未涼，番未完','人間有味是清歡，追番亦然','今日宜：續看昨日未完之集','山中無曆日，追番不知年','一集復一集，不覺已三更','風雅之事，莫過新番初開','靜坐常思己過，閒談莫論爛尾','千里之行，始於第一集','溫故而知新，補番亦快哉','花有重開日，番有續作時','萬事開頭難，開坑最簡單','偷得浮生半日閒，正好追番','曲終人不散，完結亦有餘韻','讀萬卷書，看萬集番','天行健，追番以自強不息','海內存知己，同好若比鄰','寧可食無肉，不可日無番','業精於勤荒於嬉，番荒於棄','欲窮千里目，再看一集去','三人行，必有可推之番','舊番不厭百回看','心急吃不了熱豆腐，番急看不出好滋味','雲淡風輕近午天，摸魚看番也悠然','長風破浪會有時，神作終有完結日','紙上得來終覺淺，絕知此番要細看','不畏浮雲遮望眼，只緣胸有片單在','問渠那得清如許，為有新番活水來','春宵一刻值千金，何況新番更新時','采菊東籬下，悠然看新番','人生得意須盡歡，莫使片單空對月','兩岸猿聲啼不住，輕舟已過萬重坑','會當凌絕頂，一覽眾番小','隨風潛入夜，追番細無聲','稻花香裡說豐年，聽取彈幕一片','眾裡尋他千百度，驀然回首，好番正在片單深處','沉舟側畔千帆過，爛尾前頭萬番春'];
+function renderDaily(rand){
+  const el=document.getElementById('dailyLine'); if(!el) return;
+  const t=new Date(), start=new Date(t.getFullYear(),0,0);
+  const doy=Math.floor((t-start)/86400000);
+  const i=rand?Math.floor(Math.random()*DAILY_POOL.length):doy%DAILY_POOL.length;
+  el.textContent='「'+DAILY_POOL[i]+'」';
+}
+document.getElementById('dailyLine').addEventListener('click',()=>renderDaily(true));
+renderDaily();
+
+// ═══════════════════ 守護獸睡眠（子時～卯時 23:00–07:00） ═══════════════════
+const SPIRIT_SLEEP_LINES=['嗯……天亮再說……','Zzz……別鬧……','睡了睡了，番明天追','（翻了個身）'];
+function spiritSleepCheck(){
+  const el=document.getElementById('spiritPet'); if(!el) return;
+  const h=new Date().getHours();
+  el.classList.toggle('sleeping',h>=23||h<7);
+}
+setInterval(spiritSleepCheck,5*60*1000);
+
+// ═══════════════════ 連結優化：多來源／{ep} 模板／預設站搜尋／智慧辨識 ═══════════════════
+// link 欄位相容格式：單一網址（舊資料）或多行「站名|網址」；網址中 {ep} 會替換成下一集集數
+function parseLinks(a){
+  return (a.link||'').split('\n').map(s=>s.trim()).filter(Boolean).map((s,i)=>{
+    const p=s.indexOf('|');
+    return p>0?{label:s.slice(0,p).trim(),url:s.slice(p+1).trim()}:{label:'',url:s};
+  }).filter(l=>/^https?:\/\//i.test(l.url));
+}
+function resolveLink(url,a){ return url.replace(/\{ep\}/g,String((Number(a.episode)||0)+1)); }
+function showSourcePicker(a,links){
+  const ov=document.createElement('div'); ov.className='modal-overlay show'; ov.style.zIndex=3000;
+  ov.innerHTML=`<div class="src-panel"><h3>選擇觀看來源 · ${esc(a.name)}</h3>${links.map((l,i)=>{
+    let host=''; try{ host=new URL(l.url).hostname; }catch(e){}
+    return `<button type="button" class="src-row" data-i="${i}"><b>${esc(l.label||host||'來源 '+(i+1))}</b><span>${l.url.includes('{ep}')?`第 ${(Number(a.episode)||0)+1} 集`:esc(host)}</span></button>`;
+  }).join('')}</div>`;
+  ov.addEventListener('click',e=>{
+    const b=e.target.closest('.src-row');
+    if(b){ ov.remove(); openPlayer(a.id,+b.dataset.i); }
+    else if(e.target===ov) ov.remove();
+  });
+  document.body.appendChild(ov);
+}
+// 貼上網址智慧辨識：顯示站名、偵測集數並建議換成 {ep} 模板
+function attachLinkSmart(inpId,hintId){
+  const inp=document.getElementById(inpId), hint=document.getElementById(hintId);
+  if(!inp||!hint) return;
+  const analyze=()=>{
+    const lines=inp.value.split('\n').map(s=>s.trim()).filter(Boolean);
+    const last=lines[lines.length-1]||'';
+    const url=last.includes('|')?last.slice(last.indexOf('|')+1).trim():last;
+    hint.innerHTML=''; hint.style.display='none';
+    if(!/^https?:\/\//i.test(url)||url.includes('{ep}')) return;
+    let u; try{ u=new URL(url); }catch(e){ return; }
+    const m=(u.pathname+u.search).match(/(\d+)(?!.*\d)/);
+    let html=`<span class="lh-host">${esc(u.hostname)}</span>`;
+    if(m&&+m[1]>0&&+m[1]<3000) html+=` · 偵測到集數 <b>${m[1]}</b><button type="button" class="lh-btn">換成 {ep} 模板</button>`;
+    hint.innerHTML=html; hint.style.display='block';
+  };
+  inp.addEventListener('input',analyze);
+  hint.addEventListener('click',e=>{
+    if(!e.target.classList.contains('lh-btn')) return;
+    const lines=inp.value.split('\n');
+    for(let i=lines.length-1;i>=0;i--){
+      if(lines[i].trim()){ lines[i]=lines[i].replace(/(\d+)(?!.*\d)/,'{ep}'); break; }
+    }
+    inp.value=lines.join('\n'); analyze();
+    toast('success','已換成 {ep} 集數模板，播放時自動帶入下一集');
+  });
+}
+attachLinkSmart('addLink','addLinkHint'); attachLinkSmart('editLink','editLinkHint');
+// 預設搜尋站設定（全域，localStorage）
+(function(){
+  const inp=document.getElementById('searchTpl'); if(!inp) return;
+  inp.value=localStorage.getItem('v4_search_tpl')||'';
+  inp.addEventListener('change',()=>{
+    const v=inp.value.trim();
+    if(v&&!v.includes('{name}')){ toast('error','搜尋模板需包含 {name} 佔位符'); return; }
+    localStorage.setItem('v4_search_tpl',v);
+    if(v) toast('success','預設搜尋站已儲存');
+  });
 })();
 
 // ═══════════════════ 多層山水視差背景（素材 assets/bg-far/mid/near.png，缺圖跳過該層） ═══════════════════
@@ -3203,9 +3509,17 @@ function initSpiritDrag(el){
     el.style.left=Math.min(innerWidth-el.offsetWidth-4,Math.max(4,ox+dx))+'px';
     el.style.top=Math.min(innerHeight-el.offsetHeight-4,Math.max(4,oy+dy))+'px';
     el.style.bottom='auto'; });
-  const up=()=>{ if(!down) return; down=false; el.classList.remove('dragging');
-    if(moved){ const r=el.getBoundingClientRect(); localStorage.setItem('v4_spirit_pos',JSON.stringify({x:Math.round(r.left),y:Math.round(r.top)})); }
-    else{ el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle'); SFX.pluck(); toast('info',SPIRIT_LINES[Math.floor(Math.random()*SPIRIT_LINES.length)]); } };
+  const up=e=>{ if(!down) return; down=false; el.classList.remove('dragging');
+    if(moved){
+      const r=el.getBoundingClientRect(); localStorage.setItem('v4_spirit_pos',JSON.stringify({x:Math.round(r.left),y:Math.round(r.top)}));
+      spiritFeedCheck(el,e); // 放到卡片上＝餵番 +1
+    }else if(el.classList.contains('sleeping')){
+      el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle');
+      toast('info',SPIRIT_SLEEP_LINES[Math.floor(Math.random()*SPIRIT_SLEEP_LINES.length)]); // 睡著被吵醒會不悅，不開選單
+    }else{
+      el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle'); SFX.pluck();
+      toggleSpiritMenu(el); // 台詞彩蛋移到選單「語」符
+    } };
   el.addEventListener('pointerup',up);
   el.addEventListener('pointercancel',()=>{ down=false; el.classList.remove('dragging'); });
 }
@@ -3220,6 +3534,155 @@ setInterval(()=>{
     c.appendChild(im); document.body.appendChild(c); setTimeout(()=>c.remove(),9500); };
   im.src=`assets/spirit-${st}.png`;
 },300000);
+
+// ═══════════════════ 第十二批 · 靈符扇形選單（點守護獸展開） ═══════════════════
+let _fuEls=null;
+function spiritMenuItems(){
+  const items=[
+    ['追','快速 +1 最近播放的番',()=>{ const id=localStorage.getItem('v4_last_played');
+      const a=id&&anime.find(x=>String(x.id)===id&&!x.finished);
+      if(a) incEp(a.id); else toast('info','還沒有最近播放的作品，先按一次播放吧'); }],
+    ['籤','求籤',()=>openOmikuji()],
+    ['尋','搜尋（Ctrl+K）',()=>openQuick()],
+    ['計','看統計',()=>switchTab('stats')],
+    ['語','聊兩句',()=>{ const p=spiritLinePool(); spiritSay(p[Math.floor(Math.random()*p.length)]); }],
+  ];
+  if(IS_ELECTRON&&window.electronAPI.writeBackup) items.push(['備','立即備份',spiritManualBackup]);
+  return items;
+}
+function closeSpiritMenu(){
+  if(!_fuEls) return;
+  _fuEls.forEach(f=>{ f.classList.remove('show'); setTimeout(()=>f.remove(),260); });
+  _fuEls=null;
+}
+function toggleSpiritMenu(el){
+  if(_fuEls){ closeSpiritMenu(); return; }
+  const items=spiritMenuItems(), r=el.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2, R=88;
+  const below=r.top<170; // 貼近頂端就往下開扇
+  _fuEls=items.map(([ch,tip,fn],i)=>{
+    const a=Math.PI*(0.12+0.76*i/(items.length-1)); // 約 22°~158° 均分半圓
+    let x=cx+Math.cos(a)*R-17, y=cy+(below?1:-1)*Math.sin(a)*R-24;
+    x=Math.min(innerWidth-40,Math.max(6,x)); y=Math.min(innerHeight-54,Math.max(6,y));
+    const f=document.createElement('button'); f.type='button'; f.className='spirit-fu';
+    f.textContent=ch; f.title=tip; f.setAttribute('aria-label',tip);
+    f.style.left=x+'px'; f.style.top=y+'px'; f.style.setProperty('--i',i);
+    f.addEventListener('click',ev=>{ ev.stopPropagation(); closeSpiritMenu(); bondAdd(1); fn(); });
+    document.body.appendChild(f); requestAnimationFrame(()=>f.classList.add('show'));
+    return f;
+  });
+  if(bondTier()>=2&&Math.random()<0.2&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+    el.classList.add('spirit-flip'); setTimeout(()=>el.classList.remove('spirit-flip'),1050);
+  }
+}
+document.addEventListener('pointerdown',e=>{
+  if(_fuEls&&!e.target.closest('.spirit-fu')&&!e.target.closest('#spiritPet')) closeSpiritMenu();
+});
+async function spiritManualBackup(){
+  try{
+    const out=anime.map(a=>({...a,category:getCat(a.id)}));
+    const r=await window.electronAPI.writeBackup(JSON.stringify(out,null,2));
+    if(r&&r.ok){ localStorage.setItem('v4_backup_date',_dkey(new Date())); localStorage.setItem('v4_backup_file',r.file); renderBackupLine(); spiritSay('書卷已封存妥當'); }
+    else toast('error','備份失敗');
+  }catch(e){ toast('error','備份失敗：'+e.message); }
+}
+
+// ═══════════════════ 第十二批 · 拖曳餵番（守護獸放到卡片上＝該番 +1） ═══════════════════
+function spiritFeedCheck(el,e){
+  if(!e||e.clientX==null) return;
+  const hit=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n!==el&&!el.contains(n)&&n.closest&&n.closest('.anime-card[data-id]'));
+  const card=hit&&hit.closest('.anime-card[data-id]'); if(!card) return;
+  const a=anime.find(x=>String(x.id)===card.dataset.id); if(!a||a.finished) return;
+  if(el.classList.contains('sleeping')){ spiritSay('睡了……明天再吃……'); return; }
+  if(getCat(a.id)==='watchlist'){ spiritSay('這部還沒開坑呢'); return; }
+  incEp(a.id); spiritSay(`《${a.name}》真香！`); bondAdd(3);
+}
+
+// ═══════════════════ 第十二批 · 通知使者（守護獸叼信，點信封拆閱） ═══════════════════
+let _letters=[];
+function spiritLetter(txt,act){
+  _letters.push({txt,act});
+  renderSpiritLetter();
+  setTimeout(()=>{ // 3 秒後守護獸仍不在（缺圖／手機隱藏）→ 退回 toast
+    const el=document.getElementById('spiritPet');
+    if((!el||getComputedStyle(el).display==='none')&&_letters.length) _letters.splice(0).forEach(m=>toast('info',m.txt));
+  },3000);
+}
+function renderSpiritLetter(){
+  const el=document.getElementById('spiritPet');
+  if(!el||!_letters.length||el.querySelector('.spirit-letter')) return;
+  const b=document.createElement('div'); b.className='spirit-letter'; b.textContent='信'; b.title='有信，點我拆閱';
+  b.addEventListener('pointerdown',e=>e.stopPropagation()); // 不觸發拖曳／選單
+  b.addEventListener('click',e=>{ e.stopPropagation();
+    const m=_letters.shift(); b.remove();
+    if(m){ spiritSay(m.txt); SFX.pluck(); if(m.act) m.act(); }
+    setTimeout(renderSpiritLetter,2400); // 還有下一封再掛上
+  });
+  el.appendChild(b);
+}
+
+// ═══════════════════ 第十二批 · 親密度（互動累積，日增上限 10） ═══════════════════
+const BOND_TIERS=[[0,'初識'],[40,'相熟'],[120,'知音'],[300,'莫逆']]; // ponytail: 門檻寫死，要調整改這裡
+const BOND_LINES=[[],['你來啦，今天看什麼','有你在，墨都研得香了'],['片單我都替你記熟了','不如抽支籤，解解片荒'],['與君追番，不負韶華','千番易得，知音難求']];
+function bondVal(){ return Number(localStorage.getItem('v4_spirit_bond'))||0; }
+function bondTier(){ const v=bondVal(); let t=0; BOND_TIERS.forEach((b,i)=>{ if(v>=b[0]) t=i; }); return t; }
+function bondAdd(n){
+  const day=_dkey(new Date());
+  if(localStorage.getItem('v4_bond_day')!==day){ localStorage.setItem('v4_bond_day',day); localStorage.setItem('v4_bond_today','0'); }
+  const today=Number(localStorage.getItem('v4_bond_today'))||0;
+  const add=Math.min(n,Math.max(0,10-today)); if(!add) return;
+  const before=bondTier();
+  localStorage.setItem('v4_bond_today',String(today+add));
+  localStorage.setItem('v4_spirit_bond',String(bondVal()+add));
+  if(bondTier()>before){ toast('success',`守護獸與你更親近了 · ${BOND_TIERS[bondTier()][1]}`); spiritSay(BOND_LINES[bondTier()][0]); }
+  const el=document.getElementById('spiritPet'); if(el) el.title=spiritTitle(spiritStage().eps,spiritStage().st);
+}
+function spiritLinePool(){ let p=SPIRIT_LINES.slice(); for(let i=1;i<=bondTier();i++) p=p.concat(BOND_LINES[i]); return p; }
+if(localStorage.getItem('v4_bond_open')!==_dkey(new Date())){ localStorage.setItem('v4_bond_open',_dkey(new Date())); bondAdd(2); } // 每日首開 +2
+
+// ═══════════════════ 第十二批 · 季度新番一覽（Bangumi 每週放送表） ═══════════════════
+let _seasonData=null;
+function closeSeason(){ const ov=document.getElementById('seasonOv'); if(ov) ov.remove(); }
+async function openSeason(){
+  closeSeason();
+  const ov=document.createElement('div'); ov.id='seasonOv'; ov.className='modal-overlay show'; ov.style.zIndex=3000;
+  ov.innerHTML='<div class="season-panel"><h3>季度新番 · 本季放送表</h3><div class="season-sub">資料來自 Bangumi 番組計畫，點「收入想看」即加入片單想看分類</div><div id="seasonBody" class="season-sub">拉取中…</div></div>';
+  ov.addEventListener('click',e=>{ if(e.target===ov) closeSeason(); });
+  document.body.appendChild(ov);
+  try{
+    if(!_seasonData){
+      const r=await fetch('https://api.bgm.tv/calendar');
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      _seasonData=await r.json();
+    }
+    renderSeason();
+  }catch(e){ const b=document.getElementById('seasonBody'); if(b) b.textContent='拉取失敗：'+e.message; }
+}
+function seasonHas(name,cn){
+  const norm=s=>String(s||'').trim().toLowerCase();
+  return anime.some(a=>{ const n=norm(a.name); return n&&(n===norm(name)||n===norm(cn)); });
+}
+function renderSeason(){
+  const body=document.getElementById('seasonBody'); if(!body||!_seasonData) return;
+  body.className='';
+  const todayId=new Date().getDay()||7; // Bangumi weekday.id：1=一…7=日
+  const days=_seasonData.slice().sort((a,b)=>((a.weekday.id-todayId+7)%7)-((b.weekday.id-todayId+7)%7)); // 今日排最前
+  body.innerHTML=days.map(d=>{
+    const items=(d.items||[]).map(it=>{
+      const cn=it.name_cn||'', nm=cn||it.name, img=(it.images&&(it.images.common||it.images.large))||'';
+      const has=seasonHas(it.name,cn);
+      return `<div class="season-item">${img?`<img loading="lazy" src="${esc(img)}" alt="">`:''}<div class="sn" title="${esc(it.name)}">${esc(nm)}</div><div class="sd">${esc(it.air_date||'')}</div>
+        <button type="button" class="season-add" data-day="${d.weekday.id%7}" data-name="${esc(nm)}" data-img="${esc(img)}" data-eps="${Number(it.eps)||0}" ${has?'disabled':''}>${has?'已在片單':'收入想看'}</button></div>`;
+    }).join('');
+    return `<div class="season-day${d.weekday.id===todayId?' today':''}">週${(d.weekday.cn||'').replace(/星期|週|周/g,'')}${d.weekday.id===todayId?' · 今日':''}</div><div class="season-grid">${items}</div>`;
+  }).join('');
+  body.querySelectorAll('.season-add:not([disabled])').forEach(btn=>btn.addEventListener('click',async()=>{
+    btn.disabled=true; btn.textContent='加入中…';
+    const it=await dbAdd({name:btn.dataset.name,link:'',episode:0,totalEpisodes:Number(btn.dataset.eps)||null,imageUrl:btn.dataset.img,updateDay:String(btn.dataset.day),category:'watchlist'});
+    btn.textContent=it?'已在片單':'失敗，點我重試';
+    if(!it) btn.disabled=false;
+  }));
+}
 
 // ═══════════════════ START ═══════════════════
 const _initTimeout=setTimeout(()=>{ if(!document.getElementById('appScreen').classList.contains('active')) showScreen('auth'); },8000);

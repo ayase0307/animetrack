@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, globalShortcut } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
@@ -157,6 +157,13 @@ app.whenReady().then(() => {
   createTray();
   setupAutoUpdate();
 
+  // 全域快捷鍵：Ctrl+Alt+= 幫最近播放的作品 +1（被其他程式占用時靜默略過）
+  try {
+    globalShortcut.register('Control+Alt+=', () => {
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('global:inc');
+    });
+  } catch (e) {}
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
     else showMainWindow();
@@ -167,6 +174,26 @@ app.on('before-quit', () => { isQuitting = true; });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('will-quit', () => { globalShortcut.unregisterAll(); });
+
+// ── 自動備份：寫入 userData/backups，保留最近 14 份 ──
+const BACKUP_DIR = path.join(app.getPath('userData'), 'backups');
+ipcMain.handle('backup:write', (_event, json) => {
+  try {
+    if (typeof json !== 'string' || json.length > 50 * 1024 * 1024) return { ok: false, error: 'invalid payload' };
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const d = new Date();
+    const file = `anime-backup-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.json`;
+    fs.writeFileSync(path.join(BACKUP_DIR, file), json, 'utf8');
+    const olds = fs.readdirSync(BACKUP_DIR).filter(f => /^anime-backup-.*\.json$/.test(f)).sort();
+    while (olds.length > 14) fs.unlinkSync(path.join(BACKUP_DIR, olds.shift()));
+    return { ok: true, file };
+  } catch (err) { return { ok: false, error: err.message }; }
+});
+ipcMain.handle('backup:open-dir', () => {
+  try { fs.mkdirSync(BACKUP_DIR, { recursive: true }); shell.openPath(BACKUP_DIR); } catch (e) {}
 });
 
 ipcMain.handle('anime:load', () => readAnimeList());
