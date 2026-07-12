@@ -12,6 +12,16 @@
 
 ---
 
+## 2026-07-12（第十五批）— 設計向優化四項（未發版）
+
+只動 `index.html`。與十四批一起等素材到位發 v0.5.2。
+
+- **彈窗宣紙化**：toast 改宣紙字條（紙色漸層底＋墨字、左緣色條依型別、微旋轉滾入，兩主題共用紙色；已從 `.modal` 群組選擇器移除 `.toast`）；印章字圖示 妥／誤／訊。確認框 emoji 在 `showConfirm` 內映射成字印（🚪離 🗑️焚 ⚠️慎 📥納，未知 icon 原樣通過）、`.confirm-icon` 改朱砂方印、`.confirm-modal` 上下加卷軸金線（::before/::after）。
+- **今日燈籠**：`todayBreath` 由青轉暖紅金；純 CSS 小燈籠掛在 **`.card-scrim::after`**（簷下搖曳 `lanternSway`）。**坑：`.card-cover::after` 是既有材質疊層，第一版掛那裡直接把它劫持（追印消失＋定位錯亂），勿再犯**。掛 scrim 另有翻面自動隱藏的好處。hover 補 `perspective(700px) rotateX(1.4deg)` 微傾斜（其餘 hover 效果本就豐富，未加碼）。
+- **週曆竹簡化**：`.wc-col` 竹節紋（repeating-linear-gradient 48px）＋圓筒感＋簡首穿孔（::before）＋整排繩線（`.week-cal::before`）；今日簡 `translateY(7px)` 抽出；空日「閒」字（原「—」）。淺色主題竹簡變體另寫（原 `.wc-col` 在 light 群組選擇器裡，已拆出）。≤900px 隱藏繩線與穿孔、取消抽出。
+- **行動版**：守護獸 ≤820px 改 64px 縮小版不再隱藏；時辰台詞包 `.shichen-line`，≤820px 只顯「節氣·X時」、≤480px 全隱；≤560px 工具列下拉 2-up 排列（`flex:1 1 calc(50% - 8px)`）、搜尋框整行。
+- 驗證：inline JS 語法全過；Electron harness 桌面＋390px 各項 getComputedStyle 檢查全過＋三張截圖。**測試坑：未渲染分頁裡的元素 `transform` 一律回報 none，驗 transform 前要先 `switchTab()` 並等 view transition；tab 按鈕 `.click()` 在 harness 內不觸發切換，直呼 `switchTab('week')`**。
+
 ## 2026-07-12（第十四批）— 守護獸顯眼化＋動圖支援（未發版）
 
 只動 `index.html`＋新增 `guoman-character-prompts.md`（素材提示詞，不影響程式）。發版等女角／守護獸素材到位一起。

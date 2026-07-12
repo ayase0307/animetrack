@@ -123,13 +123,23 @@ html[data-theme="light"] .ic-moon{display:none}
   transform:translateX(-130%);transition:transform .85s cubic-bezier(.3,.6,.3,1)}
 .anime-card:hover .card-cover::before{transform:translateX(130%)}
 
-/* ── 今日更新呼吸墨暈 ── */
+/* ── 今日更新：紅燈籠流光邊＋簷下小燈籠 ── */
+.anime-card.is-today{border-color:rgba(214,106,70,.38)}
 .anime-card.is-today:not(:hover){animation:todayBreath 4.5s ease-in-out infinite}
-@keyframes todayBreath{0%,100%{box-shadow:0 0 0 1px rgba(101,214,194,.16)}50%{box-shadow:0 0 24px -4px rgba(101,214,194,.42),0 0 0 1px rgba(101,214,194,.42)}}
+@keyframes todayBreath{0%,100%{box-shadow:0 0 0 1px rgba(232,120,74,.2)}50%{box-shadow:0 0 26px -4px rgba(232,120,74,.5),0 0 0 1px rgba(216,189,114,.45)}}
+.anime-card.is-today .card-scrim::after{content:'';position:absolute;top:-3px;right:32%;width:15px;height:19px;z-index:2;pointer-events:none;
+  border-radius:46%/50%;
+  background:radial-gradient(circle at 50% 36%,#e8604a,#a83a28 80%);
+  border-top:3px solid var(--gold);border-bottom:2px solid var(--gold);
+  box-shadow:0 0 12px 2px rgba(232,96,74,.5),inset 0 -3px 4px rgba(60,10,5,.45);
+  transform-origin:top center;animation:lanternSway 3.8s ease-in-out infinite}
+@keyframes lanternSway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@media (prefers-reduced-motion:reduce){.anime-card.is-today .card-scrim::after{animation:none}}
 
 /* ── 時辰問候 ── */
 .shichen{margin-left:16px;margin-right:auto;font-family:var(--font);font-size:.8rem;font-weight:600;color:var(--muted);letter-spacing:.08em;white-space:nowrap}
-@media (max-width:820px){.shichen{display:none}}
+@media (max-width:820px){.shichen{font-size:.72rem;letter-spacing:.04em;margin-left:10px}.shichen-line{display:none}}
+@media (max-width:480px){.shichen{display:none}}
 
 /* ── Ctrl+K 快速面板 ── */
 #quickOverlay{align-items:flex-start}
@@ -183,7 +193,7 @@ html[data-theme="light"] .ic-moon{display:none}
 @media (prefers-reduced-motion:reduce){
   .anime-card.ink-born,.anime-card.ink-dissolve{animation:none}
   .card-cover::before{display:none}
-  .anime-card.is-today:not(:hover){animation:none;box-shadow:0 0 0 1px rgba(101,214,194,.32)}
+  .anime-card.is-today:not(:hover){animation:none;box-shadow:0 0 0 1px rgba(232,120,74,.38)}
   .omikuji-tube.shake,.omikuji-card.reveal{animation:none}
   #scrollOpen{display:none!important}
 }
@@ -461,7 +471,12 @@ textarea.form-control{resize:vertical;min-height:78px;line-height:1.6}
 .modal-body{padding:24px}
 .modal-foot{display:flex;gap:10px;justify-content:flex-end;padding:0 24px 24px}
 .confirm-modal{max-width:400px;text-align:center}
-.confirm-icon{width:56px;height:56px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:28px auto 16px}
+.confirm-icon{width:56px;height:56px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;font-family:var(--font);margin:28px auto 16px;transform:rotate(-3deg)}
+.confirm-modal{position:relative}
+.confirm-modal::before,.confirm-modal::after{content:'';position:absolute;left:22px;right:22px;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(216,189,114,.42) 18%,rgba(216,189,114,.42) 82%,transparent)}
+.confirm-modal::before{top:12px}
+.confirm-modal::after{bottom:12px}
 .confirm-text{font-size:.96rem;line-height:1.6;padding:0 28px;margin-bottom:24px}
 .confirm-text strong{color:var(--accent)}
 .confirm-actions{display:flex;gap:10px;padding:0 24px 26px}
@@ -503,13 +518,22 @@ kbd{font-family:var(--mono);font-size:.78rem;background:var(--surface-2);border:
 
 /* ── TOASTS ── */
 .toast-container{position:fixed;top:18px;right:18px;display:flex;flex-direction:column;gap:10px;z-index:2000;pointer-events:none}
-.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--modal);border:1px solid var(--border-strong);border-radius:var(--r-md);box-shadow:var(--shadow);font-size:.88rem;font-weight:500;animation:toastIn .3s cubic-bezier(.16,1,.3,1);pointer-events:auto;max-width:340px}
-@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
-@keyframes toastOut{to{opacity:0;transform:translateX(40px)}}
-.toast-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;flex-shrink:0;color:#fff}
-.toast.success .toast-icon{background:var(--success)}
-.toast.error .toast-icon{background:var(--danger)}
-.toast.info .toast-icon{background:var(--info)}
+/* 宣紙字條：紙色底＋墨字＋朱印式圖示，兩主題共用（紙就是紙色） */
+.toast{display:flex;align-items:center;gap:10px;padding:12px 15px 12px 12px;
+  background:linear-gradient(105deg,#f6efdb,#eee3c6 62%,#e8dbbd);
+  border:1px solid rgba(84,68,36,.34);border-left:4px solid var(--cinnabar);
+  border-radius:3px 10px 10px 3px;box-shadow:0 10px 26px rgba(10,10,8,.42);
+  color:#2b2519;font-family:var(--font);font-size:.88rem;font-weight:600;
+  transform:rotate(-.6deg);animation:toastIn .38s cubic-bezier(.16,1,.3,1);pointer-events:auto;max-width:340px}
+@keyframes toastIn{from{opacity:0;transform:translateX(46px) rotate(2deg)}to{opacity:1;transform:rotate(-.6deg)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(46px) rotate(2deg)}}
+.toast-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;color:#fff8ef;font-family:var(--font);box-shadow:inset 0 0 0 1.5px rgba(255,248,239,.5);transform:rotate(-4deg)}
+.toast.success{border-left-color:var(--jade)}
+.toast.info{border-left-color:#3d6b8f}
+.toast.success .toast-icon{background:var(--jade)}
+.toast.error .toast-icon{background:var(--cinnabar)}
+.toast.info .toast-icon{background:#3d6b8f}
+@media (prefers-reduced-motion:reduce){.toast{animation:none;transform:none}}
 
 /* ── GUOMAN XUANHUAN DRAFT OVERRIDES ── */
 h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spacing:-0.01em}
@@ -544,7 +568,7 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
   radial-gradient(closest-side at 18% 12%,rgba(47,156,132,.18),transparent),
   radial-gradient(closest-side at 78% 86%,rgba(181,70,52,.14),transparent);
   filter:blur(28px);opacity:.82;z-index:-1}
-.auth-box,.form-card,.modal,.floating-bar,.toast{
+.auth-box,.form-card,.modal,.floating-bar{
   background:
     linear-gradient(135deg,rgba(246,241,225,.105),rgba(246,241,225,.035)),
     rgba(23,24,20,.88);
@@ -683,7 +707,7 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 .card-cover{background:linear-gradient(135deg,rgba(246,241,225,.08),rgba(47,156,132,.08))}
 /* hover：整張卡明顯動畫（浮起＋放大＋描金光暈呼吸） */
 .anime-card{transition:transform .32s cubic-bezier(.2,.85,.25,1),border-color .3s ease,box-shadow .3s ease}
-.anime-card:hover{transform:translateY(-10px) scale(1.03);border-color:rgba(216,189,114,.85);z-index:4;animation:cardBreath 2.6s ease-in-out infinite}
+.anime-card:hover{transform:perspective(700px) translateY(-10px) scale(1.03) rotateX(1.4deg);border-color:rgba(216,189,114,.85);z-index:4;animation:cardBreath 2.6s ease-in-out infinite}
 @keyframes cardBreath{
   0%,100%{box-shadow:0 24px 60px -26px rgba(0,0,0,.72),0 0 0 1px rgba(216,189,114,.5),0 0 26px -4px rgba(216,189,114,.42),0 0 56px -22px rgba(47,156,132,.4)}
   50%{box-shadow:0 32px 74px -26px rgba(0,0,0,.78),0 0 0 1px rgba(216,189,114,.92),0 0 42px -2px rgba(216,189,114,.66),0 0 88px -16px rgba(47,156,132,.62)}
@@ -828,7 +852,7 @@ html.theme-vt::view-transition-new(root){mix-blend-mode:normal}
 .week-label.today{color:var(--gold)}
 .week-item.today-item{background:rgba(216,189,114,.14);color:var(--gold)}
 .modal-overlay{background:rgba(7,8,6,.72)}
-.confirm-icon{background:rgba(181,70,52,.15);color:#ffb4a7}
+.confirm-icon{background:linear-gradient(135deg,var(--cinnabar),#8f3427);color:#fff3e4;box-shadow:inset 0 0 0 2px rgba(255,243,228,.5),0 6px 16px rgba(181,70,52,.35)}
 .confirm-text strong{color:var(--gold)}
 kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
 .empty{
@@ -986,7 +1010,11 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
 
 @media(max-width:560px){
   .app-main{padding:16px}
-  .anime-grid,.anime-grid.compact-view{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .toolbar{gap:8px}
+  .search-input{flex-basis:100%}
+  .ctrl-select{flex:1 1 calc(50% - 8px);min-width:0}
+  .today-banner{padding-right:18px}
+  .anime-grid,.anime-grid.compact-view{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 10px}
   .card-cover{aspect-ratio:1/1.05}
   .list-view .anime-card{grid-template-columns:92px minmax(0,1fr);min-height:126px}
   .list-view .card-cover{min-height:126px}
@@ -1004,10 +1032,22 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
 
 /* ══════════ v0.4.0 ══════════ */
 /* ── 週曆分頁：七曜更新時刻 ── */
-.week-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
-.wc-col{border:1px solid var(--border);border-radius:var(--r-lg);padding:10px 8px;display:flex;flex-direction:column;gap:9px;min-height:150px;
-  background:linear-gradient(145deg,rgba(246,241,225,.055),rgba(246,241,225,.02))}
-.wc-col.today{border-color:rgba(216,189,114,.55);background:linear-gradient(180deg,rgba(216,189,114,.10),rgba(47,156,132,.06));box-shadow:0 0 26px -12px rgba(216,189,114,.5)}
+/* ── 週曆竹簡：七片竹簡以繩串起，今日簡點亮微抽出 ── */
+.week-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;position:relative;padding-top:13px}
+.week-cal::before{content:'';position:absolute;top:9px;left:1%;right:1%;height:3px;border-radius:2px;z-index:0;
+  background:linear-gradient(90deg,transparent,rgba(150,112,62,.6) 4%,rgba(206,172,110,.5) 50%,rgba(150,112,62,.6) 96%,transparent)}
+.wc-col{position:relative;z-index:1;border:1px solid rgba(168,146,98,.3);border-radius:11px 11px 14px 14px;padding:20px 8px 10px;display:flex;flex-direction:column;gap:9px;min-height:150px;
+  background:
+    repeating-linear-gradient(180deg,transparent 0 46px,rgba(60,50,30,.14) 46px 48px),
+    linear-gradient(90deg,rgba(30,28,18,.22),transparent 18%,transparent 82%,rgba(30,28,18,.26)),
+    linear-gradient(180deg,rgba(214,196,148,.13),rgba(246,241,225,.045) 30%,rgba(214,196,148,.07))}
+.wc-col::before{content:'';position:absolute;top:6px;left:50%;width:9px;height:9px;transform:translateX(-50%);border-radius:50%;z-index:1;
+  background:rgba(12,12,9,.85);box-shadow:inset 0 0 0 2px rgba(206,172,110,.55)}
+.wc-col.today{transform:translateY(7px);border-color:rgba(216,189,114,.6);background:
+  repeating-linear-gradient(180deg,transparent 0 46px,rgba(60,50,30,.14) 46px 48px),
+  linear-gradient(90deg,rgba(30,28,18,.18),transparent 18%,transparent 82%,rgba(30,28,18,.22)),
+  linear-gradient(180deg,rgba(216,189,114,.14),rgba(47,156,132,.07));box-shadow:0 0 26px -10px rgba(216,189,114,.55)}
+@media (prefers-reduced-motion:reduce){.wc-col.today{transform:none}}
 .wc-head{text-align:center;font-family:var(--font);font-weight:800;font-size:.94rem;color:var(--muted);padding:3px 0 9px;border-bottom:1px solid var(--border)}
 .wc-col.today .wc-head{color:var(--gold)}
 .wc-head small{display:block;font-size:.64rem;font-weight:600;color:var(--cinnabar);letter-spacing:.3em;margin-top:2px}
@@ -1020,9 +1060,9 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
 .wc-plus{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(9,10,8,.62);color:#fff;font-size:16px;line-height:1;cursor:pointer;opacity:0;transition:opacity .15s,background .15s;backdrop-filter:blur(4px)}
 .wc-card:hover .wc-plus{opacity:1}
 .wc-plus:hover{background:var(--jade)}
-.wc-none{color:var(--faint);font-size:.78rem;text-align:center;padding:16px 0}
+.wc-none{color:var(--faint);font-family:var(--font);font-size:1.35rem;font-weight:700;text-align:center;padding:22px 0;opacity:.5;letter-spacing:.1em}
 .wc-note{margin-top:14px;color:var(--faint);font-size:.8rem;text-align:center}
-@media(max-width:900px){.week-cal{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.week-cal{grid-template-columns:repeat(2,1fr);padding-top:0}.week-cal::before{display:none}.wc-col{padding-top:12px}.wc-col::before{display:none}.wc-col.today{transform:none}}
 
 /* ── 卡片翻面：點封面如折扇翻轉看詳情 ──
    注意：.card-cover 有 overflow:hidden 會 flatten preserve-3d，
@@ -1079,7 +1119,7 @@ html[data-theme="light"] .sfx.firefly{background:#a8821e;box-shadow:0 0 7px 2px 
 }
 
 /* ── 宣紙主題打磨：國漫暗色覆蓋層在淺色下的對應版 ── */
-html[data-theme="light"] .auth-box,html[data-theme="light"] .form-card,html[data-theme="light"] .modal,html[data-theme="light"] .floating-bar,html[data-theme="light"] .toast{
+html[data-theme="light"] .auth-box,html[data-theme="light"] .form-card,html[data-theme="light"] .modal,html[data-theme="light"] .floating-bar{
   background:linear-gradient(135deg,rgba(255,252,244,.92),rgba(244,237,220,.96));
   box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.6)}
 html[data-theme="light"] .app-header{background:linear-gradient(180deg,rgba(248,243,230,.96),rgba(248,243,230,.78));border-bottom-color:rgba(138,111,40,.3)}
@@ -1094,8 +1134,15 @@ html[data-theme="light"] .card-cover::after{background:linear-gradient(180deg,rg
 html[data-theme="light"] .sync-pill,html[data-theme="light"] .icon-btn,html[data-theme="light"] .user-btn,html[data-theme="light"] .view-toggle,html[data-theme="light"] .img-mode{background:rgba(43,37,25,.05);border-color:rgba(84,68,36,.2)}
 html[data-theme="light"] .chip{background:rgba(43,37,25,.045);border-color:rgba(84,68,36,.18)}
 html[data-theme="light"] .icon-btn:hover,html[data-theme="light"] .user-btn:hover,html[data-theme="light"] .btn-secondary:hover,html[data-theme="light"] .view-btn:hover,html[data-theme="light"] .chip:hover{background:rgba(43,37,25,.1);border-color:rgba(138,111,40,.5)}
-html[data-theme="light"] .summary-pill,html[data-theme="light"] .stat-card,html[data-theme="light"] .week-col,html[data-theme="light"] .setup-step,html[data-theme="light"] .wc-col{background:linear-gradient(145deg,rgba(255,252,244,.85),rgba(43,37,25,.035));border-color:rgba(84,68,36,.2)}
-html[data-theme="light"] .wc-col.today{background:linear-gradient(180deg,rgba(138,111,40,.12),rgba(31,122,99,.06));border-color:rgba(138,111,40,.5)}
+html[data-theme="light"] .summary-pill,html[data-theme="light"] .stat-card,html[data-theme="light"] .week-col,html[data-theme="light"] .setup-step{background:linear-gradient(145deg,rgba(255,252,244,.85),rgba(43,37,25,.035));border-color:rgba(84,68,36,.2)}
+html[data-theme="light"] .wc-col{border-color:rgba(120,96,52,.32);background:
+  repeating-linear-gradient(180deg,transparent 0 46px,rgba(84,68,36,.1) 46px 48px),
+  linear-gradient(90deg,rgba(84,68,36,.1),transparent 18%,transparent 82%,rgba(84,68,36,.12)),
+  linear-gradient(180deg,rgba(224,206,158,.4),rgba(255,252,244,.65) 30%,rgba(230,215,172,.32))}
+html[data-theme="light"] .wc-col.today{border-color:rgba(138,111,40,.5);background:
+  repeating-linear-gradient(180deg,transparent 0 46px,rgba(84,68,36,.1) 46px 48px),
+  linear-gradient(90deg,rgba(84,68,36,.08),transparent 18%,transparent 82%,rgba(84,68,36,.1)),
+  linear-gradient(180deg,rgba(138,111,40,.14),rgba(31,122,99,.06))}
 html[data-theme="light"] .progress-bar{background:rgba(43,37,25,.12)}
 html[data-theme="light"] .card-stars .star:not(.filled){color:rgba(43,37,25,.18)}
 html[data-theme="light"] kbd{background:rgba(43,37,25,.06);border-color:rgba(84,68,36,.35)}
@@ -1212,7 +1259,7 @@ html[data-theme="light"] .fest-bridge{border-top-color:rgba(163,120,31,.35)}
 @keyframes spiritFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2.5deg)}}
 @keyframes spiritWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg) scale(1.06)}45%{transform:rotate(8deg) scale(1.1)}70%{transform:rotate(-5deg) scale(1.05)}}
 @keyframes spiritEvolve{0%{filter:drop-shadow(0 0 0 rgba(216,189,114,0))}45%{filter:drop-shadow(0 0 26px rgba(216,189,114,.95)) brightness(1.5)}100%{filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}}
-@media (max-width:820px){#spiritPet{display:none}}
+@media (max-width:820px){#spiritPet{width:64px;left:10px;bottom:12px}#spiritPet::before{inset:-10px}} /* 手機改縮小版，不再整個藏掉 */
 @media (prefers-reduced-motion:reduce){#spiritPet{animation:none}#spiritPet.wiggle,#spiritPet.evolve{animation:none}#spiritPet::before{animation:none;opacity:.6}}
 
 /* ══════════ v0.5.0 錦鯉池空狀態（素材缺失時退回墨字「空」） ══════════ */
@@ -2286,7 +2333,7 @@ function renderWeekCal(){
         <img src="${esc(a.imageUrl||FALLBACK(a.name))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${esc(FALLBACK(a.name))}'">
         <button class="wc-plus" onclick="event.stopPropagation();incEp('${a.id}')" title="看完一集 +1" aria-label="看完一集">＋</button>
         <div class="wc-info"><div class="wc-name">${esc(a.name)}</div><div class="wc-ep">第 ${a.episode} 集${a.totalEpisodes?' / '+a.totalEpisodes:''}</div></div>
-      </div>`).join('')||'<div class="wc-none">—</div>'}
+      </div>`).join('')||'<div class="wc-none">閒</div>'}
     </div>`;
   }).join('');
   const un=anime.filter(a=>!a.finished&&!a.updateDay&&getCat(a.id)!=='watchlist').length;
@@ -2619,7 +2666,8 @@ async function submitEdit(e){
 
 // ═══════════════════ CONFIRM / HELP MODAL ═══════════════════
 function showConfirm(text,icon,cb){
-  document.getElementById('confirmIcon').textContent=icon||'⚠️';
+  const seals={'🚪':'離','🗑️':'焚','⚠️':'慎','📥':'納'}; // emoji 呼叫端不動，這裡映射成水墨字印
+  document.getElementById('confirmIcon').textContent=seals[icon]||icon||'慎';
   document.getElementById('confirmText').innerHTML=text;
   confirmCb=cb; document.getElementById('confirmOverlay').classList.add('show');
   setTimeout(()=>document.getElementById('confirmOkBtn').focus(),50);
@@ -2632,7 +2680,7 @@ function closeHelp(){ document.getElementById('helpOverlay').classList.remove('s
 // ═══════════════════ TOASTS ═══════════════════
 function toast(type,msg){
   const c=document.getElementById('toastContainer');
-  const icons={success:'✓',error:'✕',info:'i'};
+  const icons={success:'妥',error:'誤',info:'訊'}; // 印章字，配宣紙字條
   const el=document.createElement('div'); el.className=`toast ${type}`;
   el.innerHTML=`<div class="toast-icon">${icons[type]||'i'}</div><span>${esc(msg)}</span>`;
   el.setAttribute('role','alert'); c.appendChild(el);
@@ -2919,7 +2967,7 @@ const SHICHEN_LINES=['夜深了，再一集就好','萬籟俱寂，好夢勝追�
 function renderShichen(){
   const el=document.getElementById('shichen'); if(!el) return;
   const i=Math.floor(((new Date().getHours()+1)%24)/2);
-  el.textContent=currentTerm()+' · '+SHICHEN_NAMES[i]+'時 · '+SHICHEN_LINES[i];
+  el.innerHTML=currentTerm()+' · '+SHICHEN_NAMES[i]+'時<span class="shichen-line"> · '+SHICHEN_LINES[i]+'</span>'; // 內容全來自本檔常數，無注入疑慮；台詞包 span 供手機隱藏
 }
 
 // ═══════════════════ 四季節氣氛圍 ═══════════════════
