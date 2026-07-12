@@ -12,6 +12,15 @@
 
 ---
 
+## 2026-07-12（第十四批）— 守護獸顯眼化＋動圖支援（未發版）
+
+只動 `index.html`＋新增 `guoman-character-prompts.md`（素材提示詞，不影響程式）。發版等女角／守護獸素材到位一起。
+
+- **守護獸顯眼化**：`#spiritPet` 84→110px；新增 `::before` 青玉靈氣光暈（radial-gradient＋`spiritAura` 呼吸動畫，與 `spiritFloat` 同 5.4s 週期）；睡眠時光暈調暗至 .22 不呼吸；reduced-motion 光暈停在 .6。
+- **動圖支援**：`updateSpirit` 改為優先載 `assets/spirit-{stage}.webp`（動態貼圖），onerror 退回 `.png`，PNG 也缺才整個隱藏——之後丟動態 webp 進 assets/ 即生效，不用改程式。
+- **素材提示詞**：`guoman-character-prompts.md` 收錄靈訊女角（斗破風性感**躺姿橫圖** 1536×768，美杜莎系＋雲韻系兩組）與守護獸三階段動態貼圖（512×512 無縫循環）提示詞。女角素材到位後需調 `.spirit-char` CSS（橫圖寬度上限、避免壓橫幅文字）。
+- 驗證：inline JS 語法全過；Electron harness 5/5（webp 缺檔退 PNG、110px、光暈存在＋動畫運行）＋截圖。
+
 ## 2026-07-12（第十三批）— 星等篩選＋手動置頂（併第十～十二批發 v0.5.1）
 
 只動 `index.html`（＋版本號）。本批與第十～十二批一起發 v0.5.1（十、十一批動過 main.js/preload.js，需重跑 electron-builder）。
