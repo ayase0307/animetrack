@@ -12,6 +12,11 @@
 
 ---
 
+## 2026-07-13（第十八批・素材已接）— 兩側侍立女角上線（與十七批一起發 v0.5.3）
+
+素材：使用者生成 5120×7680 透明原圖（`side-char-*-8k.png`，17–21MB，**不進版控**；electron-builder 加 `!assets/*-8k.png` 排除），壓成 `side-char-xiaobai.webp`／`side-char-siyouyou.webp`（h1040 yuva420p q85，各 ~110KB）。
+尺寸公式改為**寬度跟留白掛鉤**：`width:calc((100vw - 1520px)/2 + 24px);max-width:320px;height:auto`，門檻 1600→**1700px**——第一版固定 `height:46vh` 在 1920 會寬到 306px、小白九尾壓到第一張卡標題；改掛留白後最多滲入 app-main padding 24px，壓不到卡片（harness 1920 驗證通過）。
+
 ## 2026-07-13（第十八批）— 兩側侍立女角預接（等素材，未發版）
 
 只動 `index.html`＋提示詞文件。因靈訊女角只在「今日有更新」時現身，使用者要在頁面兩側留白區（內容 max-width 1520px 置中）加常駐站姿女角：左＝誅仙小白、右＝牧神記司幼幽。

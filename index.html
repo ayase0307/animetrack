@@ -751,11 +751,11 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 @keyframes charFloatM{0%,100%{transform:translateY(0) scaleX(-1)}50%{transform:translateY(-5px) scaleX(-1)}}
 @keyframes spiritIn{from{opacity:0}to{opacity:1}}
 /* 兩側侍立女角（誅仙小白＝左、牧神記司幼幽＝右）：素材缺檔 onerror 自動移除，寬螢幕留白區才顯示 */
-.side-char{position:fixed;bottom:0;height:min(46vh,520px);width:auto;z-index:2;pointer-events:none;display:none;
+.side-char{position:fixed;bottom:0;width:calc((100vw - 1520px)/2 + 24px);max-width:320px;height:auto;z-index:2;pointer-events:none;display:none;
   filter:drop-shadow(0 12px 24px rgba(0,0,0,.4));animation:charFloat 6.5s ease-in-out infinite,spiritIn .8s ease both}
 .side-char-left{left:6px}
 .side-char-right{right:6px}
-@media (min-width:1600px){.side-char{display:block}}
+@media (min-width:1700px){.side-char{display:block}} /* 寬度跟留白掛鉤：最多滲入內容區 padding 24px，壓不到卡片 */
 @media (prefers-reduced-motion:reduce){.side-char{animation:spiritIn .4s ease both}}
 @media (max-width:920px){.spirit-char{height:94px}.today-banner{padding-left:200px;padding-right:200px}}
 @media (max-width:680px){.spirit-char{display:none}.today-banner{padding-left:18px;padding-right:18px}}

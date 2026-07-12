@@ -1,6 +1,6 @@
 {
   "name": "animetrack",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "追劇小幫手桌面版",
   "main": "main.js",
   "scripts": {
@@ -21,7 +21,8 @@
       "*.svg",
       "assets/*.png",
       "assets/*.webp",
-      "!assets/xianxia-girl-*-recline-*.png"
+      "!assets/xianxia-girl-*-recline-*.png",
+      "!assets/*-8k.png"
     ],
     "win": {
       "target": "nsis",
