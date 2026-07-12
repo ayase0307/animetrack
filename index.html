@@ -750,6 +750,13 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 @keyframes charFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes charFloatM{0%,100%{transform:translateY(0) scaleX(-1)}50%{transform:translateY(-5px) scaleX(-1)}}
 @keyframes spiritIn{from{opacity:0}to{opacity:1}}
+/* 兩側侍立女角（誅仙小白＝左、牧神記司幼幽＝右）：素材缺檔 onerror 自動移除，寬螢幕留白區才顯示 */
+.side-char{position:fixed;bottom:0;height:min(46vh,520px);width:auto;z-index:2;pointer-events:none;display:none;
+  filter:drop-shadow(0 12px 24px rgba(0,0,0,.4));animation:charFloat 6.5s ease-in-out infinite,spiritIn .8s ease both}
+.side-char-left{left:6px}
+.side-char-right{right:6px}
+@media (min-width:1600px){.side-char{display:block}}
+@media (prefers-reduced-motion:reduce){.side-char{animation:spiritIn .4s ease both}}
 @media (max-width:920px){.spirit-char{height:94px}.today-banner{padding-left:200px;padding-right:200px}}
 @media (max-width:680px){.spirit-char{display:none}.today-banner{padding-left:18px;padding-right:18px}}
 @media (prefers-reduced-motion:reduce){.spirit-char{animation:spiritIn .4s ease both}.banner-mist::before,.banner-mist::after{animation:none}}
@@ -1784,6 +1791,10 @@ html[data-theme="light"] .season-item{background:rgba(43,37,25,.03)}
 </div>
 
 <!-- SHORTCUTS HELP MODAL -->
+<!-- 兩側侍立女角（素材未到位時 onerror 自動移除） -->
+<img class="side-char side-char-left" src="assets/side-char-xiaobai.webp" alt="" aria-hidden="true" onerror="this.remove()">
+<img class="side-char side-char-right" src="assets/side-char-siyouyou.webp" alt="" aria-hidden="true" onerror="this.remove()">
+
 <!-- 桌面版視窗控制（web 版隱藏） -->
 <div id="winDrag" aria-hidden="true"></div>
 <div class="win-controls">
