@@ -756,6 +756,23 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 .side-char-left{left:6px}
 .side-char-right{right:6px}
 @media (min-width:1700px){.side-char{display:block}} /* 寬度跟留白掛鉤：最多滲入內容區 padding 24px，壓不到卡片 */
+/* 側立女角對話框：宣紙字條語彙（同 toast），頭頂浮現、墨字＋角色朱印 */
+.side-bubble{position:fixed;z-index:61;max-width:200px;padding:10px 13px;pointer-events:none;opacity:0;
+  background:linear-gradient(105deg,#f6efdb,#eee3c6 62%,#e8dbbd);border:1px solid rgba(84,68,36,.34);
+  border-radius:10px;box-shadow:0 10px 24px rgba(10,10,8,.38);
+  color:#2b2519;font-family:var(--font);font-size:.84rem;font-weight:600;line-height:1.6;
+  transform:translateY(8px) rotate(-.6deg);transition:opacity .35s ease,transform .35s ease}
+.side-bubble.show{opacity:1;transform:translateY(0) rotate(-.6deg)}
+.side-bubble::after{content:'';position:absolute;bottom:-6.5px;width:12px;height:12px;transform:rotate(45deg);
+  background:#e8dbbd;border-right:1px solid rgba(84,68,36,.34);border-bottom:1px solid rgba(84,68,36,.34)}
+.side-bubble-left::after{left:26px}
+.side-bubble-right::after{right:26px}
+.sb-seal{display:inline-flex;width:20px;height:20px;margin-right:7px;border-radius:5px;align-items:center;justify-content:center;
+  font-style:normal;font-size:.7rem;font-weight:800;color:#fff8ef;transform:rotate(-4deg);vertical-align:-4px;
+  box-shadow:inset 0 0 0 1.5px rgba(255,248,239,.5)}
+.sb-seal-b{background:var(--cinnabar)}
+.sb-seal-y{background:#3d6b8f}
+@media (prefers-reduced-motion:reduce){.side-bubble{transition:opacity .2s ease;transform:none}.side-bubble.show{transform:none}}
 @media (prefers-reduced-motion:reduce){.side-char{animation:spiritIn .4s ease both}}
 @media (max-width:920px){.spirit-char{height:94px}.today-banner{padding-left:200px;padding-right:200px}}
 @media (max-width:680px){.spirit-char{display:none}.today-banner{padding-left:18px;padding-right:18px}}
@@ -3269,6 +3286,60 @@ function updateSpirit(){
   };
   img.src=`assets/spirit-${cur}.webp`;
 }
+
+// ═══════════════════ 側立女角對話（文字過渡版，未來換語音） ═══════════════════
+// 小白＝誅仙九尾天狐（千年狐的慵懶調侃）；司幼幽＝牧神記司婆婆真身（慈愛＋幽冥威嚴）
+const SIDE_CHAR_LINES={
+  left:['白','sb-seal-b',[ // 小白
+    '千年歲月悠悠，不及你追番一刻歡喜。',
+    '小狐狸掐指一算——你今晚，又要熬夜。',
+    '人間百年一晃眼，好故事值得慢慢看。',
+    '你也是個傷心人麼？那就看部熱血的吧。',
+    '九條尾巴，九部想看的番，剛剛好。',
+    '玄火壇的火都困不住我，何況一部爛尾番。',
+    '狐岐山的月色再美，也記得回來追更。',
+    '這杯靈酒敬你，敬所有沒白追的番。',
+    '別盯著我瞧呀……番還沒看完呢。',
+    '我活了千年，最不缺的就是陪你的時間。'
+  ]],
+  right:['幽','sb-seal-y',[ // 司幼幽
+    '天黑，別出門。在家追番正好。',
+    '夜深了，看完這集就去歇著吧，乖。',
+    '衣裳縫好了，你的進度也該補上了。',
+    '大墟的黑暗不可怕，棄坑才可怕。',
+    '這孩子，又忘了標記進度。',
+    '心浮氣躁的時候，就回頭看看老故事。',
+    '莫怕，有婆婆在，什麼風波都傷不著你。',
+    '秦牧那孩子小時候，也最愛聽故事。',
+    '魔教又如何？日子照樣過成詩。',
+    '月色正好，適合補番。'
+  ]]
+};
+function sideSay(side){
+  const img=document.querySelector('.side-char-'+side);
+  if(!img||getComputedStyle(img).display==='none') return;
+  const [seal,sealCls,lines]=SIDE_CHAR_LINES[side];
+  let b=document.getElementById('sideBubble-'+side);
+  if(!b){ b=document.createElement('div'); b.id='sideBubble-'+side; b.className='side-bubble side-bubble-'+side; b.setAttribute('aria-hidden','true'); document.body.appendChild(b); }
+  b.innerHTML=`<i class="sb-seal ${sealCls}">${seal}</i>`+lines[Math.floor(Math.random()*lines.length)];
+  const r=img.getBoundingClientRect(), cx=r.left+r.width/2;
+  b.style.left='0px'; b.style.bottom=(innerHeight-r.top+8)+'px';
+  const bw=b.offsetWidth;
+  b.style.left=Math.max(8,Math.min(cx-bw*.38,innerWidth-bw-8))+'px';
+  b.classList.add('show');
+  clearTimeout(b._t); b._t=setTimeout(()=>b.classList.remove('show'),7000);
+}
+(function sideCharTalk(){
+  function tick(){
+    if(!document.hidden) sideSay(Math.random()<.5?'left':'right');
+    setTimeout(tick,50000+Math.random()*70000); // 50~120 秒隨機一位開口
+  }
+  setTimeout(tick,15000);
+  ['left','right'].forEach(side=>{ // 點擊即說：未來語音互動的文字前身
+    const img=document.querySelector('.side-char-'+side);
+    if(img){ img.style.pointerEvents='auto'; img.style.cursor='pointer'; img.onclick=()=>sideSay(side); }
+  });
+})();
 
 // 守護獸閒置小動作：靜態圖也有生命感（使用者不生成動圖的替代方案）
 (function spiritIdleLife(){
