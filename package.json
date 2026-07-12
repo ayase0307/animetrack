@@ -19,7 +19,9 @@
       "viewer.html",
       "*.png",
       "*.svg",
-      "assets/*.png"
+      "assets/*.png",
+      "assets/*.webp",
+      "!assets/xianxia-girl-*-recline-*.png"
     ],
     "win": {
       "target": "nsis",
