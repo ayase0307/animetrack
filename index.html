@@ -714,7 +714,7 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 }
 @media (prefers-reduced-motion:reduce){.anime-card:hover{animation:none;box-shadow:0 24px 60px -26px rgba(0,0,0,.72),0 0 0 1px rgba(216,189,114,.7)}}
 /* 靈訊橫幅的國漫少女（持玉卷軸） */
-.today-banner{position:relative;overflow:visible;padding-right:262px;min-height:74px}
+.today-banner{position:relative;overflow:visible;padding-left:250px;padding-right:250px;min-height:74px;justify-content:center;text-align:center}
 .today-banner::after{
   content:'';
   position:absolute;
@@ -741,16 +741,17 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
   background-repeat:repeat-x;background-size:auto 100%;animation:ridgeDrift 44s linear infinite}
 @keyframes mistDrift{from{background-position:0 0}to{background-position:-50% 0}}
 @keyframes ridgeDrift{from{background-position:0 0}to{background-position:-240px 0}}
-/* 右側：斗破風躺姿女角（透明 WebP 橫圖，日夜各一張） */
-.spirit-char{position:absolute;right:14px;bottom:-4px;height:118px;width:auto;pointer-events:none;z-index:3;
+/* 兩側躺姿女角：雲韻臥左、美杜莎臥右（鏡像讓頭朝中間文字），文字置中 */
+.spirit-char{position:absolute;bottom:-4px;height:118px;width:auto;pointer-events:none;z-index:3;
   filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));transform-origin:bottom center;
   animation:charFloat 5s ease-in-out infinite,spiritIn .7s ease both}
-html[data-theme="dark"] .spirit-char-day{display:none}
-html[data-theme="light"] .spirit-char-night{display:none}
+.spirit-char-day{left:14px}
+.spirit-char-night{right:14px;transform:scaleX(-1);animation-name:charFloatM,spiritIn}
 @keyframes charFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes charFloatM{0%,100%{transform:translateY(0) scaleX(-1)}50%{transform:translateY(-5px) scaleX(-1)}}
 @keyframes spiritIn{from{opacity:0}to{opacity:1}}
-@media (max-width:920px){.spirit-char{height:94px}.today-banner{padding-right:212px}}
-@media (max-width:680px){.spirit-char{display:none}.today-banner{padding-right:18px}}
+@media (max-width:920px){.spirit-char{height:94px}.today-banner{padding-left:200px;padding-right:200px}}
+@media (max-width:680px){.spirit-char{display:none}.today-banner{padding-left:18px;padding-right:18px}}
 @media (prefers-reduced-motion:reduce){.spirit-char{animation:spiritIn .4s ease both}.banner-mist::before,.banner-mist::after{animation:none}}
 /* +1 集數翻動＋墨水進度填充 */
 .anime-card.just-updated{animation:cardTap .55s ease}
@@ -1016,7 +1017,7 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
   .toolbar{gap:8px}
   .search-input{flex-basis:100%}
   .ctrl-select{flex:1 1 calc(50% - 8px);min-width:0}
-  .today-banner{padding-right:18px}
+  .today-banner{padding-left:16px;padding-right:16px}
   .anime-grid,.anime-grid.compact-view{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 10px}
   .card-cover{aspect-ratio:1/1.05}
   .list-view .anime-card{grid-template-columns:92px minmax(0,1fr);min-height:126px}

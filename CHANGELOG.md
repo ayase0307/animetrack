@@ -12,6 +12,13 @@
 
 ---
 
+## 2026-07-12（第十七批）— 靈訊雙女角排版（未發版）
+
+只動 `index.html`。使用者夜間測試以為守護獸功能被拿掉——實為第十二批睡眠機制（23–07 點擊不開選單），harness 實測選單／餵番／信件／拖曳全數健在，無程式問題。
+
+- **靈訊橫幅改雙女角**：取消日夜切換，兩張常駐——雲韻臥左（原圖頭朝右＝朝中間）、美杜莎臥右（`scaleX(-1)` 鏡像讓頭朝中間；因 animation 蓋 transform，鏡像寫進專用 `charFloatM` keyframes，reduced-motion 時靠 `.spirit-char-night` 的靜態 transform 保底）。文字改置中（`justify-content:center`），padding 左右各 250px（≤920px 200px、≤680px 隱藏雙姝）。
+- 驗證：語法全過；harness 4/4（兩張 naturalWidth、左右歸位、鏡像動畫名、置中）＋兩主題截圖。
+
 ## 2026-07-12（第十六批）— 躺姿女角上線（日夜各一張）＋守護獸閒置小動作（發 v0.5.2）
 
 - **靈訊女角**：使用者以 AI 生成美杜莎系／雲韻系躺姿原圖（實際 7680×3840 透明 PNG，各 12–15MB，**留在 assets/ 但不進版控**）。ffmpeg 壓成 `spirit-char-medusa.webp`／`spirit-char-yunyun.webp`（高 400、yuva420p、q85，各 ~55KB）進版控。HTML 兩張 `<img>` 常駐、CSS `html[data-theme=dark/light]` 各顯一張（夜墨＝美杜莎、宣紙＝雲韻）。`.today-banner` padding-right 156→262px；≤920px 圖高 94px／留白 212px；≤680px 隱藏不變。舊 `xianxia-girl-jade-scroll`／`spirit-fox` 兩張已無引用（仍在版控，未刪）。
