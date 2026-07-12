@@ -714,7 +714,7 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
 }
 @media (prefers-reduced-motion:reduce){.anime-card:hover{animation:none;box-shadow:0 24px 60px -26px rgba(0,0,0,.72),0 0 0 1px rgba(216,189,114,.7)}}
 /* 靈訊橫幅的國漫少女（持玉卷軸） */
-.today-banner{position:relative;overflow:visible;padding-right:156px;min-height:74px}
+.today-banner{position:relative;overflow:visible;padding-right:262px;min-height:74px}
 .today-banner::after{
   content:'';
   position:absolute;
@@ -741,12 +741,15 @@ h1,h2,h3,.card-title,.section-title,.stat-val{font-family:var(--font);letter-spa
   background-repeat:repeat-x;background-size:auto 100%;animation:ridgeDrift 44s linear infinite}
 @keyframes mistDrift{from{background-position:0 0}to{background-position:-50% 0}}
 @keyframes ridgeDrift{from{background-position:0 0}to{background-position:-240px 0}}
-/* 右側：玉卷軸少女（透明 PNG，乾淨無框） */
+/* 右側：斗破風躺姿女角（透明 WebP 橫圖，日夜各一張） */
 .spirit-char{position:absolute;right:14px;bottom:-4px;height:118px;width:auto;pointer-events:none;z-index:3;
   filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));transform-origin:bottom center;
-  animation:spiritFloat 5s ease-in-out infinite,spiritIn .7s ease both}
-@keyframes spiritFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  animation:charFloat 5s ease-in-out infinite,spiritIn .7s ease both}
+html[data-theme="dark"] .spirit-char-day{display:none}
+html[data-theme="light"] .spirit-char-night{display:none}
+@keyframes charFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes spiritIn{from{opacity:0}to{opacity:1}}
+@media (max-width:920px){.spirit-char{height:94px}.today-banner{padding-right:212px}}
 @media (max-width:680px){.spirit-char{display:none}.today-banner{padding-right:18px}}
 @media (prefers-reduced-motion:reduce){.spirit-char{animation:spiritIn .4s ease both}.banner-mist::before,.banner-mist::after{animation:none}}
 /* +1 集數翻動＋墨水進度填充 */
@@ -1256,11 +1259,15 @@ html[data-theme="light"] .fest-bridge{border-top-color:rgba(163,120,31,.35)}
 #spiritPet:hover{transform:scale(1.08)}
 #spiritPet.wiggle{animation:spiritWiggle .7s ease}
 #spiritPet.evolve{animation:spiritEvolve 1.4s ease}
+#spiritPet.hop{animation:spiritHop 1.2s cubic-bezier(.36,1.6,.4,1)}
+@keyframes spiritHop{0%,100%{transform:translateY(0)}25%{transform:translateY(-22px) rotate(-4deg)}45%{transform:translateY(0)}62%{transform:translateY(-10px) rotate(3deg)}78%{transform:translateY(0)}}
+#spiritPet.twirl{animation:spiritTwirl 1.4s ease-in-out}
+@keyframes spiritTwirl{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
 @keyframes spiritFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2.5deg)}}
 @keyframes spiritWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg) scale(1.06)}45%{transform:rotate(8deg) scale(1.1)}70%{transform:rotate(-5deg) scale(1.05)}}
 @keyframes spiritEvolve{0%{filter:drop-shadow(0 0 0 rgba(216,189,114,0))}45%{filter:drop-shadow(0 0 26px rgba(216,189,114,.95)) brightness(1.5)}100%{filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}}
 @media (max-width:820px){#spiritPet{width:64px;left:10px;bottom:12px}#spiritPet::before{inset:-10px}} /* 手機改縮小版，不再整個藏掉 */
-@media (prefers-reduced-motion:reduce){#spiritPet{animation:none}#spiritPet.wiggle,#spiritPet.evolve{animation:none}#spiritPet::before{animation:none;opacity:.6}}
+@media (prefers-reduced-motion:reduce){#spiritPet{animation:none}#spiritPet.wiggle,#spiritPet.evolve,#spiritPet.hop,#spiritPet.twirl{animation:none}#spiritPet::before{animation:none;opacity:.6}}
 
 /* ══════════ v0.5.0 錦鯉池空狀態（素材缺失時退回墨字「空」） ══════════ */
 .koi-pond{position:relative;width:min(420px,86%);height:220px;margin:0 auto 20px;border-radius:50%/44%;overflow:hidden;cursor:pointer;
@@ -1604,7 +1611,8 @@ html[data-theme="light"] .season-item{background:rgba(43,37,25,.03)}
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         <div><strong id="todayBannerText"></strong><span>記得去追進度！</span></div>
         <div class="banner-mist" aria-hidden="true"></div>
-        <img class="spirit-char" src="assets/xianxia-girl-jade-scroll-1024x1280.png" alt="" aria-hidden="true">
+        <img class="spirit-char spirit-char-night" src="assets/spirit-char-medusa.webp" alt="" aria-hidden="true">
+        <img class="spirit-char spirit-char-day" src="assets/spirit-char-yunyun.webp" alt="" aria-hidden="true">
       </div>
       <div class="drag-hint" id="dragHint">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
@@ -3249,6 +3257,21 @@ function updateSpirit(){
   };
   img.src=`assets/spirit-${cur}.webp`;
 }
+
+// 守護獸閒置小動作：靜態圖也有生命感（使用者不生成動圖的替代方案）
+(function spiritIdleLife(){
+  const ACTS=[['wiggle',900],['hop',1300],['twirl',1500]];
+  function tick(){
+    const el=document.getElementById('spiritPet');
+    if(el&&!el.classList.contains('sleeping')&&!document.hidden
+       &&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+      const [cls,dur]=ACTS[Math.floor(Math.random()*ACTS.length)];
+      el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),dur);
+    }
+    setTimeout(tick,35000+Math.random()*55000); // 35~90 秒隨機一次
+  }
+  setTimeout(tick,20000);
+})();
 
 // ═══════════════════ 錦鯉池空狀態（素材 assets/koi-top.png，缺圖退回墨字「空」） ═══════════════════
 (function initKoiPond(){

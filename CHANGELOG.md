@@ -12,6 +12,13 @@
 
 ---
 
+## 2026-07-12（第十六批）— 躺姿女角上線（日夜各一張）＋守護獸閒置小動作（發 v0.5.2）
+
+- **靈訊女角**：使用者以 AI 生成美杜莎系／雲韻系躺姿原圖（實際 7680×3840 透明 PNG，各 12–15MB，**留在 assets/ 但不進版控**）。ffmpeg 壓成 `spirit-char-medusa.webp`／`spirit-char-yunyun.webp`（高 400、yuva420p、q85，各 ~55KB）進版控。HTML 兩張 `<img>` 常駐、CSS `html[data-theme=dark/light]` 各顯一張（夜墨＝美杜莎、宣紙＝雲韻）。`.today-banner` padding-right 156→262px；≤920px 圖高 94px／留白 212px；≤680px 隱藏不變。舊 `xianxia-girl-jade-scroll`／`spirit-fox` 兩張已無引用（仍在版控，未刪）。
+- **修 keyframes 撞名**：`spiritFloat` 定義兩次（女角＋守護獸），後者覆蓋前者害躺姿圖會左右搖——女角改用獨立 `charFloat`。
+- **守護獸閒置小動作**（使用者決定不生成動圖的替代方案）：每 35–90 秒隨機做 wiggle／hop（彈跳兩下）／twirl（rotateY 轉身）一次；睡眠中、分頁隱藏（document.hidden）、reduced-motion 均跳過。動態 webp 支援保留，之後有素材仍可 drop-in。
+- 驗證：語法全過；harness 8/8（兩主題圖片切換與 naturalWidth、留白 262px、hop/twirl animationName、charFloat 未被覆蓋）＋兩主題截圖。**測試坑：23–07 時測守護獸，`#spiritPet.sleeping` 規則在源碼較後會蓋掉 hop/twirl（行為正確），手動驗 class 前要先移除 sleeping**。
+
 ## 2026-07-12（第十五批）— 設計向優化四項（未發版）
 
 只動 `index.html`。與十四批一起等素材到位發 v0.5.2。
