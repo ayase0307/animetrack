@@ -1,7 +1,7 @@
-{
+﻿{
   "name": "animetrack",
-  "version": "0.5.3",
-  "description": "追劇小幫手桌面版",
+  "version": "0.5.4",
+  "description": "餈賢?撠鼠???Ｙ?",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -9,7 +9,7 @@
   },
   "build": {
     "appId": "com.ayase0307.animetrack",
-    "productName": "追劇小幫手",
+    "productName": "餈賢?撠鼠??,
     "artifactName": "AnimeTrack-Setup-${version}.${ext}",
     "icon": "enso-play-icon.png",
     "files": [
