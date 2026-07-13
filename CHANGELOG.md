@@ -12,6 +12,14 @@
 
 ---
 
+## 2026-07-14 — **v0.5.4 已發版**（第十九～二十三批一次出）
+
+exe＋blockmap＋latest.yml 三件套已上 GitHub Release 並標 Latest，自動更新生效。內容：側立女角對話框、月璃換角＋十式動作、殘影根治、四位女角動態化。
+
+**發版事故記錄（教訓）**：bump 版本時用 PowerShell `(Get-Content -Raw) -replace` 改 package.json，PS 5.1 以系統 Big5 碼頁誤讀 UTF-8，中文全亂碼還吃掉引號弄壞 JSON，且已 push（57e083f）。從上一 commit `git checkout <sha> -- package.json` 還原後用 Claude 的 Edit 工具改，4e4b541 修復。**含中文的 UTF-8 檔案永遠不要用 PS 字串管線改，一律走 Edit 工具**。
+
+---
+
 ## 2026-07-14（第二十三批）— 四位女角動起來（未發版）
 
 只動 `assets/`，**index.html 零修改**——直接用動態 WebP 覆蓋原靜態檔名。使用者出四張 121 幀@20fps 高清 GIF（原檔 `assets/1~4.gif`，10~18MB，未進版控）：1=美杜莎（720×360 斜倚）、2=雲韻（同）、3=司幼幽新造型（474×720 立繪，紅紫髮火焰法術）、4=小白（同，白狐紅衣）。
