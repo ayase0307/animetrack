@@ -3357,15 +3357,16 @@ function sideSay(side){
   });
 })();
 
-// 月璃閒置生活：35~90 秒隨機一次——散步／跳一跳／跳舞（變身改由點擊觸發）
+// 月璃閒置生活：35~90 秒隨機一次——喝茶／散步／跳一跳／跳舞（變身改由點擊觸發）
 (function spiritIdleLife(){
   function tick(){
     const el=document.getElementById('spiritPet');
     if(el&&!el.classList.contains('sleeping')&&!document.hidden
        &&!matchMedia('(prefers-reduced-motion:reduce)').matches){
       const r=Math.random();
-      if(r<.5) yueliStroll();
-      else yueliPlay(r<.8?'jump':'dance');
+      if(r<(new Date().getHours()>=19?.35:.15)) yueliPlay('tea'); // 入夜後更常居家小酌茶
+      else if(r<.55) yueliStroll();
+      else yueliPlay(r<.85?'jump':'dance');
     }
     setTimeout(tick,35000+Math.random()*55000); // 35~90 秒隨機一次
   }

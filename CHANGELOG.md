@@ -12,6 +12,17 @@
 
 ---
 
+## 2026-07-13（第二十二批）— 殘影根治＋喝茶動作（未發版）
+
+動 `index.html`＋`assets/`。使用者回報所有動圖有殘影；並排重現（GIF 原始 vs WebP 轉檔各放大 390px 連拍）**實錘殘影只出現在 WebP 側**：跳舞扇子疊影、驚嚇紫邊拖尾。
+
+- **根因**：ffmpeg 的 libwebp 動態編碼對透明背景的幀處置（dispose method）設定不當，新幀透明處透出上一幀殘像。`anim_dump` 單幀看不出來（libwebp 自家合成器容錯），**必須在 Chromium 裡並排播放才看得到**。
+- **修法**：全部 12 套改用 Google 官方 libwebp 的 `gif2webp -m 6 -mt` 重轉（本機沒裝，直接抓官方 zip：`storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0-windows-x64.zip` 免安裝解壓即用）。fox 系的 loop=1 gif2webp 給不了，用同包 `webpmux -set loop 1`（注意是 `-set loop`，別寫成 `-loop`；in-place 覆寫要先寫 temp 再搬）。fox-back 反轉中繼 GIF 用 ffmpeg `reverse＋palettegen(reserve_transparent=1)＋paletteuse` 產生後再過 gif2webp。**教訓：GIF→動態 WebP 一律用 gif2webp，別用 ffmpeg**。
+- **喝茶新動作**：使用者出「居家夜寐-飲茶-透明循環」（308×285、24 幀@25/6、同 5.76s 週期）→ `yueli-tea.webp` 入閒置池：19 點後 35%／白天 15% 喝茶，其餘散步／跳跳／跳舞照舊。
+- 驗證：harness 23/23（新增喝茶項）＋並排截圖確認 WebP 與 GIF 逐幀一致。**harness 時序又踩兩坑**：斷言餘裕貼著計時邊界會假紅（統一留 ≥1s）；測試收尾補發的 pointerup 會被算成一次完整點擊、把選單打開，後續點擊測試就變成「關閉」——收尾後要先驗 `_fuEls` 把選單收回。
+
+---
+
 ## 2026-07-13（第二十一批）— 月璃四式新動作（未發版）
 
 動 `index.html`＋`assets/`。使用者再出四套像素 GIF（側躺睡覺 24 幀@25/6、驚嚇炸毛／害羞遮臉／召喚狐火 18 幀@25/8——**幀數 fps 不同但週期都是 5.76 秒**，`YUELI_DUR=5800` 通用），轉無損 WebP：`yueli-sleep/startle/shy/fire.webp`（皆無限循環）。
