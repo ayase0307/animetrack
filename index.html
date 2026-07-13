@@ -1273,26 +1273,20 @@ html[data-theme="light"] .fest-star.big{background:#a3781f;box-shadow:0 0 10px 2
 html[data-theme="light"] .fest-bridge{border-top-color:rgba(163,120,31,.35)}
 @media (prefers-reduced-motion:reduce){#festFx{display:none}}
 
-/* ══════════ v0.5.0 水墨守護獸（素材缺失時 JS 不建立） ══════════ */
+/* ══════════ 月璃駐守（原 v0.5.0 水墨守護獸，第二十批換角；素材缺失時 JS 不建立） ══════════ */
 #spiritPet{position:fixed;left:18px;bottom:16px;z-index:60;width:110px;cursor:pointer;user-select:none;-webkit-user-drag:none;
-  filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));animation:spiritFloat 5.4s ease-in-out infinite;transition:transform .25s ease}
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));transition:transform .25s ease} /* 動圖自帶動態，取消整體漂浮 */
 #spiritPet::before{content:'';position:absolute;inset:-16px;border-radius:50%;z-index:-1;pointer-events:none;
   background:radial-gradient(circle,rgba(47,156,132,.36),rgba(47,156,132,.13) 55%,transparent 72%);animation:spiritAura 5.4s ease-in-out infinite}
 #spiritPet.sleeping::before{animation:none;opacity:.22}
-#spiritPet img{width:100%;display:block;pointer-events:none}
+#spiritPet img{width:100%;display:block;pointer-events:none;image-rendering:pixelated} /* 像素風保銳利 */
 @keyframes spiritAura{0%,100%{opacity:.5;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
 #spiritPet:hover{transform:scale(1.08)}
 #spiritPet.wiggle{animation:spiritWiggle .7s ease}
-#spiritPet.evolve{animation:spiritEvolve 1.4s ease}
-#spiritPet.hop{animation:spiritHop 1.2s cubic-bezier(.36,1.6,.4,1)}
-@keyframes spiritHop{0%,100%{transform:translateY(0)}25%{transform:translateY(-22px) rotate(-4deg)}45%{transform:translateY(0)}62%{transform:translateY(-10px) rotate(3deg)}78%{transform:translateY(0)}}
-#spiritPet.twirl{animation:spiritTwirl 1.4s ease-in-out}
-@keyframes spiritTwirl{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
 @keyframes spiritFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2.5deg)}}
 @keyframes spiritWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg) scale(1.06)}45%{transform:rotate(8deg) scale(1.1)}70%{transform:rotate(-5deg) scale(1.05)}}
-@keyframes spiritEvolve{0%{filter:drop-shadow(0 0 0 rgba(216,189,114,0))}45%{filter:drop-shadow(0 0 26px rgba(216,189,114,.95)) brightness(1.5)}100%{filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}}
 @media (max-width:820px){#spiritPet{width:64px;left:10px;bottom:12px}#spiritPet::before{inset:-10px}} /* 手機改縮小版，不再整個藏掉 */
-@media (prefers-reduced-motion:reduce){#spiritPet{animation:none}#spiritPet.wiggle,#spiritPet.evolve,#spiritPet.hop,#spiritPet.twirl{animation:none}#spiritPet::before{animation:none;opacity:.6}}
+@media (prefers-reduced-motion:reduce){#spiritPet{animation:none}#spiritPet.wiggle{animation:none}#spiritPet::before{animation:none;opacity:.6}}
 
 /* ══════════ v0.5.0 錦鯉池空狀態（素材缺失時退回墨字「空」） ══════════ */
 .koi-pond{position:relative;width:min(420px,86%);height:220px;margin:0 auto 20px;border-radius:50%/44%;overflow:hidden;cursor:pointer;
@@ -1416,16 +1410,13 @@ html[data-theme="light"] .ink-chart-card{background:linear-gradient(145deg,rgba(
 @keyframes kkDrop{0%{opacity:0;transform:translateY(0)}20%{opacity:1}100%{opacity:1;transform:translateY(78px) scale(.5)}}
 #kaikeng.kk-out{animation:frFade .35s ease forwards}
 
-/* ══════════ 第九批 · 守護獸互動深化 ══════════ */
+/* ══════════ 第九批 · 月璃互動深化 ══════════ */
 #spiritPet .spirit-bubble{position:absolute;left:78%;bottom:82%;white-space:nowrap;padding:6px 12px;border-radius:12px 12px 12px 3px;
   background:var(--modal,#1c1e18);border:1px solid var(--border-strong);color:var(--fg);font-size:.76rem;font-weight:700;
   box-shadow:0 8px 22px -10px rgba(0,0,0,.6);opacity:0;transform:translateY(6px) scale(.9);transform-origin:left bottom;
   transition:opacity .22s ease,transform .22s cubic-bezier(.2,.8,.3,1.3);pointer-events:none}
 #spiritPet .spirit-bubble.show{opacity:1;transform:none}
 #spiritPet.dragging{transition:none;animation:none;cursor:grabbing}
-.spirit-cross{position:fixed;bottom:22vh;left:-140px;width:110px;z-index:59;pointer-events:none;
-  filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));animation:spiritCross 9s linear forwards}
-.spirit-cross img{width:100%;display:block}
 
 /* ══════════ 連結優化：智慧提示、多來源選單、搜尋站設定 ══════════ */
 .link-hint{display:none;margin-top:6px;font-size:.76rem;color:var(--muted)}
@@ -1456,14 +1447,13 @@ html[data-theme="light"] .src-row:hover{background:rgba(138,111,40,.1)}
   background:linear-gradient(225deg,rgba(168,58,38,.92) 0 46%,transparent 50%)}
 html[data-theme="light"] .anime-card.ink-t1{border-color:rgba(31,122,99,.45)}
 html[data-theme="light"] .anime-card.ink-t2,html[data-theme="light"] .anime-card.ink-t3{border-color:rgba(138,111,40,.55)}
-/* 守護獸睡眠 */
+/* 月璃睡眠 */
 #spiritPet.sleeping{animation:spiritFloat 12s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35)) saturate(.7) brightness(.85)}
 #spiritPet.sleeping::after{content:'Zzz';position:absolute;left:70%;bottom:88%;font-size:.72rem;font-weight:800;color:var(--faint);font-family:var(--font);animation:zzzFloat 3s ease-in-out infinite}
 @keyframes zzzFloat{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:.95;transform:translateY(-7px)}}
 @media (prefers-reduced-motion:reduce){#spiritPet.sleeping::after{animation:none;opacity:.6}}
 /* 備份狀態列 */
 .backup-line{margin-top:10px;font-size:.76rem;color:var(--muted)}
-@keyframes spiritCross{0%{transform:translateX(0) translateY(0) rotate(2deg)}25%{transform:translateX(28vw) translateY(-24px) rotate(-3deg)}50%{transform:translateX(56vw) translateY(6px) rotate(2deg)}75%{transform:translateX(84vw) translateY(-18px) rotate(-2deg)}100%{transform:translateX(118vw) translateY(0) rotate(2deg)}}
 
 /* ══════════ 第十二批 · 靈符選單／通知使者／親密度／季度新番 ══════════ */
 /* 靈符扇形選單：符紙按鈕 */
@@ -1476,7 +1466,7 @@ html[data-theme="light"] .anime-card.ink-t2,html[data-theme="light"] .anime-card
 .spirit-fu.show{opacity:1;transform:scale(1)}
 .spirit-fu:hover{filter:brightness(1.06);transform:scale(1.12);transition-delay:0s}
 @media (prefers-reduced-motion:reduce){.spirit-fu{transition:opacity .15s ease;transform:scale(1)}}
-/* 通知使者：守護獸叼信 */
+/* 通知使者：月璃叼信 */
 .spirit-letter{position:absolute;right:-8px;top:-10px;width:27px;height:20px;display:flex;align-items:center;justify-content:center;z-index:2;
   background:linear-gradient(180deg,#f3e9cf,#e4d5ae);border:1px solid rgba(168,58,38,.6);border-radius:3px;cursor:pointer;
   font-size:.66rem;font-weight:800;color:#7a1f12;font-family:var(--font);
@@ -3097,7 +3087,9 @@ function drawOmikuji(){
   setTimeout(()=>{
     const a=pool[Math.floor(Math.random()*pool.length)];
     tube.style.display='none';
-    document.getElementById('omiGrade').textContent=OMI_GRADES[Math.floor(Math.random()*OMI_GRADES.length)];
+    const omiGrade=OMI_GRADES[Math.floor(Math.random()*OMI_GRADES.length)];
+    document.getElementById('omiGrade').textContent=omiGrade;
+    if(omiGrade==='大吉') yueliPlay('dance'); // 抽中大吉，月璃替你起舞
     document.getElementById('omiCover').src=a.imageUrl||FALLBACK(a.name);
     document.getElementById('omiName').textContent=a.name;
     document.getElementById('omiPoem').textContent=OMI_POEMS[Math.floor(Math.random()*OMI_POEMS.length)];
@@ -3254,37 +3246,58 @@ function initFestivalFx(){
 }
 initFestivalFx();
 
-// ═══════════════════ 水墨守護獸（素材 assets/spirit-*.png，缺圖自動不顯示） ═══════════════════
-const SPIRIT_STAGES=[[0,'koi','錦鯉'],[300,'jiao','蛟'],[1000,'long','龍']]; // ponytail: 進化門檻寫死，要調整改這裡
-const SPIRIT_LINES=['今天也一起追番吧','多看一集，離化龍更近一步','游來游去，等你開播','墨色正好，宜追番'];
-function spiritStage(){ const eps=anime.reduce((s,a)=>s+(Number(a.episode)||0),0); let st=SPIRIT_STAGES[0]; for(const s of SPIRIT_STAGES) if(eps>=s[0]) st=s; return {eps,st}; }
-function spiritTitle(eps,st){ const next=SPIRIT_STAGES[SPIRIT_STAGES.indexOf(st)+1];
-  const base=next?`守護獸 · ${st[2]}（累積 ${eps} 集，再看 ${next[0]-eps} 集進化為${next[2]}）`:`守護獸 · ${st[2]}（累積 ${eps} 集，已至化龍之境）`;
-  return base+`・親密度 ${bondVal()}（${BOND_TIERS[bondTier()][1]}）`; }
+// ═══════════════════ 月璃駐守（第二十批換角：像素動圖 assets/yueli-*.webp，缺圖自動不顯示） ═══════════════════
+const SPIRIT_LINES=['今天也一起追番吧','多看一集，月色更明','尾巴搖啊搖，等你開播','墨色正好，宜追番'];
+const YUELI_DUR=5800; // 每套動圖 24 幀 @ 25/6fps ≈ 5.76 秒一輪
+function spiritTitle(){ return `月璃（陪你追了 ${totalWatched()} 集）・親密度 ${bondVal()}（${BOND_TIERS[bondTier()][1]}）`; }
 function updateSpirit(){
-  const {eps,st}=spiritStage(), cur=st[1];
-  let el=document.getElementById('spiritPet');
-  if(el&&el.dataset.stage===cur){ el.title=spiritTitle(eps,st); return; }
-  const img=new Image(); img.alt='守護獸'+st[2];
+  const cur=document.getElementById('spiritPet');
+  if(cur){ cur.title=spiritTitle(); return; } // 已在場只更新 title，不重載圖（動作播放中勿打斷）
+  const img=new Image(); img.alt='月璃';
   img.onload=()=>{
-    el=document.getElementById('spiritPet'); // 重查，避免載圖期間連續呼叫重複建立
-    if(!el){
-      el=document.createElement('div'); el.id='spiritPet'; el.appendChild(img);
-      initSpiritDrag(el); // 拖曳換位＋點擊互動
-      document.body.appendChild(el);
-    } else el.replaceChildren(img);
-    const prev=localStorage.getItem('v4_spirit');
-    const prevIdx=SPIRIT_STAGES.findIndex(s=>s[1]===prev), curIdx=SPIRIT_STAGES.indexOf(st);
-    if(prevIdx>-1&&curIdx>prevIdx){ el.classList.add('evolve'); setTimeout(()=>el.classList.remove('evolve'),1500); toast('success',`守護獸進化了！${st[2]}現身`); }
-    localStorage.setItem('v4_spirit',cur);
-    el.dataset.stage=cur; el.title=spiritTitle(eps,st);
+    if(document.getElementById('spiritPet')) return; // 重查，避免載圖期間連續呼叫重複建立
+    const el=document.createElement('div'); el.id='spiritPet'; el.appendChild(img);
+    el.title=spiritTitle();
+    initSpiritDrag(el); // 拖曳換位＋點擊互動
+    document.body.appendChild(el);
     spiritSleepCheck(); renderSpiritLetter();
   };
-  img.onerror=()=>{ // 動態 webp 缺檔退回靜態 PNG，PNG 也缺才整個隱藏
-    if(img.src.endsWith('.webp')) img.src=`assets/spirit-${cur}.png`;
-    else if(el) el.remove();
-  };
-  img.src=`assets/spirit-${cur}.webp`;
+  img.onerror=()=>{ const el=document.getElementById('spiritPet'); if(el) el.remove(); };
+  img.src='assets/yueli-sit.webp';
+}
+// 動作播放器：換 img.src 播一段，時間到回坐姿（fox 帶 loop=1 需 cache-bust 從頭播）
+let _yueliTs=[];
+function _yueliSrc(name){ return `assets/yueli-${name}.webp`+(name.startsWith('fox')?'?t='+Date.now():''); }
+function yueliPlay(name,ms=YUELI_DUR){
+  const el=document.getElementById('spiritPet'), img=el&&el.querySelector('img'); if(!img) return;
+  if(el.classList.contains('sleeping')||matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  yueliReset(el,img);
+  img.src=_yueliSrc(name);
+  _yueliTs.push(setTimeout(()=>{ img.src='assets/yueli-sit.webp'; },ms));
+}
+function yueliReset(el,img){ // 取消進行中的動作／散步，回到可播狀態
+  _yueliTs.forEach(clearTimeout); _yueliTs=[];
+  el.style.transform=''; el.style.transition=''; img.style.transform='';
+}
+function yueliFox(){ // 彩蛋：變身小狐狸賴一會兒再變回來
+  const el=document.getElementById('spiritPet'), img=el&&el.querySelector('img'); if(!img) return;
+  if(el.classList.contains('sleeping')||matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  yueliReset(el,img);
+  img.src=_yueliSrc('fox');
+  _yueliTs.push(setTimeout(()=>{ img.src=_yueliSrc('fox-back'); },YUELI_DUR+2600));
+  _yueliTs.push(setTimeout(()=>{ img.src='assets/yueli-sit.webp'; },YUELI_DUR*2+2600));
+}
+function yueliStroll(){ // 閒置散步：往右走一小段再走回來（回程鏡像）
+  const el=document.getElementById('spiritPet'), img=el&&el.querySelector('img'); if(!img) return;
+  if(el.classList.contains('sleeping')||el.classList.contains('dragging')||_fuEls) return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const dist=Math.min(150,innerWidth-el.getBoundingClientRect().right-24);
+  if(dist<60) return; // 右邊沒路就不散步
+  yueliReset(el,img);
+  img.src='assets/yueli-walk.webp';
+  el.style.transition='transform 4s linear'; el.style.transform=`translateX(${dist}px)`;
+  _yueliTs.push(setTimeout(()=>{ img.style.transform='scaleX(-1)'; el.style.transform='translateX(0)'; },4000));
+  _yueliTs.push(setTimeout(()=>{ yueliReset(el,img); img.src='assets/yueli-sit.webp'; },8100));
 }
 
 // ═══════════════════ 側立女角對話（文字過渡版，未來換語音） ═══════════════════
@@ -3341,15 +3354,16 @@ function sideSay(side){
   });
 })();
 
-// 守護獸閒置小動作：靜態圖也有生命感（使用者不生成動圖的替代方案）
+// 月璃閒置生活：35~90 秒隨機一次——散步／跳一跳／跳舞，偶爾變身小狐狸
 (function spiritIdleLife(){
-  const ACTS=[['wiggle',900],['hop',1300],['twirl',1500]];
   function tick(){
     const el=document.getElementById('spiritPet');
     if(el&&!el.classList.contains('sleeping')&&!document.hidden
        &&!matchMedia('(prefers-reduced-motion:reduce)').matches){
-      const [cls,dur]=ACTS[Math.floor(Math.random()*ACTS.length)];
-      el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),dur);
+      const r=Math.random();
+      if(r<.12) yueliFox();          // 稀有彩蛋
+      else if(r<.5) yueliStroll();
+      else yueliPlay(r<.78?'jump':'dance');
     }
     setTimeout(tick,35000+Math.random()*55000); // 35~90 秒隨機一次
   }
@@ -3469,7 +3483,7 @@ function renderDaily(rand){
 document.getElementById('dailyLine').addEventListener('click',()=>renderDaily(true));
 renderDaily();
 
-// ═══════════════════ 守護獸睡眠（子時～卯時 23:00–07:00） ═══════════════════
+// ═══════════════════ 月璃睡眠（子時～卯時 23:00–07:00） ═══════════════════
 const SPIRIT_SLEEP_LINES=['嗯……天亮再說……','Zzz……別鬧……','睡了睡了，番明天追','（翻了個身）'];
 function spiritSleepCheck(){
   const el=document.getElementById('spiritPet'); if(!el) return;
@@ -3609,8 +3623,8 @@ const SEALS=[
   ['fin3','小成','完結三部',()=>anime.filter(a=>a.finished).length>=3],
   ['fin10','十全','完結十部',()=>anime.filter(a=>a.finished).length>=10],
   ['eps100','百集','累積看過一百集',()=>totalWatched()>=100],
-  ['jiao','化蛟','累積三百集，守護獸化蛟',()=>totalWatched()>=300],
-  ['long','化龍','累積千集，守護獸化龍',()=>totalWatched()>=1000],
+  ['jiao','化蛟','累積三百集，觀番功力化蛟',()=>totalWatched()>=300],
+  ['long','化龍','累積千集，觀番功力化龍',()=>totalWatched()>=1000],
   ['five','知音','給出第一個五星',()=>anime.some(a=>a.rating===5)],
   ['streak7','香火','連續追番七天',()=>getStreak().days>=7],
   ['omi','問籤','求過一次籤',()=>localStorage.getItem('v4_omi_used')==='1']
@@ -3648,7 +3662,7 @@ function playKaikeng(){
   setTimeout(()=>k.remove(),1950);
 }
 
-// ═══════════════════ 守護獸互動深化 ═══════════════════
+// ═══════════════════ 月璃互動深化 ═══════════════════
 let _spiritSayT=null;
 function spiritSay(txt){
   const el=document.getElementById('spiritPet'); if(!el) return;
@@ -3662,6 +3676,7 @@ function initSpiritDrag(el){
   try{ const p=JSON.parse(localStorage.getItem('v4_spirit_pos')||'null'); if(p){ el.style.left=Math.min(innerWidth-90,Math.max(0,p.x))+'px'; el.style.top=Math.min(innerHeight-90,Math.max(0,p.y))+'px'; el.style.bottom='auto'; } }catch(e){}
   let sx,sy,ox,oy,down=false,moved=false;
   el.addEventListener('pointerdown',e=>{ down=true; moved=false; sx=e.clientX; sy=e.clientY;
+    const im=el.querySelector('img'); if(im){ yueliReset(el,im); im.src='assets/yueli-sit.webp'; } // 散步／變身中被抓住先歸位，量位置才準
     const r=el.getBoundingClientRect(); ox=r.left; oy=r.top; el.setPointerCapture(e.pointerId); });
   el.addEventListener('pointermove',e=>{ if(!down) return;
     const dx=e.clientX-sx,dy=e.clientY-sy;
@@ -3678,25 +3693,13 @@ function initSpiritDrag(el){
       el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle');
       toast('info',SPIRIT_SLEEP_LINES[Math.floor(Math.random()*SPIRIT_SLEEP_LINES.length)]); // 睡著被吵醒會不悅，不開選單
     }else{
-      el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle'); SFX.pluck();
+      yueliPlay('jump'); SFX.pluck();
       toggleSpiritMenu(el); // 台詞彩蛋移到選單「語」符
     } };
   el.addEventListener('pointerup',up);
   el.addEventListener('pointercancel',()=>{ down=false; el.classList.remove('dragging'); });
 }
-// 閒時偶爾游過螢幕（每 5 分鐘 25% 機率）
-setInterval(()=>{
-  if(document.hidden) return;
-  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  if(Math.random()>0.25) return;
-  const st=localStorage.getItem('v4_spirit'); if(!st) return;
-  const im=new Image(); im.alt='';
-  im.onload=()=>{ const c=document.createElement('div'); c.className='spirit-cross'; c.setAttribute('aria-hidden','true');
-    c.appendChild(im); document.body.appendChild(c); setTimeout(()=>c.remove(),9500); };
-  im.src=`assets/spirit-${st}.png`;
-},300000);
-
-// ═══════════════════ 第十二批 · 靈符扇形選單（點守護獸展開） ═══════════════════
+// ═══════════════════ 第十二批 · 靈符扇形選單（點月璃展開） ═══════════════════
 let _fuEls=null;
 function spiritMenuItems(){
   const items=[
@@ -3748,18 +3751,19 @@ async function spiritManualBackup(){
   }catch(e){ toast('error','備份失敗：'+e.message); }
 }
 
-// ═══════════════════ 第十二批 · 拖曳餵番（守護獸放到卡片上＝該番 +1） ═══════════════════
+// ═══════════════════ 第十二批 · 拖曳餵番（月璃放到卡片上＝該番 +1） ═══════════════════
 function spiritFeedCheck(el,e){
   if(!e||e.clientX==null) return;
   const hit=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n!==el&&!el.contains(n)&&n.closest&&n.closest('.anime-card[data-id]'));
   const card=hit&&hit.closest('.anime-card[data-id]'); if(!card) return;
-  const a=anime.find(x=>String(x.id)===card.dataset.id); if(!a||a.finished) return;
+  const a=anime.find(x=>String(x.id)===card.dataset.id); if(!a) return;
   if(el.classList.contains('sleeping')){ spiritSay('睡了……明天再吃……'); return; }
-  if(getCat(a.id)==='watchlist'){ spiritSay('這部還沒開坑呢'); return; }
-  incEp(a.id); spiritSay(`《${a.name}》真香！`); bondAdd(3);
+  if(a.finished){ yueliPlay('angry'); spiritSay('這部都完結了，吃不下啦'); return; }
+  if(getCat(a.id)==='watchlist'){ yueliPlay('angry'); spiritSay('這部還沒開坑呢'); return; }
+  incEp(a.id); yueliPlay('jump'); spiritSay(`《${a.name}》真香！`); bondAdd(3);
 }
 
-// ═══════════════════ 第十二批 · 通知使者（守護獸叼信，點信封拆閱） ═══════════════════
+// ═══════════════════ 第十二批 · 通知使者（月璃叼信，點信封拆閱） ═══════════════════
 let _letters=[];
 function spiritLetter(txt,act){
   _letters.push({txt,act});
@@ -3795,8 +3799,8 @@ function bondAdd(n){
   const before=bondTier();
   localStorage.setItem('v4_bond_today',String(today+add));
   localStorage.setItem('v4_spirit_bond',String(bondVal()+add));
-  if(bondTier()>before){ toast('success',`守護獸與你更親近了 · ${BOND_TIERS[bondTier()][1]}`); spiritSay(BOND_LINES[bondTier()][0]); }
-  const el=document.getElementById('spiritPet'); if(el) el.title=spiritTitle(spiritStage().eps,spiritStage().st);
+  if(bondTier()>before){ toast('success',`月璃與你更親近了 · ${BOND_TIERS[bondTier()][1]}`); spiritSay(BOND_LINES[bondTier()][0]); yueliPlay('dance'); }
+  const el=document.getElementById('spiritPet'); if(el) el.title=spiritTitle();
 }
 function spiritLinePool(){ let p=SPIRIT_LINES.slice(); for(let i=1;i<=bondTier();i++) p=p.concat(BOND_LINES[i]); return p; }
 if(localStorage.getItem('v4_bond_open')!==_dkey(new Date())){ localStorage.setItem('v4_bond_open',_dkey(new Date())); bondAdd(2); } // 每日首開 +2

@@ -45,7 +45,7 @@ transparent background, reclining pose, wide composition, 1536x768
 
 ---
 
-## 二、守護獸三階段動態貼圖
+## 二、守護獸三階段動態貼圖（**已作廢**：第二十批改為月璃像素動圖 `assets/yueli-*.webp`，本節僅留存參考）
 
 **共同規格**
 - 尺寸：512×512，**正方形**

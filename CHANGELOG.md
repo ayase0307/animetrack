@@ -12,6 +12,20 @@
 
 ---
 
+## 2026-07-13（第二十批）— 守護獸換角：月璃上任（未發版）
+
+動 `index.html`＋`assets/`。守護獸「錦鯉→蛟→龍」概念整個退役，改由**月璃（像素風九尾狐娘）**駐守左下角。扇形選單、拖曳餵番、親密度（40/120/300）、睡眠（23–07）、叼信、對話泡全部原樣保留，只換視覺與動作層。
+
+- **素材**：使用者提供 6 套 24 幀像素 GIF（原檔中文名，未進版控；builder 白名單本就不含 `*.gif`），ffmpeg 轉無損動態 WebP 進版控：`yueli-sit/dance/jump/angry/walk`（無限循環）＋`yueli-fox`／`yueli-fox-back`（變身／變回，`-loop 1` 播完定格；fox-back 由原 GIF `-vf reverse` 反轉而得）。每套 24 幀 @ 25/6fps ≈ 5.76 秒一輪（JS 常數 `YUELI_DUR=5800`）。
+- **動作播放器**：`yueliPlay(name)` 換 `img.src` 播一段、時間到回坐姿；`yueliReset()` 統一取消計時鏈與位移。**fox 系 loop=1 必須 `?t=` cache-bust 才會從頭播**（同 URL 會停在已播完的最後一幀）；循環系不 bust（省線上版流量）。
+- **對應**：點擊／餵食成功＝跳躍；親密度升級／求籤大吉＝跳舞；餵食被拒（完結・想看清單）＝跺腳生氣（原完結是靜默 return，本批補了拒吃台詞）；閒置 35–90 秒隨機＝散步 50%／跳跳 28%／跳舞 10%／變身小狐狸彩蛋 12%。
+- **散步**：`yueliStroll()` 往右走 `translateX`（最多 150px，右側沒路不走）4 秒、回程 `scaleX(-1)` 鏡像 4 秒。**pointerdown 先 `yueliReset` 歸位再量 `getBoundingClientRect`**，否則散步中被抓住、拖曳落點會帶著位移偏掉。
+- **移除**：`SPIRIT_STAGES`／`spiritStage()`／進化動畫（evolve）／`v4_spirit` 階段記錄／每 5 分鐘 25% 錦鯉游屏（`.spirit-cross`，由散步取代）／CSS hop・twirl 假動作（真動圖取代，wiggle 留給睡眠戳醒）／`#spiritPet` 整體漂浮 `spiritFloat`（清醒動圖自帶動態；**睡眠仍用 12s spiritFloat，keyframes 勿刪**）。`assets/spirit-koi/jiao/long.png` 已 `git rm`（git 歷史可還原）。印譜「化蛟／化龍」成就鍵值不變、只改敘述文字（使用者已解鎖的不受影響）。
+- **像素風**：`#spiritPet img{image-rendering:pixelated}`；睡眠沿用變暗濾鏡＋Zzz（月璃人形闔眼睡，狐狸變身依使用者定案只當清醒彩蛋）。
+- 驗證：Electron harness（真 index.html＋DRAFT_PREVIEW iframe）14/14——坐姿載入、pixelated、跳躍、選單健在、播畢回坐、散步去回鏡像歸位、變身定格變回、抓住取消散步、舊制無殘留＋跳舞截圖。**測試坑：閒置生活 tick 20 秒後會亂入手動動作測試，harness 要先 override `document.hidden=true` 凍結**；散步／變身斷言貼著計時邊界（4000/8400ms）驗，機器一卡就假紅，斷言時間要留 ≥500ms 餘裕。
+
+---
+
 ## 2026-07-13（第十九批）— 側立女角對話框（未發版）
 
 只動 `index.html`。**使用者最終目標：點女角可「說話」（語音）——本批以文字對話框過渡**，未來接 TTS 時沿用 `sideSay()` 的觸發點。
