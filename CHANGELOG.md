@@ -12,6 +12,19 @@
 
 ---
 
+## 2026-07-17（第二十四批）— 使用回饋四修（未發版）
+
+動 `index.html`＋`assets/`。使用者實際使用幾天回報四項問題，逐一修正：
+
+1. **週曆今日欄取消下移**：原「竹簡抽出」效果整欄 `translateY(7px)` 使用者覺得怪，移除位移（連帶刪掉 reduced-motion 與 900px 斷點的 `transform:none` 補丁），保留金框、金底、「今日」標注與光暈。
+2. **編輯作品可貼封面網址**：編輯 modal 新增「封面圖網址」欄（`editImgUrl`）。開啟時只回填 http(s) 網址（base64 上傳圖不塞欄位）；留空儲存＝維持原封面；非 http(s) 開頭擋下並 toast，modal 不關讓使用者改。上傳仍走卡片上的換圖鈕。
+3. **四張女角動圖改來回播放（ping-pong）**：播完跳回第一幀的頓感，改成正播→倒播無縫循環。重壓管線沿用第二十三批（ffmpeg 抽幀 10fps＋lanczos 縮放出 PNG → img2webp -lossy，橫幅 q70／側立 q65），幀序 1..61 + 60..2 共 120 幀、每幀 100ms（12s 週期）、loop 0。檔案 8.2MB→15.7MB（medusa 3.1／yunyun 2.5／siyouyou 5.8／xiaobai 4.3），使用者已同意不降畫質。月璃像素動作為循環設計且倒播會怪，依使用者決定不動。源檔用 `assets/1~4.gif`（仍在磁碟、未進版控）。
+4. **右上角 音／籤／新 字體統一**：字體規則上收到 `.icon-btn`（`var(--font)`／15px／800），刪除 `.omikuji-btn` 專屬規則與 `.sfx-btn` 的 900 字重；SVG 圖示鈕不受影響。
+
+驗證：iframe 版 harness（DRAFT_PREVIEW＋mock sb）13/13 PASS＋截圖三張（週曆對齊、編輯欄位、動圖兩時點無殘影）。**harness 坑**：桌面版資料層也是 Supabase，mock IPC 進不了主畫面——要測就走 DRAFT_PREVIEW iframe＋eval 注入 mock `sb`（`sb.from().update().eq().eq()` 鏈）。
+
+---
+
 ## 2026-07-14 — **v0.5.4 已發版**（第十九～二十三批一次出）
 
 exe＋blockmap＋latest.yml 三件套已上 GitHub Release 並標 Latest，自動更新生效。內容：側立女角對話框、月璃換角＋十式動作、殘影根治、四位女角動態化。

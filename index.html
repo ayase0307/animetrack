@@ -156,7 +156,6 @@ html[data-theme="light"] .ic-moon{display:none}
 .quick-hints{display:flex;gap:14px;font-size:.7rem;color:var(--faint);padding:0 4px;flex-wrap:wrap}
 
 /* ── 求籤 ── */
-.omikuji-btn{font-family:var(--font);font-weight:800;font-size:15px}
 .omikuji-stage{display:grid;place-items:center;min-height:360px}
 .omikuji-tube{width:120px;height:190px;border-radius:14px 14px 22px 22px;position:relative;display:grid;place-items:center;
   background:linear-gradient(180deg,#6b3f2a,#4a2a1c);border:2px solid rgba(216,189,114,.4);
@@ -300,7 +299,7 @@ textarea.form-control{resize:vertical;min-height:78px;line-height:1.6}
 .sync-pill.syncing{color:var(--accent)}.sync-pill.syncing .sync-dot{background:var(--accent);animation:pulse 1s infinite}
 .sync-pill.offline{color:var(--warn)}.sync-pill.offline .sync-dot{background:var(--warn)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-.icon-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--muted);cursor:pointer;transition:all .18s}
+.icon-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--muted);cursor:pointer;transition:all .18s;font-family:var(--font);font-size:15px;font-weight:800}
 .icon-btn:hover{color:var(--fg);border-color:var(--border-strong);background:var(--surface-hover)}
 .user-btn{display:flex;align-items:center;gap:8px;padding:6px 11px 6px 6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);color:var(--fg);cursor:pointer;font-family:var(--font);font-size:.82rem;font-weight:600;transition:all .18s}
 .user-btn:hover{border-color:var(--border-strong);background:var(--surface-hover)}
@@ -1071,11 +1070,10 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
     linear-gradient(180deg,rgba(214,196,148,.13),rgba(246,241,225,.045) 30%,rgba(214,196,148,.07))}
 .wc-col::before{content:'';position:absolute;top:6px;left:50%;width:9px;height:9px;transform:translateX(-50%);border-radius:50%;z-index:1;
   background:rgba(12,12,9,.85);box-shadow:inset 0 0 0 2px rgba(206,172,110,.55)}
-.wc-col.today{transform:translateY(7px);border-color:rgba(216,189,114,.6);background:
+.wc-col.today{border-color:rgba(216,189,114,.6);background:
   repeating-linear-gradient(180deg,transparent 0 46px,rgba(60,50,30,.14) 46px 48px),
   linear-gradient(90deg,rgba(30,28,18,.18),transparent 18%,transparent 82%,rgba(30,28,18,.22)),
   linear-gradient(180deg,rgba(216,189,114,.14),rgba(47,156,132,.07));box-shadow:0 0 26px -10px rgba(216,189,114,.55)}
-@media (prefers-reduced-motion:reduce){.wc-col.today{transform:none}}
 .wc-head{text-align:center;font-family:var(--font);font-weight:800;font-size:.94rem;color:var(--muted);padding:3px 0 9px;border-bottom:1px solid var(--border)}
 .wc-col.today .wc-head{color:var(--gold)}
 .wc-head small{display:block;font-size:.64rem;font-weight:600;color:var(--cinnabar);letter-spacing:.3em;margin-top:2px}
@@ -1090,7 +1088,7 @@ kbd{background:rgba(246,241,225,.08);border-color:rgba(220,203,158,.28)}
 .wc-plus:hover{background:var(--jade)}
 .wc-none{color:var(--faint);font-family:var(--font);font-size:1.35rem;font-weight:700;text-align:center;padding:22px 0;opacity:.5;letter-spacing:.1em}
 .wc-note{margin-top:14px;color:var(--faint);font-size:.8rem;text-align:center}
-@media(max-width:900px){.week-cal{grid-template-columns:repeat(2,1fr);padding-top:0}.week-cal::before{display:none}.wc-col{padding-top:12px}.wc-col::before{display:none}.wc-col.today{transform:none}}
+@media(max-width:900px){.week-cal{grid-template-columns:repeat(2,1fr);padding-top:0}.week-cal::before{display:none}.wc-col{padding-top:12px}.wc-col::before{display:none}}
 
 /* ── 卡片翻面：點封面如折扇翻轉看詳情 ──
    注意：.card-cover 有 overflow:hidden 會 flatten preserve-3d，
@@ -1233,7 +1231,7 @@ html[data-theme="light"] .st-ev::after{background:#fffcf4}
 html[data-theme="light"] .st-ev.fin::after{background:var(--cinnabar)}
 
 /* ══════════ v0.5.0 音效開關鈕 ══════════ */
-.sfx-btn{position:relative;font-weight:900}
+.sfx-btn{position:relative}
 .sfx-btn[aria-pressed="false"]::after{content:'';position:absolute;left:6px;right:6px;top:50%;height:1.5px;background:currentColor;transform:rotate(-32deg);opacity:.85}
 .sfx-btn[aria-pressed="true"]{color:var(--gold);border-color:var(--border-strong)}
 
@@ -1782,6 +1780,7 @@ html[data-theme="light"] .season-item{background:rgba(43,37,25,.03)}
         </div>
         <div class="form-group"><label>評分</label><div class="star-input" id="editStars"><button type="button" class="star-inp-btn" data-v="1">★</button><button type="button" class="star-inp-btn" data-v="2">★</button><button type="button" class="star-inp-btn" data-v="3">★</button><button type="button" class="star-inp-btn" data-v="4">★</button><button type="button" class="star-inp-btn" data-v="5">★</button></div><input type="hidden" id="editRating"></div>
         <div class="form-group"><label>備註</label><textarea class="form-control" id="editNotes"></textarea></div>
+        <div class="form-group"><label>封面圖網址</label><input class="form-control" id="editImgUrl" placeholder="https://...jpg（留空維持原封面；上傳請用卡片上的換圖鈕）"></div>
       </div>
       <div class="modal-foot"><button type="button" class="btn btn-secondary" onclick="closeEdit()">取消</button><button type="submit" class="btn btn-primary">儲存變更</button></div>
     </form>
@@ -2662,6 +2661,7 @@ function openEdit(id){
   document.getElementById('editDay').value=a.updateDay||'';
   document.getElementById('editCat').value=getCat(id);
   document.getElementById('editNotes').value=a.notes||'';
+  document.getElementById('editImgUrl').value=/^https?:\/\//.test(a.imageUrl||'')?a.imageUrl:''; // base64 上傳圖不塞進欄位
   document.getElementById('editRating').value=a.rating||'';
   initStars('editStars','editRating',a.rating||0);
   document.getElementById('editOverlay').classList.add('show');
@@ -2683,6 +2683,9 @@ async function submitEdit(e){
     notes:document.getElementById('editNotes').value.trim(),
     category:cat
   };
+  const imgUrl=document.getElementById('editImgUrl').value.trim();
+  if(imgUrl&&!/^https?:\/\//.test(imgUrl)){ toast('error','封面網址需以 http(s):// 開頭'); return; }
+  if(imgUrl) updates.imageUrl=imgUrl; // 留空＝維持原封面（含已上傳的 base64 圖）
   catMap[id]=cat; saveCatMap();
   if(await dbUpdate(id,updates)){
     closeEdit();
