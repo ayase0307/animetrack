@@ -12,6 +12,26 @@
 
 ---
 
+## 2026-07-19（第二十五批）— 側立女角語音上線＋左側換角寧雨蝶（未發版）
+
+動 `index.html`＋`package.json`＋`assets/`。中期目標「點側立女角出語音」正式落地，同時左側女角換人。
+
+1. **司幼幽語音（右）**：使用者本地生成的 10 句 wav（GPT-SoVITS 路線，24kHz mono）轉 mp3（`-b:a 48k -ac 1`），依台詞索引命名 `assets/audio/siyouyou-01~10.mp3`。其中 2 句原本被切成兩段，用 ffmpeg `concat` 合併成整句：句3＝`衣裳縫好了`＋`你的進度也該補上了`、句7＝`莫怕`＋`有婆婆在，風波傷不著你`。10 檔共 276KB。
+2. **`sideSay(side,withVoice)`**：抽台詞索引 `i` 一次，文字泡泡與音檔共用；`withVoice` 時 `new Audio('assets/audio/${audioKey}-${(i+1)兩位數}.mp3').play()`。**點擊才出聲**（`onclick=()=>sideSay(side,true)`），**50~120 秒閒置自動開口只出文字**——無使用者互動的 autoplay 會被瀏覽器擋，且冷不防人聲擾人。缺檔／被擋 `catch` 靜默，文字照顯示。切台詞時 `_sideAudio.pause()` 防重疊。
+3. **左側小白 → 寧雨蝶（百鍊成神・冰蝶仙）**：使用者給 `assets/women.mp4`（768×1168 24fps 6s，**洋紅 `#fa00f8` 去背幕**、yuv420p 無 alpha）。去背管線（翼／紗半透明是難點）：`chromakey=0xfa00f8:0.12:0.05` →「僅 alpha 通道」`erosion` 內縮 1px 去硬邊粉圈（不碰顏色）→ `geq` 洋紅 despill `溢色=max(0,min(R,B)-G)`，只咬洋紅、膚色（R 高 B 低）與藍衣（B 高 R 低）不受影響。**ffmpeg 的 `despill` 只支援 green/blue，洋紅要自寫 geq；`despill=green` 會把金飾染青綠，勿用**。10fps 抽 60 幀→`scale=400:608:lanczos`→ping-pong（1→60→59→2＝118幀）→ libwebp `img2webp -loop 0 -d 100 -lossy -q 65 -m 4` 出 `side-char-ningyudie.webp`（4.4MB，格式對齊既有側立 400×608/100ms/loop0）。
+4. **台詞重寫**：左陣列 10 句改冰山大小姐 tone（蝶翼／冰封／百鍊成神／本小姐），seal `白`→`蝶`（沿用 `sb-seal-b` 藍印）。司幼幽句7 台詞對齊語音，拿掉語音沒念的「什麼…都」。
+5. **`package.json` build.files 補 `assets/audio/*.mp3`**：原本只打包 `assets/*.webp`／`*.png`，桌面版會缺語音檔。webp 在 assets 根已被涵蓋。
+6. **退役 xiaobai**：刪 `side-char-xiaobai.webp`（原追蹤）＋來源 `-8k.png`＋作廢的小白 wav。`women.mp4` 與 siyouyou 來源 wav 留磁碟未進版控、build.files 不打包。
+
+7. **寧雨蝶語音已交付**：使用者生成 `寧雨蝶/ningyudie-01~10.wav`（24kHz mono），同規轉 `assets/audio/ningyudie-01~10.mp3`（204KB）。兩角語音現皆齊全，時長 2.6~5.6s 正常無截斷。
+8. **九尾妖狐（月璃）各動作尺寸校準**：原 `fit()` 一律 `naturalWidth×0.55`，但畫師把角色畫在不同比例＋姿勢外擴放大畫布，導致害羞(拖曳)、驚嚇炸毛(點擊)等特別大（startle 畫布 347px→顯示 191px、shy 297×462）。新增 per-action 縮放表 `YUELI_SCALE`（sit/walk .55、dance .45、fire/tea .40、sleep .47、shy .34、startle .30），`fit()` 從 `img.src` 解析動作名取倍率，校準到頭身一致（startle 191→104px、shy 163→101px）。手機仍 ×0.582（≈舊 .32）。以首幀 montage 目視校準、node 驗證寬度帶 1.88→1.59。
+
+驗證：side-voice harness 28/28（含 ningyudie 10/10）＋yueli scale harness 5/5。去背成品疊淺米底目視無洋紅溢色。對話框設計提案已出 mockup（見下）。
+
+**設計提案（待定）**：左右對話框目前共用同款米色宣紙，僅印章色/箭頭位置不同，且冷暖跟角色相反（暖婆婆配冷藍印）。提案讓兩側各自呼應角色、仍是同形制：寧雨蝶(左)冰晶霜藍面＋蝶藍印、司幼幽(右)維持暖宣紙但印章改暖琥珀。CSS 小改，待使用者拍板。
+
+---
+
 ## 2026-07-17（第二十四批）— 使用回饋四修（未發版）
 
 動 `index.html`＋`assets/`。使用者實際使用幾天回報四項問題，逐一修正：
