@@ -12,6 +12,12 @@
 
 ---
 
+## 2026-07-20 — 抽換寧雨蝶第 5 句語音（僅推線上版）
+
+使用者重錄 `assets/audio/寧雨蝶/ningyudie-05.wav`，以原管線 `ffmpeg -ac 1 -ar 24000 -b:a 48k` 重轉覆蓋 `assets/audio/ningyudie-05.mp3`（3.12s，格式與其餘 9 檔一致）。只換素材、未動 `index.html`／`package.json`，故只 push main 更新線上版；桌面版留待下批一起發。
+
+---
+
 ## 2026-07-19（第二十五批）— 側立女角語音上線＋左側換角寧雨蝶（v0.5.5 已發版）
 
 動 `index.html`＋`package.json`＋`assets/`。中期目標「點側立女角出語音」正式落地，同時左側女角換人。
