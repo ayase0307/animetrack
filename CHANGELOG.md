@@ -12,9 +12,11 @@
 
 ---
 
-## 2026-07-20 — 抽換寧雨蝶第 5 句語音（僅推線上版）
+## 2026-07-21（第二十六批）— 側立女角語音體驗打磨（v0.5.6，只動 `index.html`＋`package.json`＋素材）
 
-使用者重錄 `assets/audio/寧雨蝶/ningyudie-05.wav`，以原管線 `ffmpeg -ac 1 -ar 24000 -b:a 48k` 重轉覆蓋 `assets/audio/ningyudie-05.mp3`（3.12s，格式與其餘 9 檔一致）。只換素材、未動 `index.html`／`package.json`，故只 push main 更新線上版；桌面版留待下批一起發。
+- **音量／淡入**：語音改由 `SIDE_VOL=0.72` 舒適音量播放，`_sideFadeIn(a,240)` 極短 8 步淡入（0.09→0.72），避免點擊後冷不防人聲偏大。
+- **「說話中」視覺**：泡泡在**語音實際播放時**（`playing` 事件）掛 `.speaking`＝邊框微亮＋1.15s 輕呼吸（`sbPulse` brightness），`ended`/`pause` 即熄；autoplay 被擋不會亮，不誤導。左藍右琥珀，色跟印章一致。reduced-motion 關閉呼吸。閒置自動開口只出字（無語音）→ 不亮，符合設計。
+- **抽換寧雨蝶第 5 句語音**：使用者重錄 `assets/audio/寧雨蝶/ningyudie-05.wav`，原管線 `ffmpeg -ac 1 -ar 24000 -b:a 48k` 重轉覆蓋 `ningyudie-05.mp3`（3.12s，與其餘 9 檔一致）。此版一併帶進桌面版（07-20 已先 push 線上版）。
 
 ---
 
