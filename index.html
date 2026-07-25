@@ -1287,7 +1287,7 @@ html[data-theme="light"] .fest-bridge{border-top-color:rgba(163,120,31,.35)}
 #spiritPet::before{content:'';position:absolute;inset:-16px;border-radius:50%;z-index:-1;pointer-events:none;
   background:radial-gradient(circle,rgba(47,156,132,.36),rgba(47,156,132,.13) 55%,transparent 72%);animation:spiritAura 5.4s ease-in-out infinite}
 #spiritPet.sleeping::before{animation:none;opacity:.22}
-#spiritPet img{width:100%;display:block;pointer-events:none;image-rendering:pixelated} /* 像素風保銳利 */
+#spiritPet img{width:100%;display:block;pointer-events:none} /* 第廿七批：高清插畫月璃，勿用 pixelated（會糊） */
 @keyframes spiritAura{0%,100%{opacity:.5;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
 #spiritPet:hover{transform:scale(1.08)}
 #spiritPet.wiggle{animation:spiritWiggle .7s ease}
@@ -3260,10 +3260,10 @@ function initFestivalFx(){
 initFestivalFx();
 
 // ═══════════════════ 月璃駐守（第二十批換角：像素動圖 assets/yueli-*.webp，缺圖自動不顯示） ═══════════════════
-const SPIRIT_LINES=['今天也一起追番吧','多看一集，月色更明','尾巴搖啊搖，等你開播','墨色正好，宜追番'];
-const YUELI_DUR=5800; // 每套動圖 24 幀 @ 25/6fps ≈ 5.76 秒一輪
-// per-action 顯示縮放（乘 naturalWidth）：畫師把角色畫在不同比例，光按畫布寬會讓炸毛/害羞等特別大，這裡按動作校準到頭身一致。基準坐姿 .55。
-const YUELI_SCALE={sit:.55,sleep:.47,walk:.55,angry:.55,dance:.45,jump:.55,fire:.40,tea:.40,shy:.34,startle:.30,fox:.55,'fox-back':.55};
+const YUELI_DUR=5800; // 每套動圖 60 幀 @ 10fps ≈ 6 秒一輪（第廿七批高清月璃）
+// per-action 顯示縮放（乘 naturalWidth＝512）：對齊舊像素月璃顯示寬（舊 sit canvas201×.55≈110px），新畫布 512 故倍率降到 ~.22 避免過大遮元素。手機 fit() 另乘 0.582。可再微調。
+const YUELI_SCALE={sit:.23,sleep:.23,walk:.23,angry:.21,dance:.22,jump:.22,fire:.40,tea:.23,shy:.22,startle:.21,fox:.23,'fox-back':.23};
+const YUELI_ZOOM=1.35; // 整體大小旋鈕：所有動作等比放大（保留 per-action 頭身比例）。覺得大/小就只調這一個數 // ponytail: 目視微調用
 function spiritTitle(){ return `月璃（陪你追了 ${totalWatched()} 集）・親密度 ${bondVal()}（${BOND_TIERS[bondTier()][1]}）`; }
 function updateSpirit(){
   const cur=document.getElementById('spiritPet');
@@ -3273,7 +3273,7 @@ function updateSpirit(){
     if(document.getElementById('spiritPet')) return; // 重查，避免載圖期間連續呼叫重複建立
     const el=document.createElement('div'); el.id='spiritPet'; el.appendChild(img);
     el.title=spiritTitle();
-    const fit=()=>{ const nm=(img.src.match(/yueli-([a-z-]+)\.webp/)||[])[1]; const sc=(YUELI_SCALE[nm]||.55)*(innerWidth<=820?0.582:1); el.style.width=Math.round(img.naturalWidth*sc)+'px'; }; // per-action 校準頭身一致（手機 ×0.582≈舊 .32）
+    const fit=()=>{ const nm=(img.src.match(/yueli-([a-z-]+)\.webp/)||[])[1]; const sc=(YUELI_SCALE[nm]||.55)*YUELI_ZOOM*(innerWidth<=820?0.582:1); el.style.width=Math.round(img.naturalWidth*sc)+'px'; }; // per-action 校準頭身一致（手機 ×0.582≈舊 .32）
     img.addEventListener('load',fit); fit(); addEventListener('resize',fit);
     initSpiritDrag(el); // 拖曳換位＋點擊互動
     document.body.appendChild(el);
@@ -3284,7 +3284,9 @@ function updateSpirit(){
 }
 // 動作播放器：換 img.src 播一段，時間到回待機（fox 帶 loop=1 需 cache-bust 從頭播）
 let _yueliTs=[];
-function _yueliSrc(name){ return `assets/yueli-${name}.webp`+(name.startsWith('fox')?'?t='+Date.now():''); }
+const YUELI_REMAP={}; // 第廿八批：walk/angry/jump/fire 高清圖已補齊，取消頂替（第廿九批 fox 亦以 11A 素材復活）
+function _yueliSrc(name){ name=YUELI_REMAP[name]||name; const u=`assets/yueli-${name}.webp`;
+  return name.indexOf('fox')===0?`${u}?t=${Date.now()}`:u; } // fox 系是 loop=1（播完定格），同 URL 不會重播，需 cache-bust
 function yueliBase(el){ return el.classList.contains('sleeping')?'assets/yueli-sleep.webp':'assets/yueli-sit.webp'; } // 待機圖依睡醒而定
 function yueliPlay(name,ms=YUELI_DUR){
   const el=document.getElementById('spiritPet'), img=el&&el.querySelector('img'); if(!img) return;
@@ -3297,13 +3299,14 @@ function yueliReset(el,img){ // 取消進行中的動作／散步，回到可播
   _yueliTs.forEach(clearTimeout); _yueliTs=[];
   el.style.transform=''; el.style.transition=''; img.style.transform='';
 }
-function yueliFox(){ // 彩蛋：變身小狐狸賴一會兒再變回來
+function yueliFox(){ // 第廿九批：變身彩蛋復活（11A 素材＝人形→狐狸完整變身），當狐狸待 3 秒再變回
   const el=document.getElementById('spiritPet'), img=el&&el.querySelector('img'); if(!img) return;
-  if(el.classList.contains('sleeping')||matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  if(el.classList.contains('sleeping')) return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){ yueliPlay('shy'); return; } // 減少動態＝不放長變身
   yueliReset(el,img);
-  img.src=_yueliSrc('fox');
-  _yueliTs.push(setTimeout(()=>{ img.src=_yueliSrc('fox-back'); },YUELI_DUR+2600));
-  _yueliTs.push(setTimeout(()=>{ img.src=yueliBase(el); },YUELI_DUR*2+2600));
+  img.src=_yueliSrc('fox'); // loop=1，播完定格在小狐狸
+  _yueliTs.push(setTimeout(()=>{ img.src=_yueliSrc('fox-back'); },YUELI_DUR+3000));
+  _yueliTs.push(setTimeout(()=>{ img.src=yueliBase(el); },YUELI_DUR*2+3000));
 }
 function yueliStroll(){ // 閒置散步：往右走一小段再走回來（回程鏡像）
   const el=document.getElementById('spiritPet'), img=el&&el.querySelector('img'); if(!img) return;
@@ -3312,7 +3315,7 @@ function yueliStroll(){ // 閒置散步：往右走一小段再走回來（回�
   const dist=Math.min(150,innerWidth-el.getBoundingClientRect().right-24);
   if(dist<60) return; // 右邊沒路就不散步
   yueliReset(el,img);
-  img.src='assets/yueli-walk.webp';
+  img.src=_yueliSrc('walk');
   el.style.transition='transform 4s linear'; el.style.transform=`translateX(${dist}px)`;
   _yueliTs.push(setTimeout(()=>{ img.style.transform='scaleX(-1)'; el.style.transform='translateX(0)'; },4000));
   _yueliTs.push(setTimeout(()=>{ yueliReset(el,img); img.src=yueliBase(el); },8100));
@@ -3527,7 +3530,8 @@ function spiritSleepCheck(){
   const h=new Date().getHours(), asleep=h>=23||h<7, was=el.classList.contains('sleeping');
   el.classList.toggle('sleeping',asleep);
   const img=el.querySelector('img');
-  if(img&&was!==asleep){ yueliReset(el,img); img.src=yueliBase(el); } // 入睡換側躺、醒來回坐姿；狀態沒變不打擾
+  if(img&&was!==asleep){ yueliReset(el,img); img.src=yueliBase(el); // 入睡換側躺、醒來回坐姿；狀態沒變不打擾
+    if(was&&!asleep) yueliSay(6); } // 剛睡醒吐一句（無互動時 autoplay 會被擋，泡泡文字仍在）
 }
 setInterval(spiritSleepCheck,5*60*1000);
 
@@ -3711,6 +3715,19 @@ function spiritSay(txt){
   b.classList.add('show');
   clearTimeout(_spiritSayT); _spiritSayT=setTimeout(()=>b.classList.remove('show'),2200);
 }
+// 月璃語音（第廿九批）：索引對應 assets/audio/yueli-01~08.mp3，順序即下表
+const YUELI_LINES=['又追番啦？帶上我一個嘛～','這集這麼好看，你居然想自己偷看？','嘿嘿，被我抓到你在摸魚咯。','快點快點，下一集我等不及啦！','哼，冷落我這麼久，該哄哄我了吧？','我們又更熟啦，開心！','唔……我睡著了嗎？你剛剛偷看我？','呀！嚇我一跳！'];
+let _yueliAudio=null;
+function yueliVoice(i){ // 只出聲。沿用側立女角的音量與淡入；autoplay 被擋就靜默略過（文字仍在）
+  try{
+    if(_yueliAudio) _yueliAudio.pause();
+    const a=new Audio(`assets/audio/yueli-${String(i+1).padStart(2,'0')}.mp3`);
+    _yueliAudio=a; a.volume=0;
+    a.addEventListener('playing',()=>_sideFadeIn(a,240));
+    a.play().catch(()=>{});
+  }catch(e){}
+}
+function yueliSay(i){ spiritSay(YUELI_LINES[i]); yueliVoice(i); }
 function initSpiritDrag(el){
   try{ const p=JSON.parse(localStorage.getItem('v4_spirit_pos')||'null'); if(p){ el.style.left=Math.min(innerWidth-90,Math.max(0,p.x))+'px'; el.style.top=Math.min(innerHeight-90,Math.max(0,p.y))+'px'; el.style.bottom='auto'; } }catch(e){}
   let sx,sy,ox,oy,down=false,moved=false;
@@ -3736,6 +3753,7 @@ function initSpiritDrag(el){
         yueliReset(el,im); im.src='assets/yueli-startle.webp';
         _yueliTs.push(setTimeout(()=>{ im.src=yueliBase(el); },YUELI_DUR));
       }
+      yueliVoice(7); // 「呀！嚇我一跳！」只出聲，不搶睡眠 toast 的文字
       toast('info',SPIRIT_SLEEP_LINES[Math.floor(Math.random()*SPIRIT_SLEEP_LINES.length)]); // 睡著被吵醒會不悅，不開選單
     }else{
       yueliFox(); SFX.pluck(); // 點擊變身小狐狸（使用者指定）
@@ -3751,10 +3769,10 @@ function spiritMenuItems(){
     ['追','快速 +1 最近播放的番',()=>{ const id=localStorage.getItem('v4_last_played');
       const a=id&&anime.find(x=>String(x.id)===id&&!x.finished);
       if(a) incEp(a.id); else toast('info','還沒有最近播放的作品，先按一次播放吧'); }],
-    ['籤','求籤',()=>{ yueliPlay('fire'); openOmikuji(); }], // 施法召狐火配合開籤儀式
+    ['籤','求籤',()=>{ yueliPlay('fire'); openOmikuji(); }], // 第廿九批：fire 高清圖已補齊，召狐火動作接回
     ['尋','搜尋（Ctrl+K）',()=>openQuick()],
     ['計','看統計',()=>switchTab('stats')],
-    ['語','聊兩句',()=>{ const p=spiritLinePool(); spiritSay(p[Math.floor(Math.random()*p.length)]); }],
+    ['語','聊兩句',()=>{ yueliSay(Math.floor(Math.random()*6)); }], // 前 6 句有預錄語音（點擊觸發＝不會被 autoplay 擋）
   ];
   if(IS_ELECTRON&&window.electronAPI.writeBackup) items.push(['備','立即備份',spiritManualBackup]);
   return items;
@@ -3847,7 +3865,6 @@ function bondAdd(n){
   if(bondTier()>before){ toast('success',`月璃與你更親近了 · ${BOND_TIERS[bondTier()][1]}`); spiritSay(BOND_LINES[bondTier()][0]); yueliPlay('dance'); }
   const el=document.getElementById('spiritPet'); if(el) el.title=spiritTitle();
 }
-function spiritLinePool(){ let p=SPIRIT_LINES.slice(); for(let i=1;i<=bondTier();i++) p=p.concat(BOND_LINES[i]); return p; }
 if(localStorage.getItem('v4_bond_open')!==_dkey(new Date())){ localStorage.setItem('v4_bond_open',_dkey(new Date())); bondAdd(2); } // 每日首開 +2
 
 // ═══════════════════ 第十二批 · 季度新番一覽（Bangumi 每週放送表） ═══════════════════

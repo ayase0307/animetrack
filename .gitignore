@@ -18,3 +18,12 @@ dist/
 # 安裝檔改由 GitHub Releases 發佈，不進版控
 updates/
 *.tmp
+
+# 素材原檔（GIF/WAV/大圖）只是產 webp/mp3 的來源，成品才進版控
+assets/*.gif
+assets/audio/*.wav
+assets/audio/月璃/
+assets/audio/寧雨蝶/
+assets/月璃素材/
+assets/*-8k.png
+assets/xianxia-girl-*.png

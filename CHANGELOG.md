@@ -8,7 +8,74 @@
 > - 資料檔位置：開發模式在專案內 `data/anime.json`；打包後在 `%APPDATA%/追劇小幫手/data/anime.json`（`app.getPath('userData')`）。**不要把資料路徑改回 `__dirname`**，asar 是唯讀的。
 > - `viewer.html` 的 `<webview>` **不可以加回 `allowpopups`**；彈窗與非 http(s) 導向已在 `main.js` 統一封鎖（`web-contents-created` handler）。要開外部連結一律走 `electronAPI.openViewerExternal()`。
 > - 圖片引用現況：`index.html` 用到 `background2.png`、`logo-transparent.png`、`enso-play-icon.png`。`background.png`（無 2）已刪除。
-> - `assets/` 內的 `RUN.mp4`、`boat.gif`、`output.gif`、仙俠少女圖為設計素材／展示媒體，未被程式引用，未進版控（約 47MB）。
+> - `assets/` 內的 `RUN.mp4`、`boat.gif`、`output.gif` 舊展示媒體已於第廿七批清除。仙俠少女來源圖（`*-8k.png`、`*-recline-*.png`、`月璃-*.gif` 等）為設計母檔，未被程式引用、未進版控。
+
+---
+
+## 2026-07-25（第廿九批，v0.5.7）— 月璃語音上線＋變身彩蛋復活（只動 `index.html`＋`assets/`）
+
+### 1. 月璃語音 8 句（`assets/audio/yueli-01~08.mp3`，共 137KB）
+
+使用者本地 GPT-SoVITS 生成 8 支 wav（24kHz mono，1.2~3.7s）放在 `assets/audio/月璃/`（中文檔名，未進版控），照側立女角同管線 `ffmpeg -ac 1 -ar 24000 -b:a 48k` 轉 mp3。**索引＝下表順序，改台詞務必同步改 `YUELI_LINES` 與檔名編號**：
+
+| # | 台詞 | 觸發點 |
+|---|------|--------|
+| 1 | 又追番啦？帶上我一個嘛～ | 扇形選單「語」 |
+| 2 | 這集這麼好看，你居然想自己偷看？ | 「語」 |
+| 3 | 嘿嘿，被我抓到你在摸魚咯。 | 「語」 |
+| 4 | 快點快點，下一集我等不及啦！ | 「語」 |
+| 5 | 哼，冷落我這麼久，該哄哄我了吧？ | 「語」 |
+| 6 | 我們又更熟啦，開心！ | 「語」 |
+| 7 | 唔……我睡著了嗎？你剛剛偷看我？ | 睡醒（`spiritSleepCheck` 由睡轉醒） |
+| 8 | 呀！嚇我一跳！ | 睡著時被拖曳戳醒（只出聲，不搶睡眠 toast） |
+
+- `yueliVoice(i)`＝只出聲、`yueliSay(i)`＝出字＋出聲，兩者複用側立女角的 `SIDE_VOL=0.72`＋`_sideFadeIn(a,240)`。autoplay 被擋就靜默略過，泡泡文字仍在。
+- 「語」符改播前 6 句有聲版（點擊觸發＝不會被 autoplay 擋）；隨之無引用的 `SPIRIT_LINES`、`spiritLinePool()` 已刪。`BOND_LINES`（升級台詞）保留不動。
+- **第 8 句實錄只有 1.2 秒**，原規劃「呀！嚇我一跳啦你！」太長，`YUELI_LINES[7]` 已縮成「呀！嚇我一跳！」對齊音檔。
+
+### 2. 變身彩蛋復活（`yueli-fox.webp` / `yueli-fox-back.webp` 換高清）
+
+第廿七批記「11A＝變身**前**人形」是**記錯了**——11A 其實是**完整變身**（人形→光效→小狐狸），所以退役的彩蛋可以直接復活，順帶淘汰 07-13 那組像素風 fox 圖（風格已不搭）。
+
+- **踩雷一：11A 是 1280×720 寬構圖**（其餘動作都是 960×960）。角色含九尾橫跨 1133×703，**方形中央裁切會把尾巴切掉**。正解＝裁寬邊再上下補白成方形：`crop=1160:720:60:0,pad=1160:1160:0:220:white,fps=10,scale=512:512`（補的白會被去背一起吃掉）。出來角色寬 490px，與 `yueli-sit.webp` 的 495px 幾乎一致。
+- **踩雷二：`ndimage.binary_closing` 預設把畫面外當 0**，侵蝕階段會吃掉最外圈 → 沒有任何連通域接得到邊框 → 去背整個失效（alpha 全 255，成品是白底方塊）。正解＝先 `np.pad(cand, 4, constant_values=True)` 再閉運算，最後裁回。
+- **踩雷三：11A 壓縮雜訊比其他片大**，第廿八批的 `mn>=248 & spread<=8` 太嚴，白底雜點沒被選中 → 殘留滿畫面白斑。放寬到 `mn>=238 & spread<=12`＋閉運算橋接＋面積 <400px 的孤立前景塊一律歸背景。
+- `YUELI_SCALE` 的 `fox`／`fox-back` 從 **.55 改 .23**（像素時代遺留值，不改會大一倍多）。
+- **fox 系是 `loop=1`（播完定格在狐狸）**，同 URL 不會重播 → `_yueliSrc()` 對 `fox` 開頭的名字加回 `?t=` cache-bust（第廿七批曾整批移除）。`fit()` 的正則在 `?` 前就比對完，不受影響。
+- `yueliFox()`：播 fox → 當狐狸待 3 秒 → 播 fox-back → 回 `yueliBase()`。`prefers-reduced-motion` 時退回原本的 `shy`。
+
+### 3. 順手修：求籤接回狐火
+
+`yueli-fire.webp` 第廿八批就補齊了，但第廿七批從「籤」符拿掉的 `yueliPlay('fire')` 一直沒接回去 → 2.3MB 打包卻從不播放。已還原成 `yueliPlay('fire'); openOmikuji();`。
+
+**驗證**：inline JS `node --check` 過；8 句台詞皆有對應 mp3；程式引用的 11 個動作圖皆存在；fox 系 loop=1、其餘 loop=0（斷言式檢查，改素材後可重跑）。`build.files` 的 `assets/*.webp`＋`assets/audio/*.mp3` 已自動涵蓋新檔，不必改 `package.json`。**已跑 App 實載**（Electron harness 載真 `index.html`）：`yueliSay(0)` 泡泡文字正確且送出 `yueli-01.mp3`；`yueliFox()` → `yueli-fox.webp?t=…` → 9s 後 `yueli-fox-back.webp?t=…`（cache-bust 有效，loop=1 同 URL 不重播的坑已避開）；`yueliPlay('fire')` → `yueli-fire.webp` 276px＝`512×.40×1.35` 符合 `YUELI_SCALE.fire`；console 無錯誤。截圖確認去背乾淨、九尾完整。`YUELI_ZOOM` 微調仍是主觀判斷，留給真機目視。
+
+---
+
+## 2026-07-22（第廿八批，v0.5.7）— 月璃補齊 10 動作＋修尾巴破洞＋整體放大（只動 `index.html`＋`assets/`）
+
+補齊 walk/angry/jump/fire 高清動作、重生 sit/sleep/tea/shy/startle/dance 修破洞，`YUELI_REMAP` 清空（`index.html:3288`）。來源＝`assets/月璃素材/月璃-01~10-白底.mp4`（960×960/145幀/~24fps）。11A-變身前人形暫未接（fox 彩蛋退役，點擊→shy，故略過）。
+
+**尾巴破洞根因＋正解（踩雷紀錄，關鍵）**：月璃九尾是白銀毛＋青藍尖，來源是**白底**。白毛尾巴跟白背景同色 → `colorkey` 去背把白毛也挖掉＝破洞。試過收緊白鍵 `0xFFFFFF:0.02`：sit 這種毛偏灰(~245)的實心 OK，但 walk 那種毛近純白(~253)的整片被吃＝黑斑（使用者回報「月璃淡化」其實就是這破洞讓尾巴稀疏）。**單一閾值治不了逐片白階差異**。
+
+**最終管線（連通域去背，閾值免疫）**：`ffmpeg fps=10,scale=512:512:lanczos` 出 RGB 幀（不做 colorkey）→ Python `scipy.ndimage.label` 標記「亮且中性」候選區(mn≥248 & max-min≤8) → **只把連到 4 邊框的連通域設透明**（真背景連邊界；尾巴內部白毛不連邊界＝保留）→ alpha gaussian 0.7 羽化 → PIL `save_all,duration=100,loop=0,quality=72,method=4`。**PIL 預設不產殘影**（不必 img2webp；本機無 libwebp，但 ffmpeg 有 libwebp_anim、Python 有 PIL 12.3/scipy 1.18）。60幀/512²/~1.8-3.1MB。補新動作照這條重跑即可。
+
+**整體偏小**：新增單一旋鈕 `const YUELI_ZOOM=1.35`（`index.html:3267`），`fit()` 乘上它；per-action `YUELI_SCALE` 比例保留，覺得大小只調這一個數。
+
+---
+
+## 2026-07-21（第廿七批，v0.5.7）— 月璃像素→高清插畫換風格（只動 `index.html`＋`assets/`）
+
+使用者在 `assets/月璃素材/` 放進 6 支新月璃白底 mp4（960×960 24fps 6s，九尾白狐娘高清插畫），整體從舊像素風換成高清。
+
+1. **去背＋防殘影轉檔管線**（白底、且角色本身有銀髮＋白毛九尾＝白吃白難點）：`ffmpeg colorkey=0xFFFFFF:0.04:0.02`（緊白鍵，實測毛尖完整保留無破）→ `fps=10` → `scale=512:512:lanczos` 抽 60 張滿版 PNG → `cwebp -q 60 -alpha_q 100` 每幀轉滿版 webp → `webpmux -frame f +100+0+0+1-b -loop 0 -bgcolor 255,255,255,0` 組裝。輸出 6 個動態 webp（各 60 幀滿版 512²、`Dispose:1`＝每幀先清畫布再畫，2.1~3.8MB）覆蓋同名 `assets/yueli-{sit,sleep,dance,tea,shy,startle}.webp`（同名＝零改碼 drop-in）。映射：01跳舞→dance、02害羞遮臉→shy、03側躺睡覺→sleep、04居家喝茶→tea、05正坐搖擺→sit、06驚嚇炸毛→startle。**踩雷紀錄：先前直接用 `ffmpeg -c:v libwebp` 輸出會產生子矩形幀＋`Dispose:0`，透明角色移動殘留＝殘影（使用者回報）；ffmpeg 沒有 dispose 旋鈕，改走 libwebp `cwebp+webpmux` 明確設 dispose=背景才根除。img2webp 的 dispose 是啟發式、受 `-m`/內容影響不穩，勿依賴。GIF 只有 1-bit alpha 會把白毛尾巴切成鋸齒，故用動態 webp 而非 gif。**
+2. **移除 `image-rendering:pixelated`**（`#spiritPet img`）：舊像素風保銳利設定會把新高清圖糊掉，拿掉。
+3. **`YUELI_SCALE` 重校（修正過大遮元素）**：新畫布 512 遠大於舊像素圖（舊 sit canvas 201），初版沿用 ~.55 倍率→顯示約 297px＝舊(110px)的 2.7 倍，遮到其他元素（使用者回報）。對齊舊顯示寬後降到 `sit/sleep/tea:.23 dance/jump:.22 shy:.22 angry/startle:.21`（512×.23≈118px≈舊 110px）。手機 fit() 另乘 0.582。可再微調。
+4. **缺 6 動作重映射**（新素材只含 6 動作）：新增 `YUELI_REMAP={walk:'sit',angry:'startle',jump:'dance'}`，`_yueliSrc()` 先過映射再組路徑（順帶移除舊 fox 的 `?t=` cache-bust）。`walk` 直載處改走 `_yueliSrc('walk')`。**狐火/變身彩蛋退役**：`yueliFox()` 改為點擊播 `shy`（原變身邏輯移除，新月璃無 fox 圖）；求籤 callback 移除 `yueliPlay('fire')` 保留 `openOmikuji()`。補齊 walk/angry/jump/fire/fox 五個高清動作後，移除 REMAP 對應項即可還原。
+5. **清理**：刪 `assets/boat.gif`（8.7MB，git 追蹤、無引用）。註：`RUN.mp4`、`output.gif` 及 2 個 `xianxia-girl-*.png` 於**先前 session 已從磁碟刪除**（git 標 `D` 未提交），非本批所為。
+6. **未觸及**：舊 `yueli-{walk,angry,jump,fire,fox,fox-back}.webp` 6 檔經 remap 後已無引用（成孤兒，仍在 build.files 打包），本批依「只刪確定垃圾」保留，待補圖或另行決定。
+
+驗證：6 檔均為有效動態 webp（含 ANIM chunk＋各 60 ANMF 幀，VP8＋alpha）；單幀走相同 colorkey 疊深灰目視邊緣乾淨、白毛九尾完整無白暈。（MCP Chrome 連不到本機 localhost，未跑 App 實載，scale 待實測微調。）
 
 ---
 
