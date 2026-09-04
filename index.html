@@ -2943,12 +2943,33 @@ function guessNextN(url,cur){
   return n>=1&&n<=99?n:1;
 }
 
+// ═══════════════════ 簡→繁（Bangumi 的 name_cn 一律是簡體） ═══════════════════
+// ponytail: opencc-js 走 CDN 按需載入 —— 這些功能本來就得連網才有資料；CDN 掛掉就原樣顯示簡體，不擋流程。
+// 要離線也能轉，把 cn2t.js（約 1MB）下載進 assets/ 改成本地路徑，並在 package.json 的 build.files 加進去。
+let _s2tFn=null;
+async function s2tReady(){
+  if(_s2tFn) return _s2tFn;
+  try{
+    if(!window.OpenCC) await new Promise((ok,fail)=>{
+      const el=document.createElement('script');
+      el.src='https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.js';
+      el.onload=ok; el.onerror=()=>fail(new Error('opencc 載入失敗'));
+      document.head.appendChild(el);
+    });
+    _s2tFn=window.OpenCC.Converter({from:'cn',to:'tw'});
+  }catch(e){ _s2tFn=x=>x; }
+  return _s2tFn;
+}
+// 只能餵 name_cn。日文原名（name）不可轉，会→會、学→學 會把日文標題轉壞。
+function s2t(x){ x=String(x||''); return _s2tFn?_s2tFn(x):x; }
+
 // ═══════════════════ BANGUMI 自動填入 ═══════════════════
 async function bgmSearch(){
   const name=document.getElementById('addName').value.trim();
   const box=document.getElementById('bgmResults');
   if(!name){ toast('info','請先輸入作品名稱再自動填入'); return; }
   const btn=document.getElementById('bgmFetchBtn'); btn.disabled=true; btn.textContent='搜尋中…';
+  await s2tReady();
   try{
     const r=await fetch(`https://api.bgm.tv/search/subject/${encodeURIComponent(name)}?type=2&responseGroup=medium&max_results=6`);
     if(!r.ok) throw new Error('HTTP '+r.status);
@@ -2958,7 +2979,7 @@ async function bgmSearch(){
     box.innerHTML=list.slice(0,6).map(s=>
       `<button type="button" class="bgm-item" onclick="bgmPick(${Number(s.id)})">`
       +`<img src="${esc((s.images&&(s.images.grid||s.images.common))||'')}" alt="" onerror="this.style.visibility='hidden'">`
-      +`<span><b>${esc(s.name_cn||s.name)}</b><small>${esc(s.name||'')}${s.air_date?' · '+esc(s.air_date):''}</small></span></button>`
+      +`<span><b>${esc(s2t(s.name_cn)||s.name)}</b><small>${esc(s.name||'')}${s.air_date?' · '+esc(s.air_date):''}</small></span></button>`
     ).join('');
     box.style.display='block';
   }catch(e){ toast('error','Bangumi 搜尋失敗：'+e.message); }
@@ -2966,11 +2987,13 @@ async function bgmSearch(){
 }
 async function bgmPick(id){
   document.getElementById('bgmResults').style.display='none';
+  await s2tReady();
   try{
     const r=await fetch('https://api.bgm.tv/v0/subjects/'+id);
     if(!r.ok) throw new Error('HTTP '+r.status);
     const s=await r.json();
-    if(s.name_cn||s.name) document.getElementById('addName').value=s.name_cn||s.name;
+    const nm=s2t(s.name_cn)||s.name;
+    if(nm) document.getElementById('addName').value=nm;
     const total=Number(s.total_episodes||s.eps)||0;
     if(total) document.getElementById('addTotal').value=total;
     const img=s.images&&(s.images.large||s.images.common);
@@ -3882,6 +3905,7 @@ async function openSeason(){
       if(!r.ok) throw new Error('HTTP '+r.status);
       _seasonData=await r.json();
     }
+    await s2tReady();
     renderSeason();
   }catch(e){ const b=document.getElementById('seasonBody'); if(b) b.textContent='拉取失敗：'+e.message; }
 }
@@ -3896,8 +3920,8 @@ function renderSeason(){
   const days=_seasonData.slice().sort((a,b)=>((a.weekday.id-todayId+7)%7)-((b.weekday.id-todayId+7)%7)); // 今日排最前
   body.innerHTML=days.map(d=>{
     const items=(d.items||[]).map(it=>{
-      const cn=it.name_cn||'', nm=cn||it.name, img=(it.images&&(it.images.common||it.images.large))||'';
-      const has=seasonHas(it.name,cn);
+      const cn=s2t(it.name_cn), nm=cn||it.name, img=(it.images&&(it.images.common||it.images.large))||'';
+      const has=seasonHas(it.name,cn)||seasonHas(it.name,it.name_cn||'');
       return `<div class="season-item">${img?`<img loading="lazy" src="${esc(img)}" alt="">`:''}<div class="sn" title="${esc(it.name)}">${esc(nm)}</div><div class="sd">${esc(it.air_date||'')}</div>
         <button type="button" class="season-add" data-day="${d.weekday.id%7}" data-name="${esc(nm)}" data-img="${esc(img)}" data-eps="${Number(it.eps)||0}" ${has?'disabled':''}>${has?'已在片單':'收入想看'}</button></div>`;
     }).join('');

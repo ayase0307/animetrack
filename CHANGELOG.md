@@ -12,6 +12,36 @@
 
 ---
 
+## 2026-09-04（第三十批，v0.5.8）— Bangumi 中文名簡轉繁（只動 `index.html`）
+
+**問題**：季度新番一覽整片簡體。根因不在季度新番本身 —— Bangumi API 的 `name_cn` 欄位一律是簡體，全站有三處直接用它：
+
+| 位置 | 原本 | 現在 |
+|---|---|---|
+| `renderSeason()` | `const cn=it.name_cn\|\|''` | `const cn=s2t(it.name_cn)` |
+| `bgmSearch()` 搜尋結果清單 | `esc(s.name_cn\|\|s.name)` | `esc(s2t(s.name_cn)\|\|s.name)` |
+| `bgmPick()` 填入名稱欄 | `s.name_cn\|\|s.name` | `s2t(s.name_cn)\|\|s.name` |
+
+只補季度新番等於漏掉另外兩處，所以修在共用點：新增 `s2tReady()` / `s2t()`（放在「BANGUMI 自動填入」區塊前）。
+
+**做法**：opencc-js 走 CDN 按需載入（`cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.js`，約 1MB），`Converter({from:'cn',to:'tw'})`。這三個功能本來就得連網才有資料，所以不是新增離線負擔；CDN 掛掉 `catch` 會把 `_s2tFn` 設成 identity，原樣顯示簡體、不擋流程。第一次開面板才下載，之後走 Chromium 磁碟快取。
+
+**踩雷／注意**
+- **`s2t()` 只能餵 `name_cn`，絕不可餵 `name`**。`name` 是日文原名，cn2t 會把 `会→會`、`学→學` 把日文標題轉壞。程式裡的 fallback 一律寫成 `s2t(x.name_cn)||x.name` 而不是 `s2t(x.name_cn||x.name)`。
+- 用 `to:'tw'`（字形）不用 `to:'twp'`（台灣慣用詞），後者會把作品名照詞庫改寫。
+- 轉出來是**字形**繁體，不等於台灣官方譯名。例：`咒术回战 → 咒術回戰`（官方是「咒術迴戰」，簡體原文沒有「迴」的資訊，字形轉換救不回來）；`干物妹 → 幹物妹`（該是「乾物妹」，是 Bangumi `name_cn` 自己的用字問題）。要正確譯名得換資料源，不在這批範圍。
+- `seasonHas()` 的重複判定改成繁簡都比一次（`seasonHas(it.name,cn)||seasonHas(it.name,it.name_cn||'')`）。不加這個的話，這批之前用簡體名匯入過的番會重新顯示「收入想看」→ 重複匯入。
+- `to:'tw'` 會正確處理一對多：`头发→頭髮`、`发现→發現`。
+
+**驗證**
+1. inline JS 三個 `<script>` 區塊 `node --check` 全過。
+2. Node 層對**真實** `api.bgm.tv/calendar`（113 部，102 部有中文名）跑 `s2t(it.name_cn)`：82 部實際被轉，簡體專用字殘留 0；`s2t('头发发现')==='頭髮發現'`；`name_cn` 空時退回日文原名；`s2t('')`／`s2t(null)` 皆為 `''`。腳本 `check_s2t.js`（scratchpad，未進版控）。
+3. **Electron harness 實載真 `index.html`**（`file://` + 真 preload）：`s2tReady()` 169ms 完成，`window.OpenCC` 有掛上、未落 fallback，轉換結果與預期字串完全相符。→ 確認 CDN script 在 `file://` renderer 載得起來（無 CSP 阻擋）。
+
+**若要離線也能轉**：把 `cn2t.js` 下載進 `assets/`、把 `el.src` 改成本地相對路徑，並在 `package.json` 的 `build.files` 加進去（現有 glob 沒涵蓋 `.js`）。程式碼裡已留註解。
+
+---
+
 ## 2026-07-25（第廿九批，v0.5.7）— 月璃語音上線＋變身彩蛋復活（只動 `index.html`＋`assets/`）
 
 ### 1. 月璃語音 8 句（`assets/audio/yueli-01~08.mp3`，共 137KB）
